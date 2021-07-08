@@ -1,0 +1,6 @@
+tensorflow~=2.5.0
+tensorflow-probability
+gym
+redis
+matplotlib
+numpy~=1.19.5
