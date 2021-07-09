@@ -27,9 +27,6 @@ if __name__ == '__main__':
     if args.config is None:
         exit("Config file needed")
 
-    if not args.gpu:
-        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
     params = read_config(args.config)
 
     if args.params is not None:
