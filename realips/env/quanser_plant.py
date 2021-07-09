@@ -36,9 +36,9 @@ class QuanserPlant:
                                                                        self.encoder_channels,
                                                                        self.num_encoder_channels)
 
-        self.analog_write_task = self.card.task_create_analog_writer(self.samples_in_buffer,
-                                                                     self.analog_channels,
-                                                                     self.num_analog_channels)
+        # self.analog_write_task = self.card.task_create_analog_writer(self.samples_in_buffer,
+        #                                                              self.analog_channels,
+        #                                                              self.num_analog_channels)
 
         self.analog_read_task = self.card.task_create_analog_reader(self.samples_in_buffer,
                                                                     self.analog_channels,
@@ -53,8 +53,8 @@ class QuanserPlant:
         print("Quanser Plant Initialized!")
 
     def start_task(self):
-        self.card.task_start(
-            self.analog_write_task, Clock.HARDWARE_CLOCK_0, self.params.frequency, self.num_samples_max)
+        # self.card.task_start(
+        #     self.analog_write_task, Clock.HARDWARE_CLOCK_0, self.params.frequency, self.num_samples_max)
         self.card.task_start(
             self.encoder_read_task, Clock.HARDWARE_CLOCK_0, self.params.frequency, self.num_samples_max)
         self.card.task_start(
