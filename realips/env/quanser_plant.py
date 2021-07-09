@@ -79,7 +79,7 @@ class QuanserPlant:
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 
     def write_analog_output(self, action):
-        self.analog_write_buffer = np.array(action)
+        self.analog_write_buffer = np.array(action, np.float32)
         self.card.write_analog(self.analog_channels, self.num_analog_channels, self.analog_write_buffer)
 
     def rescale_x(self, x_readings):
