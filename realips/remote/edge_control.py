@@ -93,60 +93,60 @@ class DDPGEdgeControl(EdgeControl):
 
     def generate_action(self):
 
-        try:
-            self.quanser_plant.start_task()
-            print("Quanser Plant Initialized!")
+        # try:
 
-            while True:
+        self.quanser_plant.start_task()
+        print("Quanser Plant Initialized!")
+
+        while True:
+
+            if self.params.ddpg_params.add_actions_observations:
+
+                action_observations = np.zeros(shape=self.params.ddpg_params.action_observations_dim)
+            else:
+                action_observations = []
+
+            while not self.quanser_plant.normal_mode:
+
+                self.reset_control()
+
+            while self.quanser_plant.normal_mode:
+
+                self.step += 1
+                # t0 = time.time()
+                states = self.quanser_plant.get_encoder_readings()
+                normal_mode = self.quanser_plant.normal_mode
+
+                last_action = self.quanser_plant.analog_write_buffer.item()
+
+                stats_observation, failed = states2observations(states)
+
+                observations = np.hstack((stats_observation, action_observations)).tolist()
+
+                agent = self.agent_a if self.active_agent else self.agent_b
+
+                if self.training:
+                    action = agent.get_exploration_action(observations, self.control_targets)
+                else:
+                    action = agent.get_exploitation_action(observations, self.control_targets)
+
+                # delta_t = time.time()-t0
+
+                self.quanser_plant.write_analog_output(action)
+
+                edge_trajectory = [observations, last_action, failed, normal_mode]
+
+                self.send_edge_trajectory(edge_trajectory)
+                # print("Inference took {}s".format(delta_t))
+                self.action_noise_decay()
 
                 if self.params.ddpg_params.add_actions_observations:
+                    action_observations = np.append(action_observations, action)[1:]
 
-                    action_observations = np.zeros(shape=self.params.ddpg_params.action_observations_dim)
-                else:
-                    action_observations = []
-
-                while not self.quanser_plant.normal_mode:
-
-                    self.reset_control()
-
-                while self.quanser_plant.normal_mode:
-
-                    self.step += 1
-                    # t0 = time.time()
-
-                    states = self.quanser_plant.get_encoder_readings()
-
-                    normal_mode = self.quanser_plant.normal_mode
-
-                    last_action = self.quanser_plant.analog_write_buffer.item()
-
-                    stats_observation, failed = states2observations(states)
-
-                    observations = np.hstack((stats_observation, action_observations)).tolist()
-
-                    agent = self.agent_a if self.active_agent else self.agent_b
-
-                    if self.training:
-                        action = agent.get_exploration_action(observations, self.control_targets)
-                    else:
-                        action = agent.get_exploitation_action(observations, self.control_targets)
-
-                    # delta_t = time.time()-t0
-
-                    self.quanser_plant.write_analog_output(action)
-
-                    edge_trajectory = [observations, last_action, failed, normal_mode]
-
-                    self.send_edge_trajectory(edge_trajectory)
-                    # print("Inference took {}s".format(delta_t))
-                    self.action_noise_decay()
-
-                    if self.params.ddpg_params.add_actions_observations:
-                        action_observations = np.append(action_observations, action)[1:]
-        except HILError:
-            print("HILError--")
-            self.quanser_plant.card.task_stop_all()
-            self.quanser_plant.card.task_stop_all()
+        # except HILError:
+        #     print("HILError--")
+        #     self.quanser_plant.card.task_stop_all()
+        #     self.quanser_plant.card.task_stop_all()
 
     def update_weights(self):
 
