@@ -17,8 +17,8 @@ class QuanserPlant:
     def __init__(self, params: QuanserParams):
         self.params = params
         self.card = HIL("q2_usb", "0")
-        self.analog_channels = np.array([0], dtype=np.uint8)
-        self.encoder_channels = np.array([0, 1], dtype=np.uint8)
+        self.analog_channels = np.array([0], dtype=np.uint32)
+        self.encoder_channels = np.array([0, 1], dtype=np.uint32)
         self.num_analog_channels = len(self.analog_channels)
         self.num_encoder_channels = len(self.encoder_channels)
         self.num_samples_max = np.iinfo(np.uint32).max
@@ -28,8 +28,8 @@ class QuanserPlant:
 
         self.sample_period = 1 / self.params.frequency
 
-        self.analog_buffer = np.zeros(self.num_analog_channels, dtype=np.float32)
-        self.encoder_buffer = np.zeros(self.num_encoder_channels, dtype=np.float32)
+        self.analog_buffer = np.zeros(self.num_analog_channels, dtype=np.float64)
+        self.encoder_buffer = np.zeros(self.num_encoder_channels, dtype=np.float64)
         self.analog_write_buffer = np.zeros(self.num_analog_channels, dtype=np.float32)
 
         self.encoder_read_task = self.card.task_create_encoder_reader(self.samples_in_buffer,
