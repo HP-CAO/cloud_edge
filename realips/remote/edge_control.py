@@ -62,6 +62,12 @@ class EdgeControl:
         edge_trajectory_pack = pickle.dumps(edge_trajectory)
         self.redis_connection.publish(channel=self.params.redis_params.ch_edge_trajectory, message=edge_trajectory_pack)
 
+    def send_plant_trajectory(self, plant_trajectory):
+        """send plant states list"""
+        plant_trajectory_pack = pickle.dumps(plant_trajectory)
+        self.redis_connection.publish(channel=self.params.redis_params.ch_plant_trajectory_segment,
+                                      message=plant_trajectory_pack)
+
     def initialize_weights_from_cloud(self, *args):
         weights = self.receives_weights()
         for agent in args:
@@ -116,6 +122,8 @@ class DDPGEdgeControl(EdgeControl):
                 self.step += 1
                 # t0 = time.time()
                 states = self.quanser_plant.get_encoder_readings()
+
+                self.send_plant_trajectory(states)
 
                 normal_mode = self.quanser_plant.normal_mode
 
