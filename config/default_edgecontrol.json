@@ -1,0 +1,82 @@
+{
+    "redis_params": {
+        "servers": [
+            {
+                "port": "6379",
+                "password": "",
+                "host_ip": "127.0.0.1",
+                "name": "server_1"
+            },
+            {
+                "port": "6379",
+                "password": "",
+                "host_ip": "127.0.0.1",
+                "name": "server_1"
+            }
+        ],
+        "ch_edge_control": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_plant_trajectory_segment": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_edge_weights": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_edge_ready_update": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_plant_reset": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_edge_mode": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_edge_trajectory": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        }
+    },
+    "ddpg_params": {
+        "critic_dense1_obs": 256,
+        "critic_dense2_obs": 128,
+        "critic_dense1_act": 128,
+        "critic_dense1": 256,
+        "critic_dense2": 128,
+        "actor_dense1": 256,
+        "actor_dense2": 128,
+        "actor_dense3": 64,
+        "soft_alpha": 0.005,
+        "action_noise_factor": 1,
+        "action_noise_half_decay_time": 1000000.0,
+        "add_actions_observations": true,
+        "action_observations_dim": 5
+    },
+    "control_params": {
+        "random_reset_target": false,
+        "x_boundary": 0.4,
+        "control_targets": [
+            0.0,
+            0.0
+        ],
+        "is_quick_recover": true,
+        "agent_type": null,
+        "initialize_from_cloud": true,
+        "train_real": true
+    },
+    "quanser_params": {
+        "frequency": 50.0,
+        "theta_dot_limit": 2,
+        "x_threshold": 0.55,
+        "theta_dot_threshold": 15,
+        "x_left": -23749,
+        "x_right": 11946,
+        "x_length": 0.814
+    }
+}
