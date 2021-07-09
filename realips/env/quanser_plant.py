@@ -50,7 +50,14 @@ class QuanserPlant:
         self.x_resolution = self.get_x_resolution()
         self.theta_resolution = self.get_theta_resolution()
 
-        print("Quanser Plant Initialized!")
+        try:
+            self.start_task()
+            print("Quanser Plant Initialized!")
+
+        except HILError:
+            print("HILError--")
+            self.card.task_stop_all()
+            self.card.task_stop_all()
 
     def start_task(self):
         # self.card.task_start(
