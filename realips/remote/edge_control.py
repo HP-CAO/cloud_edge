@@ -3,7 +3,7 @@ import threading
 import struct
 import numpy as np
 from quanser.hardware import HILError
-from realips.env.quanser import QuanserParams, QuanserPlant
+from realips.env.quanser_plant import QuanserParams, QuanserPlant
 from realips.utils import get_current_time
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
