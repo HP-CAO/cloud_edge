@@ -17,7 +17,7 @@ class ChannelMappingParams:
 
 class RedisParams:
     def __init__(self):
-        self.servers = [RedisServerParams()] * 3
+        self.servers = [RedisServerParams()] * 2
         self.ch_edge_control = ChannelMappingParams()
         self.ch_plant_trajectory_segment = ChannelMappingParams()
         self.ch_edge_weights = ChannelMappingParams()

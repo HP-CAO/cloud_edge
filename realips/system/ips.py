@@ -32,7 +32,7 @@ class IpsSystem:
             if self.params.stats_params.visualize_eval:
                 self.physics.render()
 
-            if agent.add_actions2observations:
+            if agent.add_actions_observations:
                 action_observations = np.zeros(shape=agent.action_observations_dim)
             else:
                 action_observations = []

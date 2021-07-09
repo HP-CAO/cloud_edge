@@ -27,7 +27,6 @@ class IpsDDPG(IpsSystem):
     def train(self):
 
         ep = 0
-
         best_dsas = 0.0  # Best distance score and survived
         moving_average_dsas = 0.0
 

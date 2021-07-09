@@ -140,6 +140,7 @@ class CloudTrainerDDPG(CloudTrainer):
                 # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))
 
                 moving_average_dsas = 0.95 * moving_average_dsas + 0.05 * dsas
+
                 if moving_average_dsas > best_dsas:
                     self.agent.save_weights(self.params.stats_params.model_name + '_best')
                     best_dsas = moving_average_dsas

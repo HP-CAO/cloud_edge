@@ -48,6 +48,8 @@ class DDPGAgent:
 
         self.action_noise = OrnsteinUhlenbeckActionNoise(self.shape_action)
         self.action_noise_factor = params.action_noise_factor
+        self.add_actions_observations = self.params.add_actions_observations
+        self.action_observations_dim = self.params.action_observations_dim
 
     def build_critic(self, name):
         """

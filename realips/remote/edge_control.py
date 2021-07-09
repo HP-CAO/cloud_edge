@@ -3,8 +3,7 @@ import threading
 import struct
 import numpy as np
 from quanser.hardware import HILError
-from realips.remote.transition import TrajectorySegment
-from realips.remote.quanser import QuanserParams, QuanserPlant
+from realips.env.quanser import QuanserParams, QuanserPlant
 from realips.utils import get_current_time
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
@@ -82,11 +81,12 @@ class DDPGEdgeControl(EdgeControl):
         self.t2 = threading.Thread(target=self.update_weights)
         self.t3 = threading.Thread(target=self.receive_mode)
         self.step = 0
-        self.training = eval is None
+        self.training = True if eval is None else False
 
         if eval is not None:
             self.agent_a.load_weights(eval)
             self.agent_b.load_weights(eval)
+
         elif params.control_params.initialize_from_cloud:
             print("waiting for weights from cloud")
             self.initialize_weights_from_cloud(self.agent_a, self.agent_b)
@@ -99,11 +99,13 @@ class DDPGEdgeControl(EdgeControl):
             while True:
 
                 if self.params.ddpg_params.add_actions_observations:
+
                     action_observations = np.zeros(shape=self.params.ddpg_params.action_observations_dim)
                 else:
                     action_observations = []
 
                 while not self.quanser_plant.normal_mode:
+
                     self.reset_control()
 
                 while self.quanser_plant.normal_mode:
@@ -112,10 +114,13 @@ class DDPGEdgeControl(EdgeControl):
                     # t0 = time.time()
 
                     states = self.quanser_plant.get_encoder_readings()
+
                     normal_mode = self.quanser_plant.normal_mode
+
                     last_action = self.quanser_plant.analog_write_buffer.item()
 
                     stats_observation, failed = states2observations(states)
+
                     observations = np.hstack((stats_observation, action_observations)).tolist()
 
                     agent = self.agent_a if self.active_agent else self.agent_b
@@ -133,10 +138,11 @@ class DDPGEdgeControl(EdgeControl):
 
                     self.send_edge_trajectory(edge_trajectory)
                     # print("Inference took {}s".format(delta_t))
-                    self._action_noise_decay()
+                    self.action_noise_decay()
 
                     if self.params.ddpg_params.add_actions_observations:
                         action_observations = np.append(action_observations, action)[1:]
+
         except HILError:
             print("HILError--")
             self.quanser_plant.card.task_stop_all()
@@ -159,7 +165,7 @@ class DDPGEdgeControl(EdgeControl):
 
             print("[{}] ===> Agents toggled".format(get_current_time()))
 
-    def _action_noise_decay(self):
+    def action_noise_decay(self):
         self.agent_a.noise_factor_decay(self.step)
         self.agent_b.noise_factor_decay(self.step)
 
@@ -169,6 +175,9 @@ class DDPGEdgeControl(EdgeControl):
         self.generate_action()
 
     def receive_mode(self):
+        """
+        receive_mode to switch between training and testing
+        """
         message = self.training_mode_subscriber.parse_response()[2]
         self.training = struct.unpack("?", message)
 
