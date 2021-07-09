@@ -58,17 +58,21 @@ class QuanserPlant:
         self.card.task_start(
             self.analog_read_task, Clock.HARDWARE_CLOCK_0, self.params.frequency, self.num_samples_max)
 
+        self.card.task_read_encoder(self.encoder_read_task, self.num_samples_to_read, self.encoder_buffer)
+
     def get_encoder_readings(self):
         x_old, theta_old = self.encoder_buffer
         x_old_rescaled = self.rescale_x(x_old)
         theta_old_rescaled = self.rescale_theta(theta_old)
-        self.card.task_read_analog(self.analog_read_task, self.num_samples_to_read, self.analog_buffer)
+
         self.card.task_read_encoder(self.encoder_read_task, self.num_samples_to_read, self.encoder_buffer)
+
         x_new, theta_new = self.encoder_buffer
         x_new_rescaled = self.rescale_x(x_new)
         theta_new_rescaled = self.rescale_theta(theta_new)
 
         x_dot = (x_new_rescaled - x_old_rescaled) / self.sample_period
+
         theta_dot = (theta_new_rescaled - theta_old_rescaled) / self.sample_period
 
         failed = self.is_failed(x_new_rescaled, theta_dot)
