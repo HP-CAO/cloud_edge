@@ -163,7 +163,7 @@ class DDPGEdgeControl(EdgeControl):
 
             self.active_agent = not self.active_agent
 
-            print("[{}] ===> Agents toggled".format(get_current_time()))
+            # print("[{}] ===> Agents toggled".format(get_current_time()))
 
     def action_noise_decay(self):
         self.agent_a.noise_factor_decay(self.step)
