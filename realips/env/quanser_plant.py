@@ -29,7 +29,7 @@ class QuanserPlant:
         self.sample_period = 1 / self.params.frequency
 
         self.analog_buffer = np.zeros(self.num_analog_channels, dtype=np.float64)
-        self.encoder_buffer = np.zeros(self.num_encoder_channels, dtype=np.float64)
+        self.encoder_buffer = np.zeros(self.num_encoder_channels, dtype=np.int32)
         self.analog_write_buffer = np.zeros(self.num_analog_channels, dtype=np.float32)
 
         self.encoder_read_task = self.card.task_create_encoder_reader(self.samples_in_buffer,

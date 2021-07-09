@@ -96,6 +96,7 @@ class DDPGEdgeControl(EdgeControl):
         # try:
 
         self.quanser_plant.start_task()
+
         print("Quanser Plant Initialized!")
 
         while True:
@@ -115,6 +116,7 @@ class DDPGEdgeControl(EdgeControl):
                 self.step += 1
                 # t0 = time.time()
                 states = self.quanser_plant.get_encoder_readings()
+
                 normal_mode = self.quanser_plant.normal_mode
 
                 last_action = self.quanser_plant.analog_write_buffer.item()
