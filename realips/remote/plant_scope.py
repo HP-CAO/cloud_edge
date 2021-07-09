@@ -15,7 +15,7 @@ class PlantScope:
         self.physics = GymPhysics(self.params.physics_params)
         self.redis_connection = RedisConnection(self.params.redis_params)
         self.states_subscriber = self.redis_connection.subscribe(
-            channel=self.params.redis_params.ch_plant_trajectory_segment)
+            channel=self.params.redis_params.ch_edge_trajectory)
 
     def receive_trajectory_segment(self):
         """"
