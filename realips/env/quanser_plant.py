@@ -80,7 +80,7 @@ class QuanserPlant:
 
         if failed:
             self.normal_mode = False
-
+        print(x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 
     def write_analog_output(self, action):
@@ -121,7 +121,7 @@ class QuanserPlant:
         return x_resolution
 
     def get_center_x(self):
-        x_c = (self.params.x_right - self.params.x_left) * 0.5
+        x_c = (self.params.x_right + self.params.x_left) * 0.5
         return x_c
 
     def is_failed(self, x, theta_dot):
