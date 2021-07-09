@@ -7,7 +7,7 @@ import numpy as np
 
 class GymPhysicsParams:
     def __init__(self):
-        self.x_threshold = 0.55
+        self.x_threshold = 0.407
         self.theta_dot_threshold = 15
         self.kinematics_intergrator = 'euler'
         self.ini_states = [0., 0., -math.pi, 0., False]

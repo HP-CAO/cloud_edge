@@ -1,14 +1,16 @@
 import numpy as np
-from quanser_plant.hardware import HIL, Clock, HILError
+from quanser.hardware import HIL, Clock, HILError
+import math
 
 class QuanserParams:
     def __init__(self):
         self.frequency = 50.00 # hz
-        self.x_limit = 0.5
         self.theta_dot_limit = 2
         self.x_threshold = 0.55
         self.theta_dot_threshold = 15
-
+        self.x_left = -23749
+        self.x_right = 11946
+        self.x_length = 0.814
 
 
 class QuanserPlant:
@@ -44,6 +46,10 @@ class QuanserPlant:
 
         self.normal_mode = True  # False if the pendulum is in the resetting phrase
 
+        self.x_center = self.get_center_x()
+        self.x_resolution = self.get_x_resolution()
+        self.theta_resolution = self.get_theta_resolution()
+
         print("Quanser Plant Initialized!")
 
     def start_task(self):
@@ -78,16 +84,46 @@ class QuanserPlant:
         self.analog_write_buffer = np.array(action)
         self.card.write_analog(self.analog_channels, self.num_analog_channels, self.analog_write_buffer)
 
-    @staticmethod
-    def rescale_x(x):
-        pass
+    def rescale_x(self, x_readings):
+        """
+        rescale x_position sensor reading to world relative position with respect to track center
+        :param x_readings: sensor reading from the cart encoder
+        :return: cart position
+        """
+        x = (x_readings - self.x_center) * self.x_resolution
+        return x
 
-    @staticmethod
-    def rescale_theta(theta):
-        pass
+    def rescale_theta(self, theta_readings):
+        """
+        rescale angle readings to [-pi to pi]
+        :param x_readings: sensor reading from the angle encoder
+        :return: pendulum's angle
+        """
+        theta_ini = 2
+        theta = (theta_readings - theta_ini) * self.theta_resolution
+        theta += -1 * math.pi
+        theta_rescale = math.atan2(math.sin(theta), math.cos(theta))
+        return theta_rescale
+
+    def get_theta_resolution(self):
+        theta_0 = 2
+        theta_1 = 4094
+        theta_resolution = math.pi * 2 / (theta_1 - theta_0)
+        return theta_resolution
+
+    def get_x_resolution(self):
+        x_l = self.params.x_left
+        x_r = self.params.x_right
+        x_resolution = self.params.x_length / (x_r - x_l)
+        return x_resolution
+
+    def get_center_x(self):
+        x_c = (self.params.x_right - self.params.x_left) * 0.5
+        return x_c
 
     def is_failed(self, x, theta_dot):
         failed = bool(x <= -self.params.x_threshold
                       or x >= self.params.x_threshold
                       or theta_dot > self.params.theta_dot_threshold)
         return failed
+
