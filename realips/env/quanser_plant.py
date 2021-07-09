@@ -18,10 +18,10 @@ class QuanserPlant:
         self.params = params
         self.card = HIL("q2_usb", "0")
         self.analog_channels = np.array([0], dtype=np.uint32)
-        self.encoder_channels = np.array([0, 1], dtype=np.uint32)
+        self.encoder_channels = np.array([0, 1], dtype=np.int32)
         self.num_analog_channels = len(self.analog_channels)
         self.num_encoder_channels = len(self.encoder_channels)
-        self.num_samples_max = np.iinfo(np.uint32).max
+        self.num_samples_max = np.iinfo(np.int32).max
         self.samples_in_buffer = int(self.params.frequency)
         self.num_samples_to_read = 1
         self.num_samples_to_write = 1
