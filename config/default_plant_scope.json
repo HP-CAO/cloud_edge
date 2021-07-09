@@ -37,6 +37,10 @@
         "ch_edge_mode": {
             "server_name": "cloud",
             "channel_name": "ch_edge_mode"
+        },
+        "ch_edge_trajectory": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_trajectory"
         }
     },
     "physics_params": {
