@@ -147,6 +147,7 @@ class DDPGEdgeControl(EdgeControl):
                 action = action * self.params.control_params.action_factor
 
                 print(action)
+                print(self.quanser_plant.normal_mode)
 
                 self.quanser_plant.write_analog_output(action)
 
