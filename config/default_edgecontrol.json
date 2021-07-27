@@ -71,10 +71,9 @@
         "train_real": true
     },
     "quanser_params": {
-        "frequency": 1.0,
-        "theta_dot_limit": 2,
-        "x_threshold": 0.55,
-        "theta_dot_threshold": 15,
+        "frequency": 50,
+        "x_threshold": 0.2,
+        "theta_dot_threshold": 5,
         "x_left": -23749,
         "x_right": 11946,
         "x_length": 0.814

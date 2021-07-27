@@ -141,6 +141,8 @@ class DDPGEdgeControl(EdgeControl):
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
 
+                print(action)
+                action = action * 0.1
                 # delta_t = time.time()-t0
 
                 self.quanser_plant.write_analog_output(action)
