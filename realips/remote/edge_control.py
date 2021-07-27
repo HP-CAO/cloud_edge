@@ -204,6 +204,7 @@ class DDPGEdgeControl(EdgeControl):
 
     def reset_control(self):
         while True:
+            print("resetting...")
             position_counter = 0
             states = self.quanser_plant.get_encoder_readings()
             x_ = states[0]
