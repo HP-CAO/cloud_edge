@@ -146,6 +146,8 @@ class DDPGEdgeControl(EdgeControl):
 
                 action = action * self.params.control_params.action_factor
 
+                print(action)
+
                 self.quanser_plant.write_analog_output(action)
 
                 edge_trajectory = [observations, last_action, failed, normal_mode]
