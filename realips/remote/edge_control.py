@@ -20,6 +20,7 @@ class ControlParams:
         self.agent_type = None
         self.initialize_from_cloud = True
         self.train_real = True
+        self.action_factor = 3
 
 
 class EdgeControlParams:
@@ -141,8 +142,9 @@ class DDPGEdgeControl(EdgeControl):
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
 
-                print(action)
                 # delta_t = time.time()-t0
+
+                action = action * self.params.control_params.action_factor
 
                 self.quanser_plant.write_analog_output(action)
 

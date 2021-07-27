@@ -68,10 +68,11 @@
         "is_quick_recover": true,
         "agent_type": null,
         "initialize_from_cloud": true,
-        "train_real": true
+        "train_real": true,
+        "action_factor": 3
     },
     "quanser_params": {
-        "frequency": 50,
+        "frequency": 20,
         "x_threshold": 0.2,
         "theta_dot_threshold": 5,
         "x_left": -23749,
