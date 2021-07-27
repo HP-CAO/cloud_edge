@@ -2,6 +2,7 @@ import pickle
 import threading
 import struct
 import numpy as np
+from simple_pid import PID
 from quanser.hardware import HILError
 from realips.env.quanser_plant import QuanserParams, QuanserPlant
 from realips.utils import get_current_time
@@ -88,11 +89,11 @@ class DDPGEdgeControl(EdgeControl):
         self.t3 = threading.Thread(target=self.receive_mode)
         self.step = 0
         self.training = True if eval is None else False
+        self.pid_controller = PID(Kp=1.0, setpoint=0, sample_time=0.02)
 
         if eval is not None:
             self.agent_a.load_weights(eval)
             self.agent_b.load_weights(eval)
-
         elif params.control_params.initialize_from_cloud:
             print("waiting for weights from cloud")
             self.initialize_weights_from_cloud(self.agent_a, self.agent_b)
@@ -123,7 +124,7 @@ class DDPGEdgeControl(EdgeControl):
                 # t0 = time.time()
                 states = self.quanser_plant.get_encoder_readings()
 
-                self.send_plant_trajectory(states)
+                self.send_plant_trajectory(states) # this is sent to the plant scope for monitoring
 
                 normal_mode = self.quanser_plant.normal_mode
 
@@ -146,12 +147,16 @@ class DDPGEdgeControl(EdgeControl):
 
                 edge_trajectory = [observations, last_action, failed, normal_mode]
 
-                self.send_edge_trajectory(edge_trajectory)
+                self.send_edge_trajectory(edge_trajectory) # this is sent to the cloud trainer
                 # print("Inference took {}s".format(delta_t))
                 self.action_noise_decay()
 
                 if self.params.ddpg_params.add_actions_observations:
                     action_observations = np.append(action_observations, action)[1:]
+
+                if failed:
+                    self.quanser_plant.normal_mode = False
+                    break
 
         # except HILError:
         #     print("HILError--")
@@ -192,6 +197,16 @@ class DDPGEdgeControl(EdgeControl):
         self.training = struct.unpack("?", message)
 
     def reset_control(self):
+        while True:
+            position_counter = 0
+            states = self.quanser_plant.get_encoder_readings()
+            x_ = states[0]
+            if x_ <= 0.01:
+                position_counter += 1
+            else:
+                position_counter = 0
+            if position_counter >= 5:
+                break
+            control_action = self.pid_controller(x_)
+            self.quanser_plant.write_analog_output(control_action)
         self.quanser_plant.normal_mode = True
-        # todo maybe calibration is not needed
-        pass

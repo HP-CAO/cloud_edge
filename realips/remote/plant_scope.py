@@ -1,7 +1,6 @@
 from realips.env.gym_physics import GymPhysics, GymPhysicsParams
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.remote.transition import TrajectorySegment
-import struct
 import pickle
 
 

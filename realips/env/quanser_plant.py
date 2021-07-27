@@ -5,9 +5,8 @@ import math
 class QuanserParams:
     def __init__(self):
         self.frequency = 50.00 # hz
-        self.theta_dot_limit = 2
-        self.x_threshold = 0.55
-        self.theta_dot_threshold = 15
+        self.x_threshold = 0.3
+        self.theta_dot_threshold = 10
         self.x_left = -23749
         self.x_right = 11946
         self.x_length = 0.814
@@ -36,10 +35,6 @@ class QuanserPlant:
                                                                        self.encoder_channels,
                                                                        self.num_encoder_channels)
 
-        # self.analog_write_task = self.card.task_create_analog_writer(self.samples_in_buffer,
-        #                                                              self.analog_channels,
-        #                                                              self.num_analog_channels)
-
         self.analog_read_task = self.card.task_create_analog_reader(self.samples_in_buffer,
                                                                     self.analog_channels,
                                                                     self.num_analog_channels)
@@ -51,8 +46,7 @@ class QuanserPlant:
         self.theta_resolution = self.get_theta_resolution()
 
     def start_task(self):
-        # self.card.task_start(
-        #     self.analog_write_task, Clock.HARDWARE_CLOCK_0, self.params.frequency, self.num_samples_max)
+
         self.card.task_start(
             self.encoder_read_task, Clock.HARDWARE_CLOCK_0, self.params.frequency, self.num_samples_max)
         self.card.task_start(
@@ -80,6 +74,7 @@ class QuanserPlant:
 
         if failed:
             self.normal_mode = False
+
         print(x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 

@@ -20,7 +20,9 @@ class DDPGTrainer:
     def __init__(self, params: DDPGTrainerParams, agent: DDPGAgent):
         self.params = params
         self.agent = agent
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate)
+        self.optimizer_critic = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate)
+        self.optimizer_actor = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate)
+
         self.replay_mem = ReplayMemory(size=self.params.rm_size)
 
         self.replay_memory_mutex = threading.Lock()
@@ -63,7 +65,7 @@ class DDPGTrainer:
             y_pre = self.agent.critic([ob1, tgs, a1])
             loss_critic = tf.keras.losses.mean_squared_error(y_exp, y_pre)
             q_grads = tape.gradient(loss_critic, self.agent.critic.trainable_variables)
-            self.optimizer.apply_gradients(zip(q_grads, self.agent.critic.trainable_variables))
+            self.optimizer_critic.apply_gradients(zip(q_grads, self.agent.critic.trainable_variables))
 
         # ---------------------- optimize actor ----------------------
         if self.replay_mem.get_size() >= self.params.actor_freeze_step_count:
@@ -71,7 +73,7 @@ class DDPGTrainer:
                 a1_predict = self.agent.actor([ob1, tgs])
                 actor_value = -1 * tf.math.reduce_mean(self.agent.critic([ob1, tgs, a1_predict]))
                 actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
-                self.optimizer.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
+                self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
 
         self.agent.soft_update()
 
@@ -103,7 +105,7 @@ class DDPGTrainer:
             loss_critic = tf.reduce_mean(importance_sampling_weight * td_error ** 2)
             q_grads = tape.gradient(loss_critic, self.agent.critic.trainable_variables)
             # q_grads = importance_sampling_weight * td_error * bare_grads
-            self.optimizer.apply_gradients(zip(q_grads, self.agent.critic.trainable_variables))
+            self.optimizer_critic.apply_gradients(zip(q_grads, self.agent.critic.trainable_variables))
             self.replay_mem.update_priority(idx, abs(td_error.numpy()))
 
         # ---------------------- optimize actor ----------------------
@@ -112,7 +114,7 @@ class DDPGTrainer:
                 a1_predict = self.agent.actor([ob1, tgs])
                 actor_value = -1 * tf.math.reduce_mean(self.agent.critic([ob1, tgs, a1_predict]))
                 actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
-                self.optimizer.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
+                self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
 
         self.agent.soft_update()
 
