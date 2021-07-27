@@ -69,11 +69,11 @@
         "agent_type": null,
         "initialize_from_cloud": true,
         "train_real": true,
-        "action_factor": 6
+        "action_factor": 3
     },
     "quanser_params": {
         "frequency": 10,
-        "x_threshold": 0.4,
+        "x_threshold": 0.3,
         "theta_dot_threshold": 15,
         "x_left": -23749,
         "x_right": 11946,
