@@ -153,7 +153,7 @@ class DDPGEdgeControl(EdgeControl):
 
                 edge_trajectory = [observations, last_action, failed, normal_mode]
 
-                self.send_edge_trajectory(edge_trajectory) # this is sent to the cloud trainer
+                self.send_edge_trajectory(edge_trajectory)  # this is sent to the cloud trainer
                 # print("Inference took {}s".format(delta_t))
                 self.action_noise_decay()
 

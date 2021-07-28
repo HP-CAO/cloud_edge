@@ -32,9 +32,9 @@ try:
         card.task_read_encoder(encoder_task, samples_to_read, encoder_buffer)
         # card.task_write_analog(analog_task_control, samples_to_write, analog_write_buffer)
         # print('Analog_write_buffer', analog_write_buffer)
-        # card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)
+        card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)
         print("Encoder: ", encoder_buffer)
-        # print("Analog ", analog_buffer)
+        print("Analog ", analog_buffer)
 
         if i % 2 == 0:
             analog_write_buffer = -1 * analog_write_buffer

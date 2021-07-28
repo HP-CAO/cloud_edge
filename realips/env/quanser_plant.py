@@ -2,9 +2,10 @@ import numpy as np
 from quanser.hardware import HIL, Clock, HILError
 import math
 
+
 class QuanserParams:
     def __init__(self):
-        self.frequency = 50.00 # hz
+        self.frequency = 50.00  # hz
         self.x_threshold = 0.3
         self.theta_dot_threshold = 10
         self.x_left = - 18825
@@ -33,8 +34,8 @@ class QuanserPlant:
         self.analog_write_buffer = np.zeros(self.num_analog_channels, dtype=np.float32)
 
         self.encoder_read_task = self.card.task_create_encoder_reader(self.samples_in_buffer,
-                                                                       self.encoder_channels,
-                                                                       self.num_encoder_channels)
+                                                                      self.encoder_channels,
+                                                                      self.num_encoder_channels)
 
         self.analog_read_task = self.card.task_create_analog_reader(self.samples_in_buffer,
                                                                     self.analog_channels,
@@ -47,7 +48,6 @@ class QuanserPlant:
         self.theta_resolution = self.get_theta_resolution()
 
     def start_task(self):
-
         self.card.task_start(
             self.encoder_read_task, Clock.HARDWARE_CLOCK_0, self.params.frequency, self.num_samples_max)
         self.card.task_start(
@@ -62,7 +62,7 @@ class QuanserPlant:
         theta_old_rescaled = self.rescale_theta(theta_old)
 
         self.card.task_read_encoder(self.encoder_read_task, self.num_samples_to_read, self.encoder_buffer)
-        self.card.task_read_analog(self.analog_read_task, self.num_samples_to_read, self.analog_buffer)
+        # self.card.task_read_analog(self.analog_read_task, self.num_samples_to_read, self.analog_buffer)
 
         print("step_status", self.encoder_buffer)
         print("analog_status", self.analog_buffer)
@@ -85,6 +85,7 @@ class QuanserPlant:
 
     def write_analog_output(self, action):
         self.analog_write_buffer = np.array(action, np.float32)
+        print(self.analog_write_buffer)
         self.card.write_analog(self.analog_channels, self.num_analog_channels, self.analog_write_buffer)
 
     def rescale_x(self, x_readings):
@@ -125,4 +126,3 @@ class QuanserPlant:
                       or x >= self.params.x_threshold
                       or theta_dot > self.params.theta_dot_threshold)
         return failed
-
