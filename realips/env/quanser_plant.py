@@ -31,7 +31,7 @@ class QuanserPlant:
 
         self.analog_buffer = np.zeros(self.num_analog_channels, dtype=np.float64)
         self.encoder_buffer = np.zeros(self.num_encoder_channels, dtype=np.int32)
-        self.analog_write_buffer = np.zeros(self.num_analog_channels, dtype=np.float32)
+        self.analog_write_buffer = np.zeros(self.num_analog_channels, dtype=np.float64)
 
         self.encoder_read_task = self.card.task_create_encoder_reader(self.samples_in_buffer,
                                                                       self.encoder_channels,
@@ -82,7 +82,7 @@ class QuanserPlant:
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 
     def write_analog_output(self, action):
-        self.analog_write_buffer = np.array([action], np.float32)
+        self.analog_write_buffer = np.array([action], np.float64)
         print(self.analog_write_buffer)
         self.card.write_analog(self.analog_channels, self.num_analog_channels, self.analog_write_buffer)
 
