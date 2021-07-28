@@ -7,9 +7,10 @@ class QuanserParams:
         self.frequency = 50.00 # hz
         self.x_threshold = 0.3
         self.theta_dot_threshold = 10
-        self.x_left = -23749
-        self.x_right = 11946
+        self.x_left = - 18825
+        self.x_right = 16528
         self.x_length = 0.814
+        self.x_center = 908
 
 
 class QuanserPlant:
@@ -41,7 +42,7 @@ class QuanserPlant:
 
         self.normal_mode = True  # False if the pendulum is in the resetting phrase
 
-        self.x_center = self.get_center_x()
+        self.x_center = self.params.x_center
         self.x_resolution = self.get_x_resolution()
         self.theta_resolution = self.get_theta_resolution()
 
@@ -62,6 +63,7 @@ class QuanserPlant:
 
         self.card.task_read_encoder(self.encoder_read_task, self.num_samples_to_read, self.encoder_buffer)
         print("step_status", self.encoder_buffer)
+
         x_new, theta_new = self.encoder_buffer
         x_new_rescaled = self.rescale_x(x_new)
         theta_new_rescaled = self.rescale_theta(theta_new)
@@ -114,10 +116,6 @@ class QuanserPlant:
         x_r = self.params.x_right
         x_resolution = self.params.x_length / (x_r - x_l)
         return x_resolution
-
-    def get_center_x(self):
-        x_c = (self.params.x_right + self.params.x_left) * 0.5
-        return x_c
 
     def is_failed(self, x, theta_dot):
         failed = bool(x <= -self.params.x_threshold
