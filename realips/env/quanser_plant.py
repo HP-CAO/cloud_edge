@@ -62,7 +62,10 @@ class QuanserPlant:
         theta_old_rescaled = self.rescale_theta(theta_old)
 
         self.card.task_read_encoder(self.encoder_read_task, self.num_samples_to_read, self.encoder_buffer)
+        self.card.task_read_analog(self.analog_read_task, self.num_samples_to_read, self.analog_buffer)
+
         print("step_status", self.encoder_buffer)
+        print("analog_status", self.analog_buffer)
 
         x_new, theta_new = self.encoder_buffer
         x_new_rescaled = self.rescale_x(x_new)
@@ -106,7 +109,7 @@ class QuanserPlant:
         return theta_rescale
 
     def get_theta_resolution(self):
-        theta_0 = 2
+        theta_0 = 0
         theta_1 = 4094
         theta_resolution = math.pi * 2 / (theta_1 - theta_0)
         return theta_resolution

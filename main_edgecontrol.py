@@ -4,6 +4,7 @@ from realips.remote.edge_control import EdgeControlParams, DDPGEdgeControl
 
 from utils import *
 
+
 def main_ddpg(p, eval=None):
     edge_ddpg = DDPGEdgeControl(p, eval)
     edge_ddpg.run()
