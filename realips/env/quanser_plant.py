@@ -71,7 +71,7 @@ class QuanserPlant:
 
         x_dot = (x_new_rescaled - x_old_rescaled) / self.sample_period
 
-        theta_dot = (theta_new_rescaled - theta_old_rescaled) / self.sample_period
+        theta_dot = (theta_new - theta_old) * self.theta_resolution / self.sample_period
 
         failed = self.is_failed(x_new_rescaled, theta_dot)
 
