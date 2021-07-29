@@ -24,7 +24,7 @@ try:
     card.task_start(analog_task, Clock.HARDWARE_CLOCK_0, frequency, samples)
     card.task_start(encoder_task, Clock.HARDWARE_CLOCK_0, frequency, samples)
     # card.task_start(analog_task_control, Clock.HARDWARE_CLOCK_0, frequency, samples)
-    analog_write_buffer += 2
+    # analog_write_buffer += 2
     i = 0
 
     while True:
@@ -32,13 +32,13 @@ try:
         card.task_read_encoder(encoder_task, samples_to_read, encoder_buffer)
         # card.task_write_analog(analog_task_control, samples_to_write, analog_write_buffer)
         # print('Analog_write_buffer', analog_write_buffer)
-        # card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)
+        card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)
         print("Encoder: ", encoder_buffer)
         # print("Analog ", analog_buffer)
-
-        if i % 2 == 0:
-            analog_write_buffer = -1 * analog_write_buffer
-        i += 1
+        #
+        # if i % 2 == 0:
+        #     analog_write_buffer = -1 * analog_write_buffer
+        # i += 1
 
 except HILError:
     print("HILError--")
