@@ -146,8 +146,7 @@ class DDPGEdgeControl(EdgeControl):
 
                 action = action * self.params.control_params.action_factor
 
-                print(action)
-                print(self.quanser_plant.normal_mode)
+                print("normal_mode: ", self.quanser_plant.normal_mode)
 
                 self.quanser_plant.write_analog_output(action)
 
@@ -203,9 +202,9 @@ class DDPGEdgeControl(EdgeControl):
         self.training = struct.unpack("?", message)
 
     def reset_control(self):
+        position_counter = 0
         while True:
             print("resetting...")
-            position_counter = 0
             states = self.quanser_plant.get_encoder_readings()
             x_ = states[0]
             if x_ <= 0.01:
