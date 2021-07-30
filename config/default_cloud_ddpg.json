@@ -1,6 +1,6 @@
 {
     "physics_params": {
-        "x_threshold": 0.407,
+        "x_threshold": 0.3,
         "theta_dot_threshold": 15,
         "kinematics_intergrator": "euler",
         "ini_states": [
@@ -113,9 +113,9 @@
         "rm_size": 100000,
         "batch_size": 128,
         "learning_rate": 0.0003,
-        "is_remote_train": false,
-        "eval_period": 2,
-        "actor_freeze_step_count": 5000,
+        "is_remote_train": true,
+        "eval_period": 20,
+        "actor_freeze_step_count": 1000,
         "use_prioritized_replay": false
     }
 }
