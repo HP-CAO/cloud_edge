@@ -211,20 +211,19 @@ class DDPGEdgeControl(EdgeControl):
         self.training = struct.unpack("?", message)
 
     def reset_control(self):
-        position_counter = 0
+        states = self.quanser_plant.get_encoder_readings()
+        x_ = states[0]
+
         while True:
             print("resetting...")
-            states = self.quanser_plant.get_encoder_readings()
-            x_ = states[0]
-            if abs(x_) <= 0.0015:
-                position_counter += 1
-            else:
-                position_counter = 0
-            if position_counter >= 5:
-                break
             control_action = self.pid_controller(x_)
             control_action = numpy.clip(control_action, -7, 7)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
+            states = self.quanser_plant.get_encoder_readings()
+            if x_ - states[0] < 0.005:
+                break
+            x_ = states[0]
+
         self.quanser_plant.normal_mode = True
 
     def receive_reset_command(self):
