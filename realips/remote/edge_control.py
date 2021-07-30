@@ -216,7 +216,7 @@ class DDPGEdgeControl(EdgeControl):
             print("resetting...")
             states = self.quanser_plant.get_encoder_readings()
             x_ = states[0]
-            if abs(x_) <= 0.01:
+            if abs(x_) <= 0.0015:
                 position_counter += 1
             else:
                 position_counter = 0
