@@ -1,6 +1,8 @@
 import pickle
 import threading
 import struct
+
+import numpy
 import numpy as np
 from simple_pid import PID
 from quanser.hardware import HILError
@@ -92,7 +94,7 @@ class DDPGEdgeControl(EdgeControl):
         self.t4 = threading.Thread(target=self.receive_reset_command())
         self.step = 0
         self.training = True if eval is None else False
-        self.pid_controller = PID(Kp=1.0, setpoint=0, sample_time=0.02)
+        self.pid_controller = PID(Kp=30.0, setpoint=0, sample_time=0.02)
 
         if eval is not None:
             self.agent_a.load_weights(eval)
@@ -216,6 +218,7 @@ class DDPGEdgeControl(EdgeControl):
             if position_counter >= 5:
                 break
             control_action = self.pid_controller(x_)
+            control_action = numpy.clip(control_action, -7, 7)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
         self.quanser_plant.normal_mode = True
 

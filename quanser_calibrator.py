@@ -14,14 +14,14 @@ if args.kp is not None:
     kp = float(args.kp)
 
 else:
-    kp = 1.0
+    kp = 30.0  # this value works quite well
 
 
 def get_x_resolution():
     x_l = - 18825
     x_r = 16528
-    x_resolution = 0.814 / (x_r - x_l)
-    return x_resolution
+    x_res = 0.814 / (x_r - x_l)
+    return x_res
 
 
 card = HIL("q2_usb", "0")
