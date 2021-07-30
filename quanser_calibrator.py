@@ -53,6 +53,7 @@ try:
         card.task_read_encoder(encoder_task, samples_to_read, encoder_buffer)
         x = encoder_buffer[0]
         x = x * x_resolution
+        print(x)
         action = pid_controller(x)
         analog_write_buffer = np.array([action], dtype=np.float64)
         card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)
