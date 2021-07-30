@@ -38,6 +38,7 @@ class EdgeControl:
 
         self.weights_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_edge_weights)
         self.training_mode_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_edge_mode)
+        self.runnint_reset_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_plant_reset)
         self.control_targets = self.params.control_params.control_targets
         self.active_agent = True  # True: agent_a is controller, False: agent_b is controller
         self.quanser_plant = QuanserPlant(self.params.quanser_params)
@@ -88,6 +89,7 @@ class DDPGEdgeControl(EdgeControl):
         # self.t1 = threading.Thread(target=self.generate_action)
         self.t2 = threading.Thread(target=self.update_weights)
         self.t3 = threading.Thread(target=self.receive_mode)
+        self.t4 = threading.Thread(target=self.receive_reset_command())
         self.step = 0
         self.training = True if eval is None else False
         self.pid_controller = PID(Kp=1.0, setpoint=0, sample_time=0.02)
@@ -116,7 +118,6 @@ class DDPGEdgeControl(EdgeControl):
                 action_observations = []
 
             while not self.quanser_plant.normal_mode:
-
                 self.reset_control()
 
             while self.quanser_plant.normal_mode:
@@ -125,7 +126,7 @@ class DDPGEdgeControl(EdgeControl):
                 # t0 = time.time()
                 states = self.quanser_plant.get_encoder_readings()
 
-                self.send_plant_trajectory(states) # this is sent to the plant scope for monitoring
+                self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
 
                 normal_mode = self.quanser_plant.normal_mode
 
@@ -192,6 +193,7 @@ class DDPGEdgeControl(EdgeControl):
     def run(self):
         self.t2.start()
         self.t3.start()
+        self.t4.start()
         self.generate_action()
 
     def receive_mode(self):
@@ -216,3 +218,11 @@ class DDPGEdgeControl(EdgeControl):
             control_action = self.pid_controller(x_)
             self.quanser_plant.write_analog_output(control_action)
         self.quanser_plant.normal_mode = True
+
+    def receive_reset_command(self):
+        """
+        receive reset command from the cloud trainer to reset the plant;
+        resetting command comes when the current steps reach the max_steps of a single episode
+        """
+        message = self.training_mode_subscriber.parse_response()[2]
+        self.reset = struct.unpack("?", message)
