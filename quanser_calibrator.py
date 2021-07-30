@@ -11,7 +11,8 @@ parser.add_argument('--kp', default=None, help='try different k gains for pid co
 args = parser.parse_args()
 
 if args.kp is not None:
-    kp = args.kp
+    kp = float(args.kp)
+
 else:
     kp = 1.0
 
