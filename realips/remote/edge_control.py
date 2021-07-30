@@ -227,6 +227,7 @@ class DDPGEdgeControl(EdgeControl):
             x_ = copy.deepcopy(states[0])
 
         self.quanser_plant.normal_mode = True
+        self.reset = False
 
     def receive_reset_command(self):
         """
