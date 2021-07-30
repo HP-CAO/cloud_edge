@@ -40,7 +40,7 @@ class EdgeControl:
 
         self.weights_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_edge_weights)
         self.training_mode_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_edge_mode)
-        self.runnint_reset_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_plant_reset)
+        self.plant_reset_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_plant_reset)
         self.control_targets = self.params.control_params.control_targets
         self.active_agent = True  # True: agent_a is controller, False: agent_b is controller
         self.quanser_plant = QuanserPlant(self.params.quanser_params)
@@ -94,6 +94,7 @@ class DDPGEdgeControl(EdgeControl):
         self.t4 = threading.Thread(target=self.receive_reset_command())
         self.step = 0
         self.training = True if eval is None else False
+        self.reset = False
         self.pid_controller = PID(Kp=30.0, setpoint=0, sample_time=0.02)
 
         if eval is not None:
@@ -166,6 +167,10 @@ class DDPGEdgeControl(EdgeControl):
                     self.quanser_plant.normal_mode = False
                     break
 
+                if self.reset:
+                    self.quanser_plant.normal_mode = False
+                    break
+
         # except HILError:
         #     print("HILError--")
         #     self.quanser_plant.card.task_stop_all()
@@ -227,5 +232,5 @@ class DDPGEdgeControl(EdgeControl):
         receive reset command from the cloud trainer to reset the plant;
         resetting command comes when the current steps reach the max_steps of a single episode
         """
-        message = self.training_mode_subscriber.parse_response()[2]
+        message = self.plant_reset_subscriber.parse_response()[2]
         self.reset = struct.unpack("?", message)
