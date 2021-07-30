@@ -91,7 +91,7 @@ class DDPGEdgeControl(EdgeControl):
         # self.t1 = threading.Thread(target=self.generate_action)
         self.t2 = threading.Thread(target=self.update_weights)
         self.t3 = threading.Thread(target=self.receive_mode)
-        self.t4 = threading.Thread(target=self.receive_reset_command())
+        self.t4 = threading.Thread(target=self.receive_reset_command)
         self.step = 0
         self.training = True if eval is None else False
         self.reset = False
