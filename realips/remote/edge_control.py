@@ -1,3 +1,4 @@
+import copy
 import pickle
 import threading
 import struct
@@ -212,7 +213,7 @@ class DDPGEdgeControl(EdgeControl):
 
     def reset_control(self):
         states = self.quanser_plant.get_encoder_readings()
-        x_ = states[0]
+        x_ = copy.deepcopy(states[0])
 
         while True:
             print("resetting...")
@@ -222,8 +223,7 @@ class DDPGEdgeControl(EdgeControl):
             states = self.quanser_plant.get_encoder_readings()
             if abs(x_ - states[0]) < 0.005:
                 break
-            x_ = states[0]
-
+            x_ = copy.deepcopy(states[0])
         self.quanser_plant.normal_mode = True
 
     def receive_reset_command(self):
