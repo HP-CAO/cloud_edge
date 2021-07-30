@@ -15,6 +15,14 @@ if args.kp is not None:
 else:
     kp = 1.0
 
+
+def get_x_resolution():
+    x_l = - 18825
+    x_r = 16528
+    x_resolution = 0.814 / (x_r - x_l)
+    return x_resolution
+
+
 card = HIL("q2_usb", "0")
 analog_channels = np.array([0], dtype=np.uint32)
 encoder_channels = np.array([0, 1], dtype=np.int32)
@@ -32,6 +40,7 @@ encoder_buffer = np.zeros(num_encoder_channels, dtype=np.int32)
 analog_task = card.task_create_analog_reader(samples_in_buffer, analog_channels, num_analog_channels)
 encoder_task = card.task_create_encoder_reader(samples_in_buffer, encoder_channels, num_encoder_channels)
 pid_controller = PID(kp, setpoint=0)
+x_resolution = get_x_resolution()
 
 try:
     card.task_start(analog_task, Clock.HARDWARE_CLOCK_0, frequency, samples)
@@ -42,6 +51,7 @@ try:
         card.task_read_analog(analog_task, samples_to_read, analog_buffer)
         card.task_read_encoder(encoder_task, samples_to_read, encoder_buffer)
         x = encoder_buffer[0]
+        x = x * x_resolution
         action = pid_controller(x)
         analog_write_buffer = np.array([action], dtype=np.float64)
         card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)
