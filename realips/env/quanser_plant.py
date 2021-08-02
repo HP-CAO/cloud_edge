@@ -103,7 +103,7 @@ class QuanserPlant:
         theta_ini = 0
         theta = (theta_readings - theta_ini) * self.theta_resolution
         theta += -1 * math.pi
-        theta_rescale = math.atan2(math.sin(theta), math.cos(theta))
+        theta_rescale = -1 * math.atan2(math.sin(theta), math.cos(theta))
         return theta_rescale
 
     def get_theta_resolution(self):
