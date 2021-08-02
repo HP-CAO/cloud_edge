@@ -99,6 +99,7 @@ class CloudTrainerDDPG(CloudTrainer):
                 traj_segment = self.receive_edge_trajectory()
 
             for step in range(self.params.stats_params.max_episode_steps):
+                print("current step:", step)
                 last_seg = traj_segment
                 traj_segment = self.receive_edge_trajectory()
                 stat_observations = last_seg.observations[0:5]
