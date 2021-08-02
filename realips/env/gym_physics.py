@@ -14,7 +14,7 @@ class GymPhysicsParams:
         self.gravity = 9.8
         self.mass_cart = 0.94
         self.mass_pole = 0.23
-        self.force_mag = 10.0
+        self.force_mag = 7.0
 
         self.tau = 0.02
         self.length = 0.64

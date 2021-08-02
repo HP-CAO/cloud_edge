@@ -23,7 +23,7 @@ class ControlParams:
         self.agent_type = None
         self.initialize_from_cloud = True
         self.train_real = True
-        self.action_factor = 3
+        self.action_factor = 7
 
 
 class EdgeControlParams:
@@ -164,12 +164,7 @@ class DDPGEdgeControl(EdgeControl):
                 if self.params.ddpg_params.add_actions_observations:
                     action_observations = np.append(action_observations, action)[1:]
 
-                if failed:
-                    self.quanser_plant.normal_mode = False
-                    break
-
                 if self.reset:
-                    self.quanser_plant.normal_mode = False
                     break
 
         # except HILError:
