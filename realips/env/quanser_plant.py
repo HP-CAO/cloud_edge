@@ -107,8 +107,8 @@ class QuanserPlant:
         return theta_rescale
 
     def get_theta_resolution(self):
-        theta_0 = 2
-        theta_1 = 4094
+        theta_0 = 0
+        theta_1 = 4095
         theta_resolution = math.pi * 2 / (theta_1 - theta_0)
         return theta_resolution
 
