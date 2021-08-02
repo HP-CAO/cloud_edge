@@ -2,7 +2,7 @@ import copy
 import pickle
 import threading
 import struct
-
+import time
 import numpy
 import numpy as np
 from simple_pid import PID
@@ -221,6 +221,7 @@ class DDPGEdgeControl(EdgeControl):
                 break
             x_ = copy.deepcopy(states[0])
 
+        time.sleep(10)
         self.quanser_plant.normal_mode = True
         self.reset = False
 
