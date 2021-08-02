@@ -216,11 +216,9 @@ class DDPGEdgeControl(EdgeControl):
             control_action = numpy.clip(control_action, -7, 7)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
             states = self.quanser_plant.get_encoder_readings()
-            print(abs(x_ - states[0]))
-            if abs(x_ - states[0]) < 0.005:
+            if abs(x_ - 0) < 0.01 and abs(control_action) <= 1:
                 break
             x_ = copy.deepcopy(states[0])
-
         time.sleep(10)
         self.quanser_plant.normal_mode = True
         self.reset = False
