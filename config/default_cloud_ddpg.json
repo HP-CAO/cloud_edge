@@ -105,7 +105,7 @@
         "soft_alpha": 0.005,
         "action_noise_factor": 1,
         "action_noise_half_decay_time": 1000000.0,
-        "add_actions_observations": true,
+        "add_actions_observations": false,
         "action_observations_dim": 5
     },
     "trainer_params": {
@@ -115,7 +115,7 @@
         "learning_rate": 0.0003,
         "is_remote_train": true,
         "eval_period": 20,
-        "actor_freeze_step_count": 1000,
+        "actor_freeze_step_count": 500,
         "use_prioritized_replay": false
     }
 }
