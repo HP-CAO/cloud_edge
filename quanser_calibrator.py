@@ -8,6 +8,7 @@ from quanser.hardware import HIL, Clock, HILError
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--kp', default=None, help='try different k gains for pid controller')
+parser.add_argument('control', action='store_true', help='to test reset controller')
 args = parser.parse_args()
 
 if args.kp is not None:
@@ -42,6 +43,7 @@ analog_task = card.task_create_analog_reader(samples_in_buffer, analog_channels,
 encoder_task = card.task_create_encoder_reader(samples_in_buffer, encoder_channels, num_encoder_channels)
 pid_controller = PID(kp, setpoint=0)
 x_resolution = get_x_resolution()
+theta_resolution = 0.00153
 
 try:
     card.task_start(analog_task, Clock.HARDWARE_CLOCK_0, frequency, samples)
@@ -52,8 +54,10 @@ try:
         card.task_read_analog(analog_task, samples_to_read, analog_buffer)
         card.task_read_encoder(encoder_task, samples_to_read, encoder_buffer)
         x = encoder_buffer[0]
+        theta = encoder_buffer[1]
+        theta = theta * theta_resolution
         x = x * x_resolution
-        print(x)
+        print('Position and angle', x, theta)
         action = pid_controller(x)
         analog_write_buffer = np.array([action], dtype=np.float64)
         card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)

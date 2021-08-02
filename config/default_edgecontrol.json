@@ -72,7 +72,7 @@
         "action_factor": 5
     },
     "quanser_params": {
-        "frequency": 50,
+        "frequency": 30,
         "x_threshold": 0.3,
         "theta_dot_threshold": 15,
         "x_left": -23749,

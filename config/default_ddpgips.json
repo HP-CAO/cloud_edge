@@ -1,6 +1,6 @@
 {
     "physics_params": {
-        "x_threshold": 0.55,
+        "x_threshold": 0.3,
         "theta_dot_threshold": 15,
         "kinematics_intergrator": "euler",
         "ini_states": [
@@ -13,7 +13,7 @@
         "gravity": 9.8,
         "mass_cart": 0.94,
         "mass_pole": 0.23,
-        "force_mag": 10.0,
+        "force_mag": 7.0,
         "tau": 0.02,
         "length": 0.64,
         "theta_random_std": 0.8,
@@ -61,7 +61,7 @@
         "soft_alpha": 0.005,
         "action_noise_factor": 1,
         "action_noise_half_decay_time": 1000000.0,
-        "add_actions_observations": true,
+        "add_actions_observations": false,
         "action_observations_dim": 5
     },
     "trainer_params": {

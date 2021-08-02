@@ -7,7 +7,7 @@ import numpy as np
 
 class GymPhysicsParams:
     def __init__(self):
-        self.x_threshold = 0.407
+        self.x_threshold = 0.3
         self.theta_dot_threshold = 15
         self.kinematics_intergrator = 'euler'
         self.ini_states = [0., 0., -math.pi, 0., False]
@@ -120,7 +120,7 @@ class GymPhysics(gym.Env):
 
         screen_width = 600
         screen_height = 400
-        world_width = self.params.x_threshold * 2
+        world_width = self.params.x_threshold * 2 + 1
         scale = screen_width / world_width
         carty = 100  # TOP OF CART
         polewidth = 10.0
