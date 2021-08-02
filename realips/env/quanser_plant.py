@@ -100,7 +100,7 @@ class QuanserPlant:
         :param x_readings: sensor reading from the angle encoder
         :return: pendulum's angle
         """
-        theta_ini = 2
+        theta_ini = 0
         theta = (theta_readings - theta_ini) * self.theta_resolution
         theta += -1 * math.pi
         theta_rescale = math.atan2(math.sin(theta), math.cos(theta))

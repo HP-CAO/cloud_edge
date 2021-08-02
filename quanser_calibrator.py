@@ -25,6 +25,19 @@ def get_x_resolution():
     return x_res
 
 
+def rescale_theta(theta_readings, theta_resolution):
+    """
+    rescale angle readings to [-pi to pi]
+    :param x_readings: sensor reading from the angle encoder
+    :return: pendulum's angle
+    """
+    theta_ini = 0
+    theta = (theta_readings - theta_ini) * theta_resolution
+    theta += -1 * math.pi
+    theta_rescale = math.atan2(math.sin(theta), math.cos(theta))
+    return theta_rescale
+
+
 card = HIL("q2_usb", "0")
 analog_channels = np.array([0], dtype=np.uint32)
 encoder_channels = np.array([0, 1], dtype=np.int32)
@@ -55,7 +68,7 @@ try:
         card.task_read_encoder(encoder_task, samples_to_read, encoder_buffer)
         x = encoder_buffer[0]
         theta = encoder_buffer[1]
-        theta = theta * theta_resolution
+        theta = rescale_theta(theta, theta_resolution)
         x = x * x_resolution
         print('Position and angle', x, theta)
         action = pid_controller(x)
