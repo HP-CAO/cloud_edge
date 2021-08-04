@@ -60,7 +60,7 @@
     },
     "control_params": {
         "random_reset_target": false,
-        "x_boundary": 0.4,
+        "x_boundary": 0.3,
         "control_targets": [
             0.0,
             0.0
@@ -69,7 +69,7 @@
         "agent_type": null,
         "initialize_from_cloud": true,
         "train_real": true,
-        "action_factor": 7
+        "action_factor": 5
     },
     "quanser_params": {
         "frequency": 30,

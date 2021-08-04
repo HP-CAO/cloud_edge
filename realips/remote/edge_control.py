@@ -219,6 +219,7 @@ class DDPGEdgeControl(EdgeControl):
             if abs(x_ - 0) < 0.01 and abs(control_action) <= 1:
                 break
             x_ = copy.deepcopy(states[0])
+
         time.sleep(10)
         self.quanser_plant.normal_mode = True
         self.reset = False
