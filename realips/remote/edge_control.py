@@ -189,7 +189,7 @@ class DDPGEdgeControl(EdgeControl):
         self.agent_b.noise_factor_decay(self.step)
 
     def run(self):
-        # self.t2.start()
+        self.t2.start()
         self.t3.start()
         self.t4.start()
         self.generate_action()
