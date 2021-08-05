@@ -188,5 +188,4 @@ class CloudTrainerDDPG(CloudTrainer):
         self.store_trajectory()
 
     def initiate_reset(self):
-        print("send.......")
         self.redis_connection.publish(self.params.redis_params.ch_plant_reset, struct.pack("?", True))

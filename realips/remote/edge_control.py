@@ -162,9 +162,6 @@ class DDPGEdgeControl(EdgeControl):
                 if self.params.ddpg_params.add_actions_observations:
                     action_observations = np.append(action_observations, action)[1:]
 
-                if self.reset:
-                    break
-
                 one_loop_time = time.time() - t0
 
                 time.sleep(self.sample_period - one_loop_time) \
@@ -192,7 +189,7 @@ class DDPGEdgeControl(EdgeControl):
         self.agent_b.noise_factor_decay(self.step)
 
     def run(self):
-        self.t2.start()
+        # self.t2.start()
         self.t3.start()
         self.t4.start()
         self.generate_action()
@@ -227,7 +224,6 @@ class DDPGEdgeControl(EdgeControl):
 
         time.sleep(5)
         self.quanser_plant.normal_mode = True
-        self.reset = False
         print("resetting finished")
 
     def receive_reset_command(self):
@@ -238,4 +234,5 @@ class DDPGEdgeControl(EdgeControl):
         print("waiting for reset sommand command")
         message = self.plant_reset_subscriber.parse_response()[2]
         self.reset = struct.unpack("?", message)
+        self.quanser_plant.normal_mode = False
         print("receive Reset", self.reset)
