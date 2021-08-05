@@ -81,7 +81,7 @@ while True:
     x = encoder_buffer[0]
     theta = encoder_buffer[1]
     theta = rescale_theta(theta, theta_resolution)
-    x = x * x_resolution
+    # x = x * x_resolution
     print('Position and angle', x, theta)
     action = pid_controller(x)
     analog_write_buffer = np.array([action], dtype=np.float64)
