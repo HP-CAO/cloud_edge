@@ -208,7 +208,7 @@ class DDPGEdgeControl(EdgeControl):
 
             x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
-            control_action = numpy.clip(control_action, -2.5, 2.5)  # set an action range
+            control_action = numpy.clip(control_action, -3, 3)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
 
             if abs(x) <= 300:
