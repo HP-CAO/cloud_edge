@@ -108,6 +108,7 @@ class CloudTrainerDDPG(CloudTrainer):
                                            self.target,
                                            traj_segment.last_action,
                                            traj_segment.failed)
+                print(r)
                 if training:
                     self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
                                                   traj_segment.observations, traj_segment.failed)

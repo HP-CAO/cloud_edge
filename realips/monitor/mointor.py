@@ -105,7 +105,6 @@ class ModelStats:
     def training_monitor(self, episode):
 
         average_reward, on_target_steps, average_distance_score, survived = self.log_data()
-
         with self.training_log_writer.as_default():
             tf.summary.scalar('Average_Reward', average_reward, self.total_steps)
             tf.summary.scalar('On_target_step', on_target_steps, self.total_steps)
