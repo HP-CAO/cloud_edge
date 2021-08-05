@@ -50,6 +50,7 @@ class QuanserPlant:
 
         if failed:
             self.normal_mode = False
+
         print(x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 

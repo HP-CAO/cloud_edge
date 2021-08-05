@@ -73,7 +73,7 @@
     },
     "quanser_params": {
         "frequency": 30,
-        "x_threshold": 0.3,
+        "x_threshold": 0.32,
         "theta_dot_threshold": 15,
         "x_left": -23749,
         "x_right": 11946,

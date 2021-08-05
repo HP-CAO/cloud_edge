@@ -98,7 +98,7 @@ class DDPGEdgeControl(EdgeControl):
         self.step = 0
         self.training = True if eval is None else False
         self.reset = False
-        self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
+        self.pid_controller = PID(Kp=0.0003, setpoint=0, sample_time=self.sample_period)
 
         if eval is not None:
             self.agent_a.load_weights(eval)
@@ -209,13 +209,12 @@ class DDPGEdgeControl(EdgeControl):
         step = 0
 
         while True:
-            print("resetting...")
             x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
-            control_action = numpy.clip(control_action, -7, 7)  # set an action range
+            control_action = numpy.clip(control_action, -5, 5)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
 
-            if abs(x - 0) <= 30:
+            if abs(x) <= 30:
                 step += 1
                 if step >= 10:  # if the cart stables around 0 for 10 steps then resetting finished
                     break
