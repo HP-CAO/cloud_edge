@@ -18,7 +18,7 @@ if args.kp is not None:
     kp = float(args.kp)
 
 else:
-    kp = 30.0  # this value works quite well
+    kp = 0.0005  # this value works quite well
 
 
 def get_current_time():
@@ -81,8 +81,8 @@ while True:
     x = encoder_buffer[0]
     theta = encoder_buffer[1]
     theta = rescale_theta(theta, theta_resolution)
-    # x = x * x_resolution
-    print('Position and angle', x, theta)
+    x_world = x * x_resolution
+    print('Position and angle', x_world, theta)
     action = pid_controller(x)
     analog_write_buffer = np.array([action], dtype=np.float64)
     card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)

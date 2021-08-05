@@ -95,8 +95,8 @@ class CloudTrainerDDPG(CloudTrainer):
 
             # Ditch the safety active data
             traj_segment = self.receive_edge_trajectory()
-            while not traj_segment.normal_operation:
-                traj_segment = self.receive_edge_trajectory()
+            # while not traj_segment.normal_operation:
+            #     traj_segment = self.receive_edge_trajectory()
 
             for step in range(self.params.stats_params.max_episode_steps):
                 print("current step:", step)
@@ -147,9 +147,9 @@ class CloudTrainerDDPG(CloudTrainer):
                     best_dsas = moving_average_dsas
 
             self.initiate_reset()
-            t0 = time.time()
-            while time.time() - t0 < self.params.stats_params.reset_delay:
-                self.receive_edge_trajectory()
+            # t0 = time.time()
+            # while time.time() - t0 < self.params.stats_params.reset_delay:
+            #     self.receive_edge_trajectory()
 
     def optimize_ddpg(self):
 

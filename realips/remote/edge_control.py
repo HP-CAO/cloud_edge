@@ -45,6 +45,8 @@ class EdgeControl:
         self.control_targets = self.params.control_params.control_targets
         self.active_agent = True  # True: agent_a is controller, False: agent_b is controller
         self.quanser_plant = QuanserPlant(self.params.quanser_params)
+        self.control_frequency = self.params.quanser_params.frequency
+        self.sample_period = self.quanser_plant.sample_period
 
     def reset_targets(self):
         if self.params.control_params.random_reset_target:
@@ -96,7 +98,7 @@ class DDPGEdgeControl(EdgeControl):
         self.step = 0
         self.training = True if eval is None else False
         self.reset = False
-        self.pid_controller = PID(Kp=30.0, setpoint=0, sample_time=0.02)
+        self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
 
         if eval is not None:
             self.agent_a.load_weights(eval)
@@ -106,12 +108,6 @@ class DDPGEdgeControl(EdgeControl):
             self.initialize_weights_from_cloud(self.agent_a, self.agent_b)
 
     def generate_action(self):
-
-        # try:
-
-        self.quanser_plant.start_task()
-
-        print("Quanser Plant Initialized!")
 
         while True:
 
@@ -127,14 +123,16 @@ class DDPGEdgeControl(EdgeControl):
             while self.quanser_plant.normal_mode:
 
                 self.step += 1
-                # t0 = time.time()
+
+                t0 = time.time()
+
                 states = self.quanser_plant.get_encoder_readings()
 
-                self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
+                # self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
 
                 normal_mode = self.quanser_plant.normal_mode
 
-                last_action = self.quanser_plant.analog_write_buffer.item()
+                last_action = self.quanser_plant.analog_buffer
 
                 stats_observation, failed = states2observations(states)
 
@@ -147,7 +145,7 @@ class DDPGEdgeControl(EdgeControl):
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
 
-                # delta_t = time.time()-t0
+                delta_t = time.time() - t0
 
                 action = action * self.params.control_params.action_factor
 
@@ -158,7 +156,7 @@ class DDPGEdgeControl(EdgeControl):
                 edge_trajectory = [observations, last_action, failed, normal_mode]
 
                 self.send_edge_trajectory(edge_trajectory)  # this is sent to the cloud trainer
-                # print("Inference took {}s".format(delta_t))
+                print("Inference took {}s".format(delta_t))
                 self.action_noise_decay()
 
                 if self.params.ddpg_params.add_actions_observations:
@@ -167,10 +165,10 @@ class DDPGEdgeControl(EdgeControl):
                 if self.reset:
                     break
 
-        # except HILError:
-        #     print("HILError--")
-        #     self.quanser_plant.card.task_stop_all()
-        #     self.quanser_plant.card.task_stop_all()
+                one_loop_time = time.time() - t0
+
+                time.sleep(self.sample_period - one_loop_time) \
+                    if one_loop_time < self.sample_period else print("timeout:", one_loop_time)
 
     def update_weights(self):
 
@@ -207,22 +205,27 @@ class DDPGEdgeControl(EdgeControl):
         self.training = struct.unpack("?", message)
 
     def reset_control(self):
-        states = self.quanser_plant.get_encoder_readings()
-        x_ = copy.deepcopy(states[0])
+
+        step = 0
 
         while True:
             print("resetting...")
-            control_action = self.pid_controller(x_)
+            x = self.quanser_plant.encoder_buffer[0].copy()
+            control_action = self.pid_controller(x)
             control_action = numpy.clip(control_action, -7, 7)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
-            states = self.quanser_plant.get_encoder_readings()
-            if abs(x_ - 0) < 0.01 and abs(control_action) <= 1:
-                break
-            x_ = copy.deepcopy(states[0])
 
-        time.sleep(10)
+            if abs(x - 0) <= 30:
+                step += 1
+                if step >= 10:  # if the cart stables around 0 for 10 steps then resetting finished
+                    break
+            else:
+                step = 0
+
+        time.sleep(5)
         self.quanser_plant.normal_mode = True
         self.reset = False
+        print("resetting finished")
 
     def receive_reset_command(self):
         """
