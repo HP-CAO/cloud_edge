@@ -97,7 +97,6 @@ class DDPGEdgeControl(EdgeControl):
         self.t4 = threading.Thread(target=self.receive_reset_command)
         self.step = 0
         self.training = True if eval is None else False
-        self.reset = False
         self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
 
         if eval is not None:
@@ -231,9 +230,5 @@ class DDPGEdgeControl(EdgeControl):
         receive reset command from the cloud trainer to reset the plant;
         resetting command comes when the current steps reach the max_steps of a single episode
         """
-        print("waiting for reset sommand command")
-        reset_pack = self.plant_reset_subscriber.parse_response()[2]
-        reset_command = pickle.loads(reset_pack)
-        self.reset = reset_command
+        _ = self.plant_reset_subscriber.parse_response()[2]
         self.quanser_plant.normal_mode = False
-        print("receive Reset", self.reset)
