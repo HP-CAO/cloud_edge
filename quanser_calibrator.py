@@ -1,8 +1,11 @@
+import time
+
 import numpy as np
 import math
 import os
 import argparse
 from simple_pid import PID
+from datetime import datetime
 from quanser.hardware import HIL, Clock, HILError
 
 
@@ -16,6 +19,12 @@ if args.kp is not None:
 
 else:
     kp = 30.0  # this value works quite well
+
+
+def get_current_time():
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    return current_time
 
 
 def get_x_resolution():
@@ -44,6 +53,7 @@ encoder_channels = np.array([0, 1], dtype=np.int32)
 num_analog_channels = len(analog_channels)
 num_encoder_channels = len(encoder_channels)
 frequency = 10.00  # increase periods
+period_time = 1 / frequency
 samples = np.iinfo(np.int32).max
 # samples_in_buffer = int(frequency)
 # samples_to_read = 1
@@ -66,6 +76,7 @@ theta_resolution = 0.00153
 while True:
     # card.task_read_analog(analog_task, samples_to_read, analog_buffer)
     # card.task_read_encoder(encoder_task, samples_to_read, encoder_buffer)
+    t0 = time.time()
     card.read_encoder(encoder_channels, num_encoder_channels, encoder_buffer)
     x = encoder_buffer[0]
     theta = encoder_buffer[1]
@@ -77,6 +88,10 @@ while True:
     card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)
     print("Encoder: ", encoder_buffer)
     print("analog_control", analog_write_buffer)
+    t1 = time.time()
+    print(get_current_time())
+    if t1 - t0 < period_time:
+        time.sleep(period_time - t1 + t0)
 
 
 # except HILError:
