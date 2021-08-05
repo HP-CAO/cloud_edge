@@ -107,8 +107,7 @@ class CloudTrainerDDPG(CloudTrainer):
                 r = self.reward_fcn.reward(stat_observations,
                                            self.target,
                                            traj_segment.last_action,
-                                           traj_segment.failed)
-                print(r)
+                                           traj_segment.failed).squeeze()
                 if training:
                     self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
                                                   traj_segment.observations, traj_segment.failed)
