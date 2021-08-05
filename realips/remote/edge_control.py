@@ -237,3 +237,4 @@ class DDPGEdgeControl(EdgeControl):
         """
         message = self.plant_reset_subscriber.parse_response()[2]
         self.reset = struct.unpack("?", message)
+        print("receive Reset", self.reset)
