@@ -235,6 +235,7 @@ class DDPGEdgeControl(EdgeControl):
         receive reset command from the cloud trainer to reset the plant;
         resetting command comes when the current steps reach the max_steps of a single episode
         """
+        print("waiting for reset sommand command")
         message = self.plant_reset_subscriber.parse_response()[2]
         self.reset = struct.unpack("?", message)
         print("receive Reset", self.reset)
