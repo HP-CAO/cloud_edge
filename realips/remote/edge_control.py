@@ -209,6 +209,7 @@ class DDPGEdgeControl(EdgeControl):
         step = 0
 
         while True:
+
             x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
             control_action = numpy.clip(control_action, -5, 5)  # set an action range
@@ -220,6 +221,8 @@ class DDPGEdgeControl(EdgeControl):
                     break
             else:
                 step = 0
+
+            self.quanser_plant.get_encoder_readings()
 
         time.sleep(5)
         self.quanser_plant.normal_mode = True

@@ -93,7 +93,6 @@ while True:
     if t1 - t0 < period_time:
         time.sleep(period_time - t1 + t0)
 
-
 # except HILError:
 #     print("HILError--")
 #     card.task_stop_all()
