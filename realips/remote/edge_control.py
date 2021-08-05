@@ -217,14 +217,15 @@ class DDPGEdgeControl(EdgeControl):
 
             if abs(x) <= 300:
                 step += 1
-                if step >= 100:  # if the cart stables around 0 for 10 steps then resetting finished
+                if step >= 100:  # if the cart stables around 0 for 100 steps then resetting finished
                     break
             else:
                 step = 0
 
             self.quanser_plant.get_encoder_readings()
+            print("resetting", get_current_time())
 
-        time.sleep(10)
+        time.sleep(5)
         self.quanser_plant.normal_mode = True
         self.reset = False
         print("resetting finished")
