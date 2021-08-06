@@ -197,8 +197,9 @@ class DDPGEdgeControl(EdgeControl):
         """
         receive_mode to switch between training and testing
         """
-        message = self.training_mode_subscriber.parse_response()[2]
-        self.training = struct.unpack("?", message)
+        while True:
+            message = self.training_mode_subscriber.parse_response()[2]
+            self.training = struct.unpack("?", message)
 
     def reset_control(self):
 
@@ -230,6 +231,7 @@ class DDPGEdgeControl(EdgeControl):
         receive reset command from the cloud trainer to reset the plant;
         resetting command comes when the current steps reach the max_steps of a single episode
         """
-        _ = self.plant_reset_subscriber.parse_response()[2]
-        self.quanser_plant.normal_mode = False
-        print("resetting command received")
+
+        while True:
+            _ = self.plant_reset_subscriber.parse_response()[2]
+            self.quanser_plant.normal_mode = False
