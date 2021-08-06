@@ -140,8 +140,7 @@ class DDPGEdgeControl(EdgeControl):
                 agent = self.agent_a if self.active_agent else self.agent_b
 
                 if self.training:
-                    # action = agent.get_exploration_action(observations, self.control_targets)
-                    action = agent.get_exploitation_action(observations, self.control_targets)
+                    action = agent.get_exploration_action(observations, self.control_targets)
 
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)

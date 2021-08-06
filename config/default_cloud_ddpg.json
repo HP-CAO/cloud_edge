@@ -103,7 +103,7 @@
         "actor_dense2": 128,
         "actor_dense3": 64,
         "soft_alpha": 0.005,
-        "action_noise_factor": 1,
+        "action_noise_factor": 0.5,
         "action_noise_half_decay_time": 1000000.0,
         "add_actions_observations": false,
         "action_observations_dim": 5
@@ -114,7 +114,7 @@
         "batch_size": 128,
         "learning_rate": 0.00002,
         "is_remote_train": true,
-        "eval_period": 5,
+        "eval_period": 10,
         "actor_freeze_step_count": 500,
         "use_prioritized_replay": false,
         "pre_fill_exp": 5000
