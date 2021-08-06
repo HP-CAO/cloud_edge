@@ -117,6 +117,6 @@
         "eval_period": 5,
         "actor_freeze_step_count": 500,
         "use_prioritized_replay": false,
-        "pre_fill_exp": 1000
+        "pre_fill_exp": 2000
     }
 }
