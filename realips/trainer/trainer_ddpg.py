@@ -14,6 +14,7 @@ class DDPGTrainerParams:
         self.eval_period = 2
         self.actor_freeze_step_count = 5000
         self.use_prioritized_replay = False
+        self.pre_fill_exp = 10000
 
 
 class DDPGTrainer:
@@ -41,7 +42,7 @@ class DDPGTrainer:
             self.optimize_prioritized()
             return
 
-        if self.params.batch_size > self.replay_mem.get_size():
+        if self.params.pre_fill_exp > self.replay_mem.get_size():
             return
 
         self.replay_memory_mutex.acquire()

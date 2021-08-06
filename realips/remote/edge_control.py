@@ -212,7 +212,7 @@ class DDPGEdgeControl(EdgeControl):
             control_action = numpy.clip(control_action, -2.5, 2.5)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
 
-            if abs(x) <= 300:
+            if abs(x) <= 600:
                 step += 1
                 if step >= 100:  # if the cart stables around 0 for 100 steps then resetting finished
                     break
