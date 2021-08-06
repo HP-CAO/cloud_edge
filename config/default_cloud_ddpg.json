@@ -31,7 +31,7 @@
         "crash_penalty": 10
     },
     "stats_params": {
-        "max_episode_steps": 100,
+        "max_episode_steps": 1000,
         "total_steps": 5000000.0,
         "evaluation_steps": 600,
         "target_distance_score": 0.5,
