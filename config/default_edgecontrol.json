@@ -69,7 +69,7 @@
         "agent_type": null,
         "initialize_from_cloud": true,
         "train_real": true,
-        "action_factor": 7
+        "action_factor": 5
     },
     "quanser_params": {
         "frequency": 25,
