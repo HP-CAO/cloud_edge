@@ -112,11 +112,11 @@
         "gamma_discount": 0.99,
         "rm_size": 100000,
         "batch_size": 128,
-        "learning_rate": 0.0003,
+        "learning_rate": 0.00002,
         "is_remote_train": true,
-        "eval_period": 20,
+        "eval_period": 5,
         "actor_freeze_step_count": 500,
         "use_prioritized_replay": false,
-        "pre_fill_exp": 10000
+        "pre_fill_exp": 1000
     }
 }
