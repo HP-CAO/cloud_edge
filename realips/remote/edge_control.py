@@ -203,7 +203,8 @@ class DDPGEdgeControl(EdgeControl):
 
     def reset_control(self):
 
-        step = 0
+        # step = 0
+        t0 = time.time()
 
         while True:
 
@@ -212,17 +213,18 @@ class DDPGEdgeControl(EdgeControl):
             control_action = numpy.clip(control_action, -2.5, 2.5)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
 
-            if abs(x) <= 600:
-                step += 1
-                if step >= 100:  # if the cart stables around 0 for 100 steps then resetting finished
-                    break
-            else:
-                step = 0
+            # if abs(x) <= 600:
+            #     step += 1
+            #     if step >= 100:  # if the cart stables around 0 for 100 steps then resetting finished
+            #         break
+            # else:
+            #     step = 0
+            if time.time() - t0 > 10:  # set resetting time threshold
+                break
 
             self.quanser_plant.get_encoder_readings()
             print("resetting", get_current_time())
 
-        time.sleep(5)
         self.quanser_plant.normal_mode = True
         print("resetting finished")
 
