@@ -232,3 +232,4 @@ class DDPGEdgeControl(EdgeControl):
         """
         _ = self.plant_reset_subscriber.parse_response()[2]
         self.quanser_plant.normal_mode = False
+        print("resetting command received")
