@@ -225,6 +225,7 @@ class DDPGEdgeControl(EdgeControl):
             self.quanser_plant.get_encoder_readings()
             print("resetting", get_current_time())
 
+        self.quanser_plant.write_analog_output(0)
         self.quanser_plant.normal_mode = True
         print("resetting finished")
 
