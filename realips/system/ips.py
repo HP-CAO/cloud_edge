@@ -19,7 +19,7 @@ class IpsSystem:
 
         self.physics = GymPhysics(self.params.physics_params)
         self.model_stats = ModelStats(self.params.stats_params, self.physics)
-        self.reward_fcn = RewardFcn(self.params.reward_params, self.physics)
+        self.reward_fcn = RewardFcn(self.params.reward_params)
         self.shape_targets = self.model_stats.get_shape_targets()
         self.shape_observations = self.physics.get_shape_observations()
 
@@ -48,7 +48,10 @@ class IpsSystem:
 
             self.model_stats.observations = copy.deepcopy(stats_observations_next)
 
-            self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, failed)
+            self.model_stats.measure(self.model_stats.observations, self.model_stats.targets,
+                                     failed, pole_length=self.params.physics_params.length,
+                                     distance_score_factor=self.params.reward_params.distance_score_factor)
+
             self.model_stats.reward.append(r)
 
             self.model_stats.cart_positions.append(self.physics.states[0])

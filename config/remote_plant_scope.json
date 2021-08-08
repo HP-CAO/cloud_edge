@@ -3,9 +3,9 @@
         "servers": [
             {
                 "port": "6379",
-                "password": "",
-                "host_ip": "127.0.0.1",
-                "name": "server_1"
+                "password": "hongi123",
+                "host_ip": "10.162.12.193",
+                "name": "cloud"
             },
             {
                 "port": "6379",
@@ -15,36 +15,36 @@
             }
         ],
         "ch_edge_control": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_plant_control"
         },
         "ch_plant_trajectory_segment": {
-            "server_name": "server_1",
-            "channel_name": "channel"
-        },
-        "ch_edge_weights": {
-            "server_name": "server_1",
-            "channel_name": "channel"
-        },
-        "ch_edge_ready_update": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_plant_trajectory_segment"
         },
         "ch_plant_reset": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_plant_reset"
+        },
+        "ch_edge_weights": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_weights"
+        },
+        "ch_edge_ready_update": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_ready_update"
         },
         "ch_edge_mode": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_edge_mode"
         },
         "ch_edge_trajectory": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_edge_trajectory"
         }
     },
     "physics_params": {
-        "x_threshold": 0.3,
+        "x_threshold": 0.407,
         "theta_dot_threshold": 15,
         "kinematics_intergrator": "euler",
         "ini_states": [
@@ -57,14 +57,16 @@
         "gravity": 9.8,
         "mass_cart": 0.94,
         "mass_pole": 0.23,
-        "force_mag": 5.0,
-        "voltage_mag": 5.0,
+        "force_mag": 10.0,
         "tau": 0.02,
         "length": 0.64,
         "theta_random_std": 0.8,
         "friction_cart": 10,
         "friction_pole": 0.0011,
         "with_friction": true,
-        "force_input": false
+        "force_input": false,
+        "power_input_constant": 35.52,
+        "nonzero_constant": 0.01,
+        "distance_score_factor": 5
     }
 }

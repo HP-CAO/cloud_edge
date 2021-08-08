@@ -8,6 +8,7 @@ import distutils.util
 import matplotlib.pyplot as plt
 from realips.env.gym_physics import GymPhysics
 from realips.utils import states2observations
+from realips.env.reward import RewardFcn
 
 
 class ModelStatsParams:
@@ -69,7 +70,7 @@ class ModelStats:
     def reset_status(self):
         self.reward = []
         self.observations = None
-        self.failed = None
+        self.failed = False
         self.distance_scores = []
         self.on_target_steps = 0
         self.cart_positions = []
@@ -89,9 +90,9 @@ class ModelStats:
         else:
             return sum(self.distance_scores) / len(self.distance_scores)
 
-    def measure(self, observation, target, crash):
+    def measure(self, observation, target, crash, pole_length, distance_score_factor):
 
-        distance_score = self.physics.get_distance_score(observation, target)
+        distance_score = RewardFcn.get_distance_score(observation, target, pole_length, distance_score_factor)
 
         if distance_score > self.params.target_distance_score:
             self.on_target_steps += 1

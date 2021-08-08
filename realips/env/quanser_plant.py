@@ -5,9 +5,6 @@ import math
 
 class QuanserParams:
     def __init__(self):
-        self.frequency = 50.00  # hz
-        self.x_threshold = 0.3
-        self.theta_dot_threshold = 10
         self.x_left = - 18825
         self.x_right = 16528
         self.x_length = 0.814
@@ -15,7 +12,7 @@ class QuanserParams:
 
 
 class QuanserPlant:
-    def __init__(self, params: QuanserParams):
+    def __init__(self, params: QuanserParams, sample_frequency, x_watchdog, theta_watchdog):
         # for simplicity, using immediate write and  immediate read interface
         self.params = params
         self.card = HIL("q2_usb", "0")
@@ -23,7 +20,7 @@ class QuanserPlant:
         self.encoder_channels = np.array([0, 1], dtype=np.int32)
         self.num_analog_channels = len(self.analog_channels)
         self.num_encoder_channels = len(self.encoder_channels)
-        self.sample_period = 1 / self.params.frequency
+        self.sample_period = 1 / sample_frequency
         self.analog_buffer = np.zeros(self.num_analog_channels, dtype=np.float64)
         self.encoder_buffer = np.zeros(self.num_encoder_channels, dtype=np.int32)
 
@@ -31,9 +28,12 @@ class QuanserPlant:
         self.x_center = self.params.x_center
         self.x_resolution = self.get_x_resolution()
         self.theta_resolution = self.get_theta_resolution()
+        self.x_thresold = x_watchdog
+        self.theta_threshold = theta_watchdog
         print("Quanser Plant Initialized!")
 
     def get_encoder_readings(self):
+        # todo debug theta_acc
         x_old, theta_old = self.encoder_buffer
         x_old_rescaled = self.rescale_x(x_old)
 
@@ -93,7 +93,5 @@ class QuanserPlant:
         return x_resolution
 
     def is_failed(self, x, theta_dot):
-        failed = bool(x <= -self.params.x_threshold
-                      or x >= self.params.x_threshold
-                      or theta_dot > self.params.theta_dot_threshold)
+        failed = bool(abs(x) >= self.x_thresold or theta_dot > self.theta_threshold)
         return failed

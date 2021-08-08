@@ -16,8 +16,10 @@ from realips.utils import states2observations
 
 class ControlParams:
     def __init__(self):
+        self.frequency = 50.00  # hz
+        self.x_threshold = 0.3
+        self.theta_dot_threshold = 10
         self.random_reset_target = False
-        self.x_boundary = 0.4
         self.control_targets = [0., 0.]
         self.is_quick_recover = True
         self.agent_type = None
@@ -44,14 +46,18 @@ class EdgeControl:
         self.plant_reset_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_plant_reset)
         self.control_targets = self.params.control_params.control_targets
         self.active_agent = True  # True: agent_a is controller, False: agent_b is controller
-        self.quanser_plant = QuanserPlant(self.params.quanser_params)
-        self.control_frequency = self.params.quanser_params.frequency
+        self.quanser_plant = QuanserPlant(self.params.quanser_params,
+                                          self.params.control_params.frequency,
+                                          self.params.control_params.x_threshold,
+                                          self.params.control_params.theta_dot_threshold)
+
+        self.control_frequency = self.params.control_params.frequency
         self.sample_period = self.quanser_plant.sample_period
 
     def reset_targets(self):
         if self.params.control_params.random_reset_target:
-            x_target = np.random.uniform(-self.params.control_params.x_boundary,
-                                         self.params.control_params.x_boundary) * 0.5
+            x_target = np.random.uniform(-self.params.control_params.x_threshold,
+                                         self.params.control_params.x_threshold) * 0.5
             self.control_targets = [x_target, 0.]
         else:
             self.control_targets = self.params.control_params.control_targets
@@ -204,23 +210,16 @@ class DDPGEdgeControl(EdgeControl):
 
     def reset_control(self):
 
-        # step = 0
         t0 = time.time()
 
         while True:
 
-            x = self.quanser_plant.encoder_buffer[0].copy()
+            x, theta = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
             control_action = numpy.clip(control_action, -2.5, 2.5)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
 
-            # if abs(x) <= 600:
-            #     step += 1
-            #     if step >= 100:  # if the cart stables around 0 for 100 steps then resetting finished
-            #         break
-            # else:
-            #     step = 0
-            if time.time() - t0 > 10:  # set resetting time threshold
+            if time.time() - t0 > 10:  # simply setting time threshold for resetting control
                 break
 
             self.quanser_plant.get_encoder_readings()

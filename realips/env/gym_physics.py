@@ -10,11 +10,13 @@ class GymPhysicsParams:
         self.x_threshold = 0.3
         self.theta_dot_threshold = 15
         self.kinematics_intergrator = 'euler'
+
         self.ini_states = [0., 0., -math.pi, 0., False]
         self.gravity = 9.8
         self.mass_cart = 0.94
         self.mass_pole = 0.23
-        self.force_mag = 7.0
+        self.force_mag = 5.0
+        self.voltage_mag = 5.0
 
         self.tau = 0.02
         self.length = 0.64
@@ -23,9 +25,6 @@ class GymPhysicsParams:
         self.friction_pole = 0.0011
         self.with_friction = True
         self.force_input = False
-        self.power_input_constant = 35.52  # miu*I*U
-        self.nonzero_constant = 1e-2
-        self.distance_score_factor = 5
 
 
 class GymPhysics(gym.Env):
@@ -56,7 +55,11 @@ class GymPhysics(gym.Env):
 
         x, x_dot, theta, theta_dot, failed = self.states
 
-        force = action * self.params.force_mag
+        if self.params.force_input:
+            force = action * self.params.force_mag
+        else:
+            voltage = action * self.params.voltage_mag
+            force = self.voltage2force(voltage, x_dot)
 
         costheta = math.cos(theta)
         sintheta = math.sin(theta)
@@ -201,28 +204,13 @@ class GymPhysics(gym.Env):
         observations, _ = states2observations(self.params.ini_states)
         return len(observations)
 
-    def get_distance_score(self, observation, target):
+    def voltage2force(self, voltage, cart_v):
         """
-        calculate reward
-        :param observation: [pos, vel, sin_angle, cos_angle, angle_rate]
-        :param target: [pos_target, angle_target]
+        Convert voltage control to force control
+        :param voltage: voltage action from the agent
+        :return: force actuation to the plant
         """
 
-        cart_position = observation[0]
-        pendulum_angle_sin = observation[2]
-        pendulum_angle_cos = observation[3]
-
-        target_cart_position = target[0]
-        target_pendulum_angle = target[1]
-
-        pendulum_length = self.params.length
-
-        pendulum_tip_position = np.array(
-            [cart_position + pendulum_length * pendulum_angle_sin, pendulum_length * pendulum_angle_cos])
-        target_tip_position = np.array(
-            [target_cart_position + pendulum_length * np.sin(target_pendulum_angle),
-             pendulum_length * np.cos(target_pendulum_angle)])
-
-        distance = np.linalg.norm(target_tip_position - pendulum_tip_position)
-
-        return np.exp(-distance * self.params.distance_score_factor)  # distance [0, inf) -> score [1, 0)
+        # f = 0.90 * 3.71 * 0.69 * 7.68 * (voltage * 6.35 - 7.68 * 3.71 * cart_v) / (6.35 * 6.35 * 2.6)
+        f = 17.69 * (voltage * 6.35 - 28.4928 * cart_v) / 104.8385
+        return f

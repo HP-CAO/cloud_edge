@@ -62,7 +62,10 @@ class IpsDDPG(IpsSystem):
 
                 self.model_stats.observations = copy.deepcopy(stats_observations_next)
 
-                self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, failed)
+                self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, failed,
+                                         pole_length=self.params.physics_params.length,
+                                         distance_score_factor=self.params.reward_params.distance_score_factor)
+
                 self.model_stats.reward.append(r)
 
                 self.trainer.optimize()

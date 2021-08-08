@@ -3,7 +3,6 @@ import copy
 import struct
 import math
 import threading
-import time
 from realips.remote.transition import TrajectorySegment
 from realips.utils import get_current_time
 from realips.system.ips import IpsSystemParams, IpsSystem
@@ -124,7 +123,10 @@ class CloudTrainerDDPG(CloudTrainer):
 
                 self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
                 self.model_stats.targets = copy.deepcopy(self.target)
-                self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, traj_segment.failed)
+                self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, traj_segment.failed,
+                                         pole_length=self.params.physics_params.length,
+                                         distance_score_factor=self.params.reward_params.distance_score_factor)
+
                 self.model_stats.reward.append(r)
 
                 if not traj_segment.normal_operation:
