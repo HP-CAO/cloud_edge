@@ -59,8 +59,10 @@
         "action_observations_dim": 5
     },
     "control_params": {
+        "frequency": 50.0,
+        "x_threshold": 0.3,
+        "theta_dot_threshold": 10,
         "random_reset_target": false,
-        "x_boundary": 0.3,
         "control_targets": [
             0.0,
             0.0
@@ -72,9 +74,6 @@
         "action_factor": 5
     },
     "quanser_params": {
-        "frequency": 25,
-        "x_threshold": 0.32,
-        "theta_dot_threshold": 15,
         "x_left": -23749,
         "x_right": 11946,
         "x_length": 0.814,

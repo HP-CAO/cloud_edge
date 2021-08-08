@@ -3,9 +3,9 @@
         "servers": [
             {
                 "port": "6379",
-                "password": "",
-                "host_ip": "127.0.0.1",
-                "name": "server_1"
+                "password": "hongi123",
+                "host_ip": "10.162.12.193",
+                "name": "cloud"
             },
             {
                 "port": "6379",
@@ -15,32 +15,32 @@
             }
         ],
         "ch_edge_control": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_plant_control"
         },
         "ch_plant_trajectory_segment": {
-            "server_name": "server_1",
-            "channel_name": "channel"
-        },
-        "ch_edge_weights": {
-            "server_name": "server_1",
-            "channel_name": "channel"
-        },
-        "ch_edge_ready_update": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_plant_trajectory_segment"
         },
         "ch_plant_reset": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_plant_reset"
+        },
+        "ch_edge_weights": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_weights"
+        },
+        "ch_edge_ready_update": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_ready_update"
         },
         "ch_edge_mode": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_edge_mode"
         },
         "ch_edge_trajectory": {
-            "server_name": "server_1",
-            "channel_name": "channel"
+            "server_name": "cloud",
+            "channel_name": "ch_edge_trajectory"
         }
     },
     "physics_params": {
