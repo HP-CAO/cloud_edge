@@ -24,7 +24,7 @@ else:
 
 def signal_handler(signal, frame):
     global run
-    print("exiting")
+    print("Safe exiting")
     run = False
 
 
@@ -97,4 +97,3 @@ while True:
         break
 
 card.close()
-print("safely exiting ")
