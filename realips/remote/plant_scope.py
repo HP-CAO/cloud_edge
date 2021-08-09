@@ -36,4 +36,5 @@ class PlantScope:
 
         while True:
             states = self.receive_plant_trajectory()
+            print(states)
             self.physics.render(states=states)
