@@ -59,7 +59,7 @@
         "action_observations_dim": 5
     },
     "control_params": {
-        "frequency": 50.0,
+        "frequency": 30.0,
         "x_threshold": 0.3,
         "theta_dot_threshold": 10,
         "random_reset_target": false,

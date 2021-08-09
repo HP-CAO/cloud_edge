@@ -33,7 +33,6 @@ class QuanserPlant:
         print("Quanser Plant Initialized!")
 
     def get_encoder_readings(self):
-        # todo debug theta_acc
         x_old, theta_old = self.encoder_buffer
         x_old_rescaled = self.rescale_x(x_old)
 

@@ -14,9 +14,10 @@ class RewardFcn:
     def __init__(self, params: RewardParams):
         self.params = params
 
-    def reward(self, observations, targets, action, terminal):
+    def reward(self, observations, targets, action, terminal, pole_length):
         """
         calculate reward
+        :param pole_length: the length of the pole
         :param observations: [pos, vel, sin_angle, cos_angle, angle_rate]
         :param targets: [pos_target, angle_target]
         :param action: action based on current states
@@ -24,7 +25,7 @@ class RewardFcn:
         :return: a scalar value
         """
 
-        distance_score = self.get_distance_score(observations, targets)
+        distance_score = self.get_distance_score(observations, targets, pole_length, self.params.distance_score_factor)
 
         r = self.params.distance_score_reward * distance_score
         r -= self.params.action_penalty * action

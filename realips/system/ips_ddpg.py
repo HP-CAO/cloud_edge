@@ -55,7 +55,8 @@ class IpsDDPG(IpsSystem):
 
                 observations_next = np.hstack((stats_observations_next, action_observations)).tolist()
 
-                r = self.reward_fcn.reward(self.model_stats.observations, self.model_stats.targets, action, failed)
+                r = self.reward_fcn.reward(self.model_stats.observations, self.model_stats.targets, action, failed,
+                                           pole_length=self.params.physics_params.length)
 
                 self.trainer.store_experience(observations, self.model_stats.targets, action, r,
                                               observations_next, failed)

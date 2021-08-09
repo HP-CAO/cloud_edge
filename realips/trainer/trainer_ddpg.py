@@ -11,7 +11,6 @@ class DDPGTrainerParams:
         self.batch_size = 128
         self.learning_rate = 0.0003
         self.is_remote_train = False
-        self.eval_period = 2
         self.actor_freeze_step_count = 5000
         self.use_prioritized_replay = False
         self.pre_fill_exp = 10000

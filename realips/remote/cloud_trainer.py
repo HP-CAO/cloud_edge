@@ -84,7 +84,7 @@ class CloudTrainerDDPG(CloudTrainer):
             self.ep += 1
             step = 0
 
-            if self.ep % self.params.trainer_params.eval_period == 0:
+            if self.ep % self.params.stats_params.eval_period == 0:
                 self.redis_connection.publish(self.params.redis_params.ch_edge_mode, struct.pack("?", False))
                 training = False
                 print("EVALUATING!!!!!!")

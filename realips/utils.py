@@ -33,7 +33,7 @@ class ActionNoise:
 
 class OrnsteinUhlenbeckActionNoise(ActionNoise):
 
-    def __init__(self, action_dim, bounds, clip_or_wrap, mu=0, theta=0.15, sigma=0.1, dt=0.04):
+    def __init__(self, action_dim, bounds=(-1, 1), clip_or_wrap=0, mu=0, theta=0.15, sigma=0.1, dt=0.04):
         super().__init__(action_dim, bounds, clip_or_wrap)
         self.mu = mu
         self.theta = theta

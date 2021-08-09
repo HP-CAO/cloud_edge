@@ -45,7 +45,7 @@
         "weights_path": null,
         "running_mode": "train",
         "random_initial_ips": true,
-        "visualize_eval": true,
+        "visualize_eval": false,
         "reset_delay": 1.0
     },
     "agent_params": {
@@ -67,9 +67,8 @@
         "gamma_discount": 0.99,
         "rm_size": 100000,
         "batch_size": 128,
-        "learning_rate": 0.0003,
+        "learning_rate": 0.00003,
         "is_remote_train": false,
-        "eval_period": 2,
         "actor_freeze_step_count": 5000,
         "use_prioritized_replay": false,
         "pre_fill_exp": 10000

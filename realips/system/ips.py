@@ -44,7 +44,8 @@ class IpsSystem:
             states_next = self.physics.step(action)
             stats_observations_next, failed = states2observations(states_next)
 
-            r = self.reward_fcn.reward(self.model_stats.observations, self.model_stats.targets, action, failed)
+            r = self.reward_fcn.reward(self.model_stats.observations, self.model_stats.targets, action, failed,
+                                       pole_length=self.params.physics_params.length)
 
             self.model_stats.observations = copy.deepcopy(stats_observations_next)
 
