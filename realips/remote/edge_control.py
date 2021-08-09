@@ -133,7 +133,7 @@ class DDPGEdgeControl(EdgeControl):
 
                 states = self.quanser_plant.get_encoder_readings()
 
-                # self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
+                self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
 
                 normal_mode = self.quanser_plant.normal_mode
 
