@@ -106,7 +106,7 @@ class CloudTrainerDDPG(CloudTrainer):
                 r = self.reward_fcn.reward(stat_observations,
                                            self.target,
                                            traj_segment.last_action,
-                                           traj_segment.failed).squeeze()
+                                           traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
                 print(r)
                 if training:
                     self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,

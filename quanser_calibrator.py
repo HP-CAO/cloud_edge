@@ -50,7 +50,7 @@ def rescale_theta(theta_readings, theta_resolution):
     theta_ini = 0
     theta = (theta_readings - theta_ini) * theta_resolution
     theta += -1 * math.pi
-    theta_rescale = math.atan2(math.sin(theta), math.cos(theta))
+    theta_rescale = -1 * math.atan2(math.sin(theta), math.cos(theta))
     return theta_rescale
 
 

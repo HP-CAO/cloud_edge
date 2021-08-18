@@ -133,7 +133,7 @@ class DDPGEdgeControl(EdgeControl):
 
                 states = self.quanser_plant.get_encoder_readings()
 
-                # self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
+                self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
 
                 normal_mode = self.quanser_plant.normal_mode
 
@@ -214,7 +214,7 @@ class DDPGEdgeControl(EdgeControl):
 
         while True:
 
-            x, theta = self.quanser_plant.encoder_buffer[0].copy()
+            x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
             control_action = numpy.clip(control_action, -2.5, 2.5)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
