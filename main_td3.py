@@ -1,17 +1,17 @@
 import argparse
 import os
 
-from realips.system.ips_ddpg import IpsDDPG, IpsDDPGParams
+from realips.system.ips_td3 import IpsTD3Params, IpsTD3
 from utils import *
 
 
 def main_train(p):
-    ips = IpsDDPG(p)
+    ips = IpsTD3(p)
     ips.train()
 
 
 def main_test(p):
-    ips = IpsDDPG(p)
+    ips = IpsTD3(p)
     ips.test()
 
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', action='store_true', help='Activate usage of GPU')
     parser.add_argument('--generate_config', action='store_true', help='Enable to write default config only')
-    parser.add_argument('--config', default='./config/local_ddpgips.json', help='Path to config file')
+    parser.add_argument('--config', default='./config/local_td3ips.json', help='Path to config file')
     parser.add_argument('--id', default=None, help='If set overrides the logfile name and the save name')
     parser.add_argument('--force', action='store_true', help='Override log file without asking')
     parser.add_argument('--weights', default=None, help='Path to pretrained weights')
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.generate_config:
-        generate_config(IpsDDPGParams(), "config/default_ddpgips.json")
+        generate_config(IpsTD3Params(), "config/default_td3ips.json")
         exit("ddpgips_config file generated")
 
     if not args.gpu:

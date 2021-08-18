@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 
 class RewardParams:
@@ -13,8 +14,10 @@ class RewardFcn:
 
     def __init__(self, params: RewardParams):
         self.params = params
+        # self.reward = self.distance_reward
+        self.reward = self.distance_reward
 
-    def reward(self, observations, targets, action, terminal, pole_length):
+    def distance_reward(self, observations, targets, action, terminal, pole_length):
         """
         calculate reward
         :param pole_length: the length of the pole
@@ -61,3 +64,23 @@ class RewardFcn:
         distance = np.linalg.norm(target_tip_position - pendulum_tip_position)
 
         return np.exp(-distance * distance_score_factor)  # distance [0, inf) -> score [1, 0)
+
+    def simple_reward(self, observations, targets, action, terminal, pole_length):
+        """
+        to calculate the simple stepwise reward, to swing it up
+        r= - (theta ** 2 + 0.1 * theta_dot**2 + 0.001 * a **2) - terminal_penalty
+        """
+        x_tar, theta_tar = targets
+        x, x_dot, sin_theta, cos_theta, theta_dot = observations
+        theta = math.atan2(sin_theta, cos_theta)
+        theta_diff = x_tar - theta
+
+        r = -1 * (theta_diff ** 2 + 0.1 * theta_dot ** 2 + 0.001 * action ** 2) - terminal * 10
+
+        return r
+
+
+
+
+
+

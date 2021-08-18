@@ -37,19 +37,19 @@ class DDPGAgent:
         self.shape_observations = shape_observations
         self.shape_targets = shape_targets
         self.shape_action = shape_action
-
+        self.on_edge = on_edge
         self.actor = self.build_actor("normal-")
-
-        if not on_edge:
-            self.critic = self.build_critic("normal-")
-            self.critic_target = self.build_critic("target-")
-            self.actor_target = self.build_actor("target-")
-            self.hard_update()
-
         self.action_noise = OrnsteinUhlenbeckActionNoise(self.shape_action)
         self.action_noise_factor = params.action_noise_factor
         self.add_actions_observations = self.params.add_actions_observations
         self.action_observations_dim = self.params.action_observations_dim
+
+    def initial_model(self):
+        if not self.on_edge:
+            self.critic = self.build_critic("normal-")
+            self.critic_target = self.build_critic("target-")
+            self.actor_target = self.build_actor("target-")
+            self.hard_update()
 
     def build_critic(self, name):
         """
@@ -137,16 +137,6 @@ class DDPGAgent:
 
         return action
 
-    def get_eval_action(self, observations, targets): # todo check this
-        """
-        get action for evaluation without any noise
-        return: an action scalar
-        """
-        observations = tf.expand_dims(observations, 0)
-        targets = tf.expand_dims(targets, 0)
-        action = self.actor_target([observations, targets]).numpy().squeeze()
-        return action
-
     def hard_update(self):
         self.actor_target.set_weights(self.actor.get_weights())
         self.critic_target.set_weights(self.critic.get_weights())
@@ -171,8 +161,10 @@ class DDPGAgent:
         self.actor.set_weights(weights)
 
     def save_weights(self, model_name):
-        self.actor_target.save_weights('./models/' + model_name + '_DDPG/actor_weights')
-        self.critic_target.save_weights('./models/' + model_name + '_DDPG/critic_weights')
+        self.actor.save_weights('./models/' + model_name + '_DDPG/actor_weights')
+        self.critic.save_weights('./models/' + model_name + '_DDPG/critic_weights')
+        self.actor_target.save_weights('./models/' + model_name + '_DDPG/actor_target_weights')
+        self.critic_target.save_weights('./models/' + model_name + '_DDPG/critic_target_weights')
 
     def load_weights(self, path_to_weights):
         print("loading pretrained weights......")

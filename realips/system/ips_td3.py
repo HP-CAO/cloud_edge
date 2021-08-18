@@ -1,28 +1,27 @@
-from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
-from realips.trainer.trainer_ddpg import DDPGTrainer, DDPGTrainerParams
+from realips.agent.td3 import TD3Agent, TD3AgentParams
+from realips.trainer.trainer_td3 import TD3Trainer, TD3TrainerParams
 from realips.system.ips import IpsSystem, IpsSystemParams
 from realips.utils import states2observations
 import numpy as np
 import copy
-import time
 
 
-class IpsDDPGParams(IpsSystemParams):
+class IpsTD3Params(IpsSystemParams):
     def __init__(self):
         super().__init__()
-        self.agent_params = DDPGAgentParams()
-        self.trainer_params = DDPGTrainerParams()
+        self.agent_params = TD3AgentParams()
+        self.trainer_params = TD3TrainerParams()
 
 
-class IpsDDPG(IpsSystem):
-    def __init__(self, params: IpsDDPGParams):
+class IpsTD3(IpsSystem):
+    def __init__(self, params: IpsTD3Params):
         super().__init__(params)
         self.params = params
         if self.params.agent_params.add_actions_observations:
             self.shape_observations += self.params.agent_params.action_observations_dim
-        self.agent = DDPGAgent(params.agent_params, self.shape_observations, self.shape_targets, shape_action=1)
-        self.trainer = DDPGTrainer(params.trainer_params, self.agent)
+        self.agent = TD3Agent(params.agent_params, self.shape_observations, self.shape_targets, action_shape=1)
         self.agent.initial_model()
+        self.trainer = TD3Trainer(params.trainer_params, self.agent)
         if self.params.stats_params.weights_path is not None:
             self.agent.load_weights(self.params.stats_params.weights_path)
 
@@ -37,7 +36,6 @@ class IpsDDPG(IpsSystem):
             self.model_stats.init_episode()
             ep += 1
             step = 0
-            t0 = 0
 
             if self.params.agent_params.add_actions_observations:
                 action_observations = np.zeros(shape=self.params.agent_params.action_observations_dim)
@@ -54,6 +52,7 @@ class IpsDDPG(IpsSystem):
                     action_observations = np.append(action_observations, action)[1:]
 
                 states_next = self.physics.step(action)
+
                 stats_observations_next, failed = states2observations(states_next)
 
                 observations_next = np.hstack((stats_observations_next, action_observations)).tolist()
@@ -61,11 +60,8 @@ class IpsDDPG(IpsSystem):
                 r = self.reward_fcn.reward(self.model_stats.observations, self.model_stats.targets, action, failed,
                                            pole_length=self.params.physics_params.length)
 
-                if time.time() - t0 > (1 / self.params.physics_params.simulation_frequency):
-                    self.trainer.store_experience(observations, self.model_stats.targets, action, r,
-                                                  observations_next, failed)
-                    t0 = time.time()
-                    print("Store_transition")
+                self.trainer.store_experience(observations, self.model_stats.targets, action, r,
+                                              observations_next, failed)
 
                 self.model_stats.observations = copy.deepcopy(stats_observations_next)
 

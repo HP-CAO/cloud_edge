@@ -25,12 +25,14 @@ class GymPhysicsParams:
         self.friction_pole = 0.0011
         self.with_friction = True
         self.force_input = False
+        self.sim_with_delay = False
+        self.simulation_frequency = 30
 
 
 class GymPhysics(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second': 30
+        'video.frames_per_second': 20 # this is not working
     }
 
     def __init__(self, params: GymPhysicsParams):

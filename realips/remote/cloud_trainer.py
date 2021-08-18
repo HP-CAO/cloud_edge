@@ -72,7 +72,7 @@ class CloudTrainerDDPG(CloudTrainer):
             self.agent.load_weights(self.params.stats_params.weights_path)
 
         self.send_weights(self.agent.get_actor_weights())
-        self.target = [0., 0.]  # TODO send to edge
+        self.target = [0., 0.]
 
     def store_trajectory(self):
 
