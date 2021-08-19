@@ -1,2 +1,4 @@
-# rips
-Real Inverted Pendulum System (RIPS) Who doesn't like rips?
+# ribs
+Real Inverted Pendulum System (RIBS) 
+Who doesn't like ribs?
+
