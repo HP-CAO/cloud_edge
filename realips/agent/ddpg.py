@@ -181,6 +181,7 @@ class DDPGAgent:
         self.critic.load_weights(path_to_critic)
         self.actor_target.load_weights(path_to_actor_target)
         self.critic_target.load_weights(path_to_critc_target)
+        # todo maybe I need to save the learning rate for the adam optimizer
         # self.hard_update()
 
     def noise_factor_decay(self, step):

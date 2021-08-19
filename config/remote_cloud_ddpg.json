@@ -109,9 +109,10 @@
     },
     "trainer_params": {
         "gamma_discount": 0.99,
-        "rm_size": 100000,
+        "rm_size": 1000000,
         "batch_size": 128,
-        "learning_rate": 0.00002,
+        "learning_rate_actor": 0.00003,
+        "learning_rate_critic": 0.00003,
         "is_remote_train": true,
         "actor_freeze_step_count": 500,
         "use_prioritized_replay": false,

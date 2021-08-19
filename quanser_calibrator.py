@@ -87,7 +87,7 @@ while True:
     analog_write_buffer = np.array([action], dtype=np.float64)
     card.write_analog(analog_channels, num_analog_channels, analog_write_buffer)
     print("Encoder: ", encoder_buffer)
-    print("analog_control", analog_write_buffer)
+    print("Analog_control", analog_write_buffer)
     t1 = time.time()
     print(get_current_time())
     if t1 - t0 < period_time:
