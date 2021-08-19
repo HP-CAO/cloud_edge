@@ -57,6 +57,7 @@ class CloudTrainerDDPG(CloudTrainer):
         if self.params.agent_params.add_actions_observations:
             self.shape_observations += self.params.agent_params.action_observations_dim
         self.agent = DDPGAgent(self.params.agent_params, self.shape_observations, self.shape_targets, shape_action=1)
+        self.agent.initial_model()
         self.trainer = DDPGTrainer(self.params.trainer_params, self.agent)
         self.edge_status_subscriber = self.redis_connection.subscribe(
             channel=self.params.redis_params.ch_edge_ready_update)
@@ -98,7 +99,6 @@ class CloudTrainerDDPG(CloudTrainer):
             #     traj_segment = self.receive_edge_trajectory()
 
             for step in range(self.params.stats_params.max_episode_steps):
-                print("current step:", step)
                 last_seg = traj_segment
                 traj_segment = self.receive_edge_trajectory()
                 stat_observations = last_seg.observations[0:5]
@@ -107,7 +107,6 @@ class CloudTrainerDDPG(CloudTrainer):
                                            self.target,
                                            traj_segment.last_action,
                                            traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
-                print(r)
                 if training:
                     self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
                                                   traj_segment.observations, traj_segment.failed)

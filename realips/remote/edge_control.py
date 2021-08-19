@@ -18,7 +18,7 @@ class ControlParams:
     def __init__(self):
         self.frequency = 50.00  # hz
         self.x_threshold = 0.3
-        self.theta_dot_threshold = 10
+        self.theta_dot_threshold = 50
         self.random_reset_target = False
         self.control_targets = [0., 0.]
         self.is_quick_recover = True
@@ -223,11 +223,11 @@ class DDPGEdgeControl(EdgeControl):
                 break
 
             self.quanser_plant.get_encoder_readings()
-            print("resetting", get_current_time())
+            print("resetting.....")
 
         self.quanser_plant.write_analog_output(0)
         self.quanser_plant.normal_mode = True
-        print("resetting finished")
+        print("<==========resetting finished==========>")
 
     def receive_reset_command(self):
         """

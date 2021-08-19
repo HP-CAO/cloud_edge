@@ -61,7 +61,7 @@
     "control_params": {
         "frequency": 30.0,
         "x_threshold": 0.3,
-        "theta_dot_threshold": 10,
+        "theta_dot_threshold": 50,
         "random_reset_target": false,
         "control_targets": [
             0.0,
