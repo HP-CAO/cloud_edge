@@ -70,7 +70,7 @@ encoder_buffer = np.zeros(num_encoder_channels, dtype=np.int32)
 
 pid_controller = PID(kp, setpoint=0)
 x_resolution = get_x_resolution()
-theta_resolution = 0.00153
+theta_resolution = 0.00153398
 
 run = True
 signal.signal(signal.SIGINT, signal_handler)
