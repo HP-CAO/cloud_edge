@@ -65,7 +65,6 @@ class IpsDDPG(IpsSystem):
                     self.trainer.store_experience(observations, self.model_stats.targets, action, r,
                                                   observations_next, failed)
                     t0 = time.time()
-                    print("Store_transition")
 
                 self.model_stats.observations = copy.deepcopy(stats_observations_next)
 

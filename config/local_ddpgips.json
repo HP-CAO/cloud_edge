@@ -15,13 +15,14 @@
         "mass_pole": 0.23,
         "force_mag": 5.0,
         "voltage_mag": 5.0,
-        "tau": 0.02,
+        "tau": 0.03333,
         "length": 0.64,
         "theta_random_std": 0.8,
         "friction_cart": 10,
         "friction_pole": 0.0011,
         "with_friction": true,
-        "force_input": true
+        "force_input": true,
+        "simulation_frequency": 30
     },
     "reward_params": {
         "distance_score_reward": 0.5,

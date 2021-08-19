@@ -174,10 +174,14 @@ class DDPGAgent:
 
         path_to_actor = path_to_weights + 'actor_weights'
         path_to_critic = path_to_weights + 'critic_weights'
+        path_to_actor_target = path_to_weights + 'actor_target_weights'
+        path_to_critc_target = path_to_weights + 'critic_target_weights'
 
         self.actor.load_weights(path_to_actor)
         self.critic.load_weights(path_to_critic)
-        self.hard_update()
+        self.actor_target.load_weights(path_to_actor_target)
+        self.critic_target.load_weights(path_to_critc_target)
+        # self.hard_update()
 
     def noise_factor_decay(self, step):
         decay_rate = 0.693 / self.params.action_noise_half_decay_time

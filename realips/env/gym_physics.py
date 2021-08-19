@@ -18,7 +18,7 @@ class GymPhysicsParams:
         self.force_mag = 5.0
         self.voltage_mag = 5.0
 
-        self.tau = 0.02
+        self.tau = 1 / 30
         self.length = 0.64
         self.theta_random_std = 0.8
         self.friction_cart = 10
@@ -32,7 +32,7 @@ class GymPhysicsParams:
 class GymPhysics(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second': 20 # this is not working
+        'video.frames_per_second': 30 # this is not working
     }
 
     def __init__(self, params: GymPhysicsParams):
