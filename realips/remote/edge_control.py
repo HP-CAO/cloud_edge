@@ -230,17 +230,15 @@ class DDPGEdgeControl(EdgeControl):
 
             print("resetting.....")
 
-        if self.ep % self.params.control_params.calibrating_period == 0:
+        while self.ep % self.params.control_params.calibrating_period == 0:
 
             print("calibrating...")
 
-            while True:
-                _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
-                if x_dot == 0 and theta_dot == 0:
-                    time.sleep(5)
-                    break
-
-            self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
+            _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
+            if x_dot == 0 and theta_dot == 0:
+                time.sleep(5)
+                self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
+                break
 
         self.quanser_plant.write_analog_output(0)
 
