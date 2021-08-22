@@ -1,5 +1,6 @@
 import argparse
 import os
+import signal
 from realips.remote.edge_control import EdgeControlParams, DDPGEdgeControl
 
 from utils import *

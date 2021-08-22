@@ -53,7 +53,7 @@
         "actor_dense2": 128,
         "actor_dense3": 64,
         "soft_alpha": 0.005,
-        "action_noise_factor": 0.2,
+        "action_noise_factor": 0.0,
         "action_noise_half_decay_time": 1000000.0,
         "add_actions_observations": false,
         "action_observations_dim": 5

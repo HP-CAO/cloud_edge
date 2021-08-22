@@ -65,8 +65,6 @@ class DDPGTrainer:
 
                 a2 = self.agent.actor_target([ob2, tgs])
 
-                # action_noise = tf.random.normal(shape=(self.params.batch_size, 1), mean=0, stddev=0.3) # this one works pretty good
-
                 action_noise = tf.clip_by_value(tf.random.normal(shape=(self.params.batch_size, 1), mean=0, stddev=0.3),
                                                 clip_value_min=-0.5, clip_value_max=0.5)
 
