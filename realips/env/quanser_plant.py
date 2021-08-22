@@ -30,17 +30,19 @@ class QuanserPlant:
         self.theta_resolution = self.get_theta_resolution()
         self.x_thresold = x_watchdog
         self.theta_threshold = theta_watchdog
+        self.x_center = 0
+        self.theta_ini = 0
         print("Quanser Plant Initialized!")
 
     def get_encoder_readings(self):
         x_old, theta_old = self.encoder_buffer
-        x_old_rescaled = self.rescale_x(x_old)
+        x_old_rescaled = self.rescale_x(x_old, self.x_center)
 
         self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
         print("step_status", self.encoder_buffer)
         x_new, theta_new = self.encoder_buffer
-        x_new_rescaled = self.rescale_x(x_new)
-        theta_new_rescaled = self.rescale_theta(theta_new)
+        x_new_rescaled = self.rescale_x(x_new, self.x_center)
+        theta_new_rescaled = self.rescale_theta(theta_new, self.theta_ini)
 
         x_dot = (x_new_rescaled - x_old_rescaled) / self.sample_period
         theta_dot = -1 * (theta_new - theta_old) * self.theta_resolution / self.sample_period
@@ -58,22 +60,21 @@ class QuanserPlant:
         print(self.analog_buffer)
         self.card.write_analog(self.analog_channels, self.num_analog_channels, self.analog_buffer)
 
-    def rescale_x(self, x_readings):
+    def rescale_x(self, x_readings, x_center):
         """
         rescale x_position sensor reading to world relative position with respect to track center
         :param x_readings: sensor reading from the cart encoder
         :return: cart position
         """
-        x = (x_readings - self.x_center) * self.x_resolution
+        x = (x_readings - x_center) * self.x_resolution
         return x
 
-    def rescale_theta(self, theta_readings):
+    def rescale_theta(self, theta_readings, theta_ini):
         """
         rescale angle readings to [-pi to pi]
         :param x_readings: sensor reading from the angle encoder
         :return: pendulum's angle
         """
-        theta_ini = 0
         theta = (theta_readings - theta_ini) * self.theta_resolution
         theta += -1 * math.pi
         theta_rescale = -1 * math.atan2(math.sin(theta), math.cos(theta))

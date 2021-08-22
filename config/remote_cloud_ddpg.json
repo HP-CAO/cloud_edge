@@ -116,7 +116,7 @@
         "is_remote_train": true,
         "actor_freeze_step_count": 500,
         "use_prioritized_replay": false,
-        "pre_fill_exp": 5000,
+        "pre_fill_exp": 2000,
         "training_epoch": 1
     }
 }

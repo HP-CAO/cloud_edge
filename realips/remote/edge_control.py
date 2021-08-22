@@ -26,6 +26,7 @@ class ControlParams:
         self.initialize_from_cloud = True
         self.train_real = True
         self.action_factor = 7
+        self.calibrating_period = 5
 
 
 class EdgeControlParams:
@@ -102,6 +103,7 @@ class DDPGEdgeControl(EdgeControl):
         self.t3 = threading.Thread(target=self.receive_mode)
         self.t4 = threading.Thread(target=self.receive_reset_command)
         self.step = 0
+        self.ep = 0
         self.training = True if eval is None else False
         self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
 
@@ -115,6 +117,8 @@ class DDPGEdgeControl(EdgeControl):
     def generate_action(self):
 
         while True:
+
+            self.ep += 1
 
             if self.params.ddpg_params.add_actions_observations:
 
@@ -223,10 +227,25 @@ class DDPGEdgeControl(EdgeControl):
                 break
 
             self.quanser_plant.get_encoder_readings()
+
             print("resetting.....")
 
+        if self.ep % self.params.control_params.calibrating_period == 0:
+
+            print("calibrating...")
+
+            while True:
+                _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
+                if x_dot == 0 and theta_dot == 0:
+                    time.sleep(5)
+                    break
+
+            self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
+
         self.quanser_plant.write_analog_output(0)
+
         self.quanser_plant.normal_mode = True
+
         print("<==========resetting finished==========>")
 
     def receive_reset_command(self):
