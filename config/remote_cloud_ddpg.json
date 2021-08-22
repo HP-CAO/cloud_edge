@@ -30,7 +30,7 @@
         "distance_score_factor": 5
     },
     "stats_params": {
-        "max_episode_steps": 1000,
+        "max_episode_steps": 600,
         "total_steps": 5000000.0,
         "evaluation_steps": 600,
         "target_distance_score": 0.5,
@@ -116,7 +116,7 @@
         "is_remote_train": true,
         "actor_freeze_step_count": 500,
         "use_prioritized_replay": false,
-        "pre_fill_exp": 5000,
+        "pre_fill_exp": 4800,
         "training_epoch": 1
     }
 }
