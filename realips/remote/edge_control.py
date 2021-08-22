@@ -235,6 +235,7 @@ class DDPGEdgeControl(EdgeControl):
             print("calibrating...")
 
             _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
+
             if x_dot == 0 and theta_dot == 0:
                 time.sleep(5)
                 self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
