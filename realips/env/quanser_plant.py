@@ -28,7 +28,7 @@ class QuanserPlant:
         self.x_center = self.params.x_center
         self.x_resolution = self.get_x_resolution()
         self.theta_resolution = self.get_theta_resolution()
-        self.x_thresold = x_watchdog
+        self.x_threshold = x_watchdog
         self.theta_threshold = theta_watchdog
         self.x_center = 0
         self.theta_ini = 0
@@ -39,7 +39,7 @@ class QuanserPlant:
         x_old_rescaled = self.rescale_x(x_old, self.x_center)
 
         self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
-        print("step_status", self.encoder_buffer)
+        # print("step_status", self.encoder_buffer)
         x_new, theta_new = self.encoder_buffer
         x_new_rescaled = self.rescale_x(x_new, self.x_center)
         theta_new_rescaled = self.rescale_theta(theta_new, self.theta_ini)
@@ -52,12 +52,11 @@ class QuanserPlant:
         if failed:
             self.normal_mode = False
 
-        print(x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
+        print("States:", x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 
     def write_analog_output(self, action):
         self.analog_buffer = np.array([action], np.float64)
-        print(self.analog_buffer)
         self.card.write_analog(self.analog_channels, self.num_analog_channels, self.analog_buffer)
 
     def rescale_x(self, x_readings, x_center):
@@ -93,5 +92,5 @@ class QuanserPlant:
         return x_resolution
 
     def is_failed(self, x, theta_dot):
-        failed = bool(abs(x) >= self.x_thresold or theta_dot > self.theta_threshold)
+        failed = bool(abs(x) >= self.x_threshold or theta_dot > self.theta_threshold)
         return failed

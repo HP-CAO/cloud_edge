@@ -75,7 +75,7 @@
         "actor_freeze_step_count": 1000,
         "use_prioritized_replay": false,
         "pre_fill_exp": 10000,
-        "actor_update_period": 1,
+        "actor_update_period": 2,
         "training_epoch" : 1
     }
 }

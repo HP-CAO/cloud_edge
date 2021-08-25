@@ -107,7 +107,9 @@ class CloudTrainerDDPG(CloudTrainer):
                                            self.target,
                                            traj_segment.last_action,
                                            traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
-                if training:
+
+                if training and traj_segment.sequence_number == last_seg + 1:
+                    # only save the experience if the two trajectory are consecutive
                     self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
                                                   traj_segment.observations, traj_segment.failed)
 

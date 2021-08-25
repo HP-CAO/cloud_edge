@@ -62,7 +62,7 @@ class TD3Trainer:
 
             action_target = self.agent.actor_target([ob2, tgs])
 
-            action_noise = tf.clip_by_value(tf.random.normal(shape=(self.params.batch_size, 1),mean=0, stddev=0.3),
+            action_noise = tf.clip_by_value(tf.random.normal(shape=(self.params.batch_size, 1), mean=0, stddev=0.3),
                                             clip_value_min=-0.5, clip_value_max=0.5)
 
             action_target = tf.clip_by_value((action_target + action_noise), clip_value_min=-1, clip_value_max=1)

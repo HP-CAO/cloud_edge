@@ -32,6 +32,7 @@ class TrajectorySegment:
         s.last_action = seg[1]
         s.failed = seg[2]
         s.normal_operation = seg[3]
+        s.sequence_number = seg[-1]
         return s
 
     def get_observation(self):

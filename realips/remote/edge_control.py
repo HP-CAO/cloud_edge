@@ -115,6 +115,7 @@ class DDPGEdgeControl(EdgeControl):
             self.initialize_weights_from_cloud(self.agent_a, self.agent_b)
 
     def generate_action(self):
+        #  to make sure the states and the next states are consecutive
 
         while True:
 
@@ -163,10 +164,10 @@ class DDPGEdgeControl(EdgeControl):
 
                 self.quanser_plant.write_analog_output(action)
 
-                edge_trajectory = [observations, last_action, failed, normal_mode]
+                edge_trajectory = [observations, last_action, failed, normal_mode, self.step]
 
                 self.send_edge_trajectory(edge_trajectory)  # this is sent to the cloud trainer
-                print("Inference took {}s".format(delta_t))
+                # print("Inference took {}s".format(delta_t))
                 self.action_noise_decay()
 
                 if self.params.ddpg_params.add_actions_observations:
@@ -220,7 +221,7 @@ class DDPGEdgeControl(EdgeControl):
 
             x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
-            control_action = numpy.clip(control_action, -2.5, 2.5)  # set an action range
+            control_action = np.clip(control_action, -2.5, 2.5)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
 
             if time.time() - t0 > 10:  # simply setting time threshold for resetting control
@@ -230,22 +231,23 @@ class DDPGEdgeControl(EdgeControl):
 
             print("resetting.....")
 
-        # while self.ep % self.params.control_params.calibrating_period == 0:
-        #
-        #     print("calibrating...")
-        #
-        #     _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
-        #
-        #     if x_dot == 0 and theta_dot == 0:
-        #         time.sleep(5)
-        #         self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
-        #         break
-
         self.quanser_plant.write_analog_output(0)
-
         self.quanser_plant.normal_mode = True
-
         print("<==========resetting finished==========>")
+
+    def calibration(self):
+
+        while self.ep % self.params.control_params.calibrating_period == 0:
+
+            print("calibrating...")
+
+            _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
+
+            if x_dot == 0 and theta_dot == 0:
+                time.sleep(5)
+                self.quanser_plant.get_encoder_readings()
+                self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
+                break
 
     def receive_reset_command(self):
         """
