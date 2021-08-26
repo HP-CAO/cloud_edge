@@ -142,7 +142,7 @@ class DDPGEdgeControl(EdgeControl):
 
                 normal_mode = self.quanser_plant.normal_mode
 
-                last_action = self.quanser_plant.analog_buffer
+                last_action = self.quanser_plant.analog_buffer / self.params.control_params.action_factor # todo check here
 
                 stats_observation, failed = states2observations(states)
 
@@ -152,17 +152,16 @@ class DDPGEdgeControl(EdgeControl):
 
                 if self.training:
                     action = agent.get_exploration_action(observations, self.control_targets)
-
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
 
                 delta_t = time.time() - t0
 
-                action = action * self.params.control_params.action_factor
+                action_real = action * self.params.control_params.action_factor
 
                 print("normal_mode: ", self.quanser_plant.normal_mode)
 
-                self.quanser_plant.write_analog_output(action)
+                self.quanser_plant.write_analog_output(action_real)
 
                 edge_trajectory = [observations, last_action, failed, normal_mode, self.step]
 
