@@ -4,6 +4,7 @@ import threading
 import struct
 import time
 import signal
+import sys
 import numpy
 import numpy as np
 from simple_pid import PID
@@ -222,7 +223,7 @@ class DDPGEdgeControl(EdgeControl):
         self.generate_action()
         print("Exiting... quanser card closed")
         self.quanser_plant.card.close()
-        return 
+        sys.exit()
 
     def receive_mode(self):
         """
