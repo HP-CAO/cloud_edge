@@ -82,8 +82,8 @@ class ReplayMemory(object):
         self.head = -1
         self.full = False
         self.memory = None
-        self.alpha = self.params.alpha
-        self.beta = self.params.beta
+        self.alpha = 1  # put a parameter to reset alpha beta
+        self.beta = 1
 
     def shuffle(self):
         """
