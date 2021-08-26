@@ -34,6 +34,13 @@ def read_config(config_path):
     return json.loads(json_data, object_hook=lambda d: Namespace(**d))
 
 
+def write_config(params, config_path):
+    f = open(config_path, "w")
+    json_data = json.dumps(params.__dict__, default=lambda o: o.__dict__, indent=4)
+    f.write(json_data)
+    f.close()
+
+
 def override_params(params, overrides):
     assert (len(overrides) % 2 == 0)
     for k in range(0, len(overrides), 2):
