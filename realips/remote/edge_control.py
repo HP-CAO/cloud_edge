@@ -98,6 +98,8 @@ class DDPGEdgeControl(EdgeControl):
             self.shape_observations += self.params.ddpg_params.action_observations_dim
         self.agent_a = DDPGAgent(self.params.ddpg_params, shape_observations=self.shape_observations, on_edge=True)
         self.agent_b = DDPGAgent(self.params.ddpg_params, shape_observations=self.shape_observations, on_edge=True)
+        self.agent_a.initial_model()
+        self.agent_b.initial_model()
         # self.t1 = threading.Thread(target=self.generate_action)
         self.t2 = threading.Thread(target=self.update_weights)
         self.t3 = threading.Thread(target=self.receive_mode)
