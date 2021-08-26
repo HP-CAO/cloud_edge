@@ -97,7 +97,7 @@ class ModelStats:
         if distance_score > self.params.target_distance_score:
             self.on_target_steps += 1
         self.distance_scores.append(distance_score)
-        
+
         if crash:
             self.survived = False
 

@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 from realips.utils import states2observations
-from realips.monitor.mointor import ModelStatsParams, ModelStats
+from realips.monitor.monitor import ModelStatsParams, ModelStats
 from realips.env.gym_physics import GymPhysics, GymPhysicsParams
 from realips.env.reward import RewardParams, RewardFcn
 
