@@ -252,7 +252,7 @@ class DDPGEdgeControl(EdgeControl):
             if still_step > 50:
                 break
 
-            time.sleep(self.sample_period - time.time() - t0)
+            time.sleep(self.sample_period - time.time() + t0)
 
         self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
