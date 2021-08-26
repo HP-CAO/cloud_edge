@@ -127,7 +127,7 @@ class DDPGEdgeControl(EdgeControl):
             else:
                 action_observations = []
 
-            while not self.quanser_plant.normal_mode:  # todo if
+            while not self.quanser_plant.normal_mode:
                 self.reset_control()
 
             while self.quanser_plant.normal_mode:
