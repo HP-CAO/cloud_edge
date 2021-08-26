@@ -222,6 +222,7 @@ class DDPGEdgeControl(EdgeControl):
         self.generate_action()
         print("Exiting... quanser card closed")
         self.quanser_plant.card.close()
+        return 
 
     def receive_mode(self):
         """
