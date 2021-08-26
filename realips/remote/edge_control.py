@@ -3,6 +3,7 @@ import pickle
 import threading
 import struct
 import time
+import signal
 import numpy
 import numpy as np
 from simple_pid import PID
@@ -12,6 +13,16 @@ from realips.utils import get_current_time
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
 from realips.utils import states2observations
+
+
+def signal_handler(signal, frame):
+    global run
+    print("Safe exiting")
+    run = False
+
+
+run = True
+signal.signal(signal.SIGINT, signal_handler)
 
 
 class ControlParams:
@@ -179,6 +190,9 @@ class DDPGEdgeControl(EdgeControl):
                 time.sleep(self.sample_period - one_loop_time) \
                     if one_loop_time < self.sample_period else print("timeout:", one_loop_time)
 
+                if run is False:
+                    return
+
     def update_weights(self):
 
         while True:
@@ -194,6 +208,9 @@ class DDPGEdgeControl(EdgeControl):
 
             self.active_agent = not self.active_agent
 
+            if run is False:
+                return
+
     def action_noise_decay(self):
         self.agent_a.noise_factor_decay(self.step)
         self.agent_b.noise_factor_decay(self.step)
@@ -203,6 +220,8 @@ class DDPGEdgeControl(EdgeControl):
         self.t3.start()
         self.t4.start()
         self.generate_action()
+        print("Exiting... quanser card closed")
+        self.quanser_plant.card.close()
 
     def receive_mode(self):
         """
@@ -211,6 +230,9 @@ class DDPGEdgeControl(EdgeControl):
         while True:
             message = self.training_mode_subscriber.parse_response()[2]
             self.training = struct.unpack("?", message)
+
+            if run is False:
+                return
 
     def reset_control(self):
 
@@ -229,6 +251,9 @@ class DDPGEdgeControl(EdgeControl):
             self.quanser_plant.get_encoder_readings()
 
             print("resetting.....")
+
+            if run is False:
+                return
 
         self.quanser_plant.write_analog_output(0)
         self.quanser_plant.normal_mode = True
@@ -256,6 +281,9 @@ class DDPGEdgeControl(EdgeControl):
 
             time.sleep(self.sample_period - time.time() + t0)
 
+            if run is False:
+                return
+
         self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
         print("<========= re-calibration done =========>")
@@ -269,3 +297,6 @@ class DDPGEdgeControl(EdgeControl):
         while True:
             _ = self.plant_reset_subscriber.parse_response()[2]
             self.quanser_plant.normal_mode = False
+
+            if run is False:
+                return
