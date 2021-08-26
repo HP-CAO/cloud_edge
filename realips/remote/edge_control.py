@@ -127,7 +127,7 @@ class DDPGEdgeControl(EdgeControl):
             else:
                 action_observations = []
 
-            while not self.quanser_plant.normal_mode:
+            while not self.quanser_plant.normal_mode:  # todo if
                 self.reset_control()
 
             while self.quanser_plant.normal_mode:
@@ -142,7 +142,7 @@ class DDPGEdgeControl(EdgeControl):
 
                 normal_mode = self.quanser_plant.normal_mode
 
-                last_action = self.quanser_plant.analog_buffer / self.params.control_params.action_factor # todo check here
+                last_action = self.quanser_plant.analog_buffer / self.params.control_params.action_factor  # todo check here
 
                 stats_observation, failed = states2observations(states)
 
@@ -192,8 +192,6 @@ class DDPGEdgeControl(EdgeControl):
 
             self.active_agent = not self.active_agent
 
-            # print("[{}] ===> Agents toggled".format(get_current_time()))
-
     def action_noise_decay(self):
         self.agent_a.noise_factor_decay(self.step)
         self.agent_b.noise_factor_decay(self.step)
@@ -232,11 +230,14 @@ class DDPGEdgeControl(EdgeControl):
 
         self.quanser_plant.write_analog_output(0)
         self.quanser_plant.normal_mode = True
-        print("<==========resetting finished==========>")
+        print("<========== resetting finished ==========>")
+
+        if self.ep % self.params.control_params.calibrating_period == 0:
+            self.calibration()
 
     def calibration(self):
 
-        while self.ep % self.params.control_params.calibrating_period == 0:
+        while True:
 
             print("calibrating...")
 
@@ -247,6 +248,8 @@ class DDPGEdgeControl(EdgeControl):
                 self.quanser_plant.get_encoder_readings()
                 self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
                 break
+
+        print("<========= re-calibration done =========>")
 
     def receive_reset_command(self):
         """

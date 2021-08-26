@@ -93,10 +93,7 @@ class CloudTrainerDDPG(CloudTrainer):
                 self.redis_connection.publish(self.params.redis_params.ch_edge_mode, struct.pack("?", True))
                 training = True
 
-            # Ditch the safety active data
             traj_segment = self.receive_edge_trajectory()
-            # while not traj_segment.normal_operation:
-            #     traj_segment = self.receive_edge_trajectory()
 
             for step in range(self.params.stats_params.max_episode_steps):
                 last_seg = traj_segment
@@ -108,7 +105,7 @@ class CloudTrainerDDPG(CloudTrainer):
                                            traj_segment.last_action,
                                            traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
 
-                if training and traj_segment.sequence_number == last_seg + 1:
+                if training and traj_segment.sequence_number == (last_seg.sequence_number + 1):
                     # only save the experience if the two trajectory are consecutive
                     self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
                                                   traj_segment.observations, traj_segment.failed)
