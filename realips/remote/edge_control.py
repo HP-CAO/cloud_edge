@@ -237,18 +237,25 @@ class DDPGEdgeControl(EdgeControl):
 
     def calibration(self):
 
+        still_step = 0
+
         while True:
+
+            t0 = time.time()
 
             print("calibrating...")
 
             _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
 
-            if x_dot == 0 and theta_dot == 0:
-                time.sleep(5)
-                self.quanser_plant.get_encoder_readings()
-                self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
+            still_step = still_step + 1 if x_dot == 0. and theta_dot == 0. else 0
+
+            if still_step > 50:
                 break
 
+            time.sleep(self.sample_period - time.time() - t0)
+
+        self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
+        self.quanser_plant.get_encoder_readings()
         print("<========= re-calibration done =========>")
 
     def receive_reset_command(self):
