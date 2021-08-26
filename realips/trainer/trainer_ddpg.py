@@ -15,6 +15,7 @@ class DDPGTrainerParams:
         self.actor_freeze_step_count = 5000
         self.use_prioritized_replay = False
         self.pre_fill_exp = 10000
+        self.target_action_noise = False
         self.training_epoch = 1
 
 
@@ -25,7 +26,6 @@ class DDPGTrainer:
         self.optimizer_critic = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate_critic)
         self.optimizer_actor = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate_actor)
         self.replay_mem = ReplayMemory(size=self.params.rm_size)
-
         self.replay_memory_mutex = threading.Lock()
 
     def store_experience(self, observations, targets, action, reward, next_observations, failed):
@@ -64,11 +64,12 @@ class DDPGTrainer:
             with tf.GradientTape() as tape:
 
                 a2 = self.agent.actor_target([ob2, tgs])
+                
+                if self.params.target_action_noise:
+                    action_noise = tf.clip_by_value(tf.random.normal(shape=(self.params.batch_size, 1), mean=0, stddev=0.3),
+                                                    clip_value_min=-0.5, clip_value_max=0.5)
 
-                action_noise = tf.clip_by_value(tf.random.normal(shape=(self.params.batch_size, 1), mean=0, stddev=0.3),
-                                                clip_value_min=-0.5, clip_value_max=0.5)
-
-                a2 = tf.clip_by_value((a2 + action_noise), clip_value_min=-1, clip_value_max=1)
+                    a2 = tf.clip_by_value((a2 + action_noise), clip_value_min=-1, clip_value_max=1)
 
                 q_e = self.agent.critic_target([ob2, tgs, a2])
 

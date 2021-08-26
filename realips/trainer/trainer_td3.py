@@ -28,7 +28,7 @@ class TD3Trainer:
         self.optimizer_actor = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate_actor)
         self.replay_mem = ReplayMemory(size=self.params.rm_size)
         self.replay_memory_mutex = threading.Lock()
-        self.update_counter = 0
+        self.critic_update = 0
 
     def store_experience(self, observations, targets, action, reward, next_observations, failed):
         if self.params.is_remote_train:
@@ -41,8 +41,6 @@ class TD3Trainer:
     def optimize(self):
 
         for i in range(self.params.training_epoch):
-
-            self.update_counter += 1
 
             if self.params.pre_fill_exp > self.replay_mem.get_size():
                 return
@@ -86,7 +84,8 @@ class TD3Trainer:
 
             # ---------------------- optimize actor ----------------------
 
-            if self.update_counter % self.params.actor_update_period == 0: # update actor less frequently
+            self.critic_update += 1
+            if self.critic_update % self.params.actor_update_period == 0:  # update actor less frequently
 
                 if self.replay_mem.get_size() >= self.params.actor_freeze_step_count:
                     with tf.GradientTape() as tape:
