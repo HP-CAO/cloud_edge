@@ -32,6 +32,8 @@ class QuanserPlant:
         self.theta_threshold = theta_watchdog
         self.x_center = 0
         self.theta_ini = 0
+        # ditch default initialized reading if not start with [0, 0]
+        self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
         print("Quanser Plant Initialized!")
 
     def get_encoder_readings(self):
@@ -43,7 +45,7 @@ class QuanserPlant:
         x_new, theta_new = self.encoder_buffer
         x_new_rescaled = self.rescale_x(x_new, self.x_center)
         theta_new_rescaled = self.rescale_theta(theta_new, self.theta_ini)
-        print(theta_old, theta_new)
+
         x_dot = (x_new_rescaled - x_old_rescaled) / self.sample_period
         theta_dot = -1 * (theta_new - theta_old) * self.theta_resolution / self.sample_period
 
