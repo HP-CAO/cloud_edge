@@ -94,3 +94,17 @@ class QuanserPlant:
     def is_failed(self, x, theta_dot):
         failed = bool(abs(x) >= self.x_threshold or theta_dot > self.theta_threshold)
         return failed
+
+    def get_theta_dot(self, theta_old, theta_new):
+
+        theta_reading_limit = 32768
+
+        if np.sign(theta_old) != np.sign(theta_new) and abs(theta_new) > 10000:
+
+            d_theta = np.sign(theta_old) * (2 * theta_reading_limit - abs(theta_old - abs(theta_new)))
+        else:
+            d_theta = theta_new - theta_old
+
+        theta_dot = -1 * d_theta * self.theta_resolution / self.sample_period
+
+        return theta_dot
