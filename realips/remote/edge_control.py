@@ -118,6 +118,8 @@ class DDPGEdgeControl(EdgeControl):
             print("waiting for weights from cloud")
             self.initialize_weights_from_cloud(self.agent_a, self.agent_b)
 
+        self.calibration()
+
     def generate_action(self):
         #  to make sure the states and the next states are consecutive
 
