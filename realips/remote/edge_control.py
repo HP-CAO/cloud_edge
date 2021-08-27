@@ -148,7 +148,7 @@ class DDPGEdgeControl(EdgeControl):
 
                 normal_mode = self.quanser_plant.normal_mode
 
-                last_action = self.quanser_plant.analog_buffer / self.params.control_params.action_factor  # todo check here
+                last_action = self.quanser_plant.analog_buffer / self.params.control_params.action_factor
 
                 stats_observation, failed = states2observations(states)
 
@@ -181,7 +181,7 @@ class DDPGEdgeControl(EdgeControl):
                 one_loop_time = time.time() - t0
 
                 time.sleep(self.sample_period - one_loop_time) \
-                    if one_loop_time < self.sample_period else print("timeout:", one_loop_time)
+                    if one_loop_time < self.sample_period else print("time_out:", one_loop_time)
 
     def update_weights(self):
 
@@ -260,8 +260,7 @@ class DDPGEdgeControl(EdgeControl):
 
             dt = time.time() - t0
 
-            # time.sleep(self.sample_period - dt) if dt < self.sample_period else print("time_out")
-            time.sleep(self.sample_period - dt)
+            time.sleep(self.sample_period - dt) if dt < self.sample_period else print("time_out")
 
         self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
