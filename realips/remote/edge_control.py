@@ -18,9 +18,9 @@ from realips.utils import states2observations
 
 class ControlParams:
     def __init__(self):
-        self.frequency = 50.00  # hz
+        self.frequency = 30.00  # hz
         self.x_threshold = 0.3
-        self.theta_dot_threshold = 50
+        self.theta_dot_threshold = 15
         self.random_reset_target = False
         self.control_targets = [0., 0.]
         self.is_quick_recover = True
@@ -268,7 +268,7 @@ class DDPGEdgeControl(EdgeControl):
 
         self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
-        print("<========= re-calibration done =========>")
+        print("<========= calibration done =========>")
 
     def receive_reset_command(self):
         """

@@ -49,11 +49,13 @@ class QuanserPlant:
         x_dot = (x_new_rescaled - x_old_rescaled) / self.sample_period
         theta_dot = -1 * (theta_new - theta_old) * self.theta_resolution / self.sample_period
 
+        print(theta_new, theta_old)
+
         failed = self.is_failed(x_new_rescaled, theta_dot)
 
         if failed:
             self.normal_mode = False
-
+        print("failure", failed)
         print("States:", x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 
