@@ -3,6 +3,8 @@ import pickle
 import threading
 import struct
 import time
+import signal
+import sys
 import numpy
 import numpy as np
 from simple_pid import PID
@@ -16,9 +18,9 @@ from realips.utils import states2observations
 
 class ControlParams:
     def __init__(self):
-        self.frequency = 50.00  # hz
+        self.frequency = 30.00  # hz
         self.x_threshold = 0.3
-        self.theta_dot_threshold = 50
+        self.theta_dot_threshold = 15
         self.random_reset_target = False
         self.control_targets = [0., 0.]
         self.is_quick_recover = True
@@ -98,6 +100,8 @@ class DDPGEdgeControl(EdgeControl):
             self.shape_observations += self.params.ddpg_params.action_observations_dim
         self.agent_a = DDPGAgent(self.params.ddpg_params, shape_observations=self.shape_observations, on_edge=True)
         self.agent_b = DDPGAgent(self.params.ddpg_params, shape_observations=self.shape_observations, on_edge=True)
+        self.agent_a.initial_model()
+        self.agent_b.initial_model()
         # self.t1 = threading.Thread(target=self.generate_action)
         self.t2 = threading.Thread(target=self.update_weights)
         self.t3 = threading.Thread(target=self.receive_mode)
@@ -113,6 +117,8 @@ class DDPGEdgeControl(EdgeControl):
         elif params.control_params.initialize_from_cloud:
             print("waiting for weights from cloud")
             self.initialize_weights_from_cloud(self.agent_a, self.agent_b)
+
+        self.calibration()
 
     def generate_action(self):
         #  to make sure the states and the next states are consecutive
@@ -202,13 +208,16 @@ class DDPGEdgeControl(EdgeControl):
         self.t4.start()
         self.generate_action()
 
-    def receive_mode(self):
+    def receive_mode(self, running):
         """
         receive_mode to switch between training and testing
         """
         while True:
             message = self.training_mode_subscriber.parse_response()[2]
             self.training = struct.unpack("?", message)
+
+            if running:
+                break
 
     def reset_control(self):
 
@@ -252,11 +261,14 @@ class DDPGEdgeControl(EdgeControl):
             if still_step > 50:
                 break
 
-            time.sleep(self.sample_period - time.time() + t0)
+            dt = time.time() - t0
+
+            # time.sleep(self.sample_period - dt) if dt < self.sample_period else print("time_out")
+            time.sleep(self.sample_period - dt)
 
         self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
-        print("<========= re-calibration done =========>")
+        print("<========= calibration done =========>")
 
     def receive_reset_command(self):
         """

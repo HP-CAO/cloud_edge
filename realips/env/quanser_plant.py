@@ -32,6 +32,8 @@ class QuanserPlant:
         self.theta_threshold = theta_watchdog
         self.x_center = 0
         self.theta_ini = 0
+        # ditch default initialized reading if not start with [0, 0]
+        self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
         print("Quanser Plant Initialized!")
 
     def get_encoder_readings(self):
@@ -47,12 +49,14 @@ class QuanserPlant:
         x_dot = (x_new_rescaled - x_old_rescaled) / self.sample_period
         theta_dot = -1 * (theta_new - theta_old) * self.theta_resolution / self.sample_period
 
+        print(theta_new, theta_old)
+
         failed = self.is_failed(x_new_rescaled, theta_dot)
 
         if failed:
             self.normal_mode = False
-
-        print("States:", x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
+            print("failure", failed)
+            print("States:", x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 
     def write_analog_output(self, action):
