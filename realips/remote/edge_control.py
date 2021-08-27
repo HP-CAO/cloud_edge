@@ -16,16 +16,6 @@ from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
 from realips.utils import states2observations
 
 
-def signal_handler(signal, frame):
-    global run
-    print("Safe exiting")
-    run = False
-
-
-run = True
-signal.signal(signal.SIGINT, signal_handler)
-
-
 class ControlParams:
     def __init__(self):
         self.frequency = 50.00  # hz
@@ -113,9 +103,9 @@ class DDPGEdgeControl(EdgeControl):
         self.agent_a.initial_model()
         self.agent_b.initial_model()
         # self.t1 = threading.Thread(target=self.generate_action)
-        self.t2 = threading.Thread(target=self.update_weights, args=[run])
-        self.t3 = threading.Thread(target=self.receive_mode, args=[run])
-        self.t4 = threading.Thread(target=self.receive_reset_command, args=[run])
+        self.t2 = threading.Thread(target=self.update_weights)
+        self.t3 = threading.Thread(target=self.receive_mode)
+        self.t4 = threading.Thread(target=self.receive_reset_command)
         self.step = 0
         self.ep = 0
         self.training = True if eval is None else False
@@ -191,10 +181,7 @@ class DDPGEdgeControl(EdgeControl):
                 time.sleep(self.sample_period - one_loop_time) \
                     if one_loop_time < self.sample_period else print("timeout:", one_loop_time)
 
-                if run is False:
-                    return
-
-    def update_weights(self, running=True):
+    def update_weights(self):
 
         while True:
 
@@ -209,9 +196,6 @@ class DDPGEdgeControl(EdgeControl):
 
             self.active_agent = not self.active_agent
 
-            if not running:
-                return
-
     def action_noise_decay(self):
         self.agent_a.noise_factor_decay(self.step)
         self.agent_b.noise_factor_decay(self.step)
@@ -221,11 +205,6 @@ class DDPGEdgeControl(EdgeControl):
         self.t3.start()
         self.t4.start()
         self.generate_action()
-        self.t2.join()
-        self.t3.join()
-        self.t4.join()
-        print("Exiting... quanser card closed")
-        self.quanser_plant.card.close()
 
     def receive_mode(self, running):
         """
@@ -256,9 +235,6 @@ class DDPGEdgeControl(EdgeControl):
 
             print("resetting.....")
 
-            if not run:
-                return
-
         self.quanser_plant.write_analog_output(0)
         self.quanser_plant.normal_mode = True
         print("<========== resetting finished ==========>")
@@ -283,16 +259,13 @@ class DDPGEdgeControl(EdgeControl):
             if still_step > 50:
                 break
 
-            if not run:
-                return
-
             time.sleep(self.sample_period - time.time() + t0)
 
         self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
         print("<========= re-calibration done =========>")
 
-    def receive_reset_command(self, running):
+    def receive_reset_command(self):
         """
         receive reset command from the cloud trainer to reset the plant;
         resetting command comes when the current steps reach the max_steps of a single episode
@@ -301,5 +274,3 @@ class DDPGEdgeControl(EdgeControl):
         while True:
             _ = self.plant_reset_subscriber.parse_response()[2]
             self.quanser_plant.normal_mode = False
-            if not running:
-                break
