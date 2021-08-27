@@ -208,16 +208,13 @@ class DDPGEdgeControl(EdgeControl):
         self.t4.start()
         self.generate_action()
 
-    def receive_mode(self, running):
+    def receive_mode(self):
         """
         receive_mode to switch between training and testing
         """
         while True:
             message = self.training_mode_subscriber.parse_response()[2]
             self.training = struct.unpack("?", message)
-
-            if running:
-                break
 
     def reset_control(self):
 
