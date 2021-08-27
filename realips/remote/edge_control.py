@@ -221,6 +221,9 @@ class DDPGEdgeControl(EdgeControl):
         self.t3.start()
         self.t4.start()
         self.generate_action()
+        self.t2.join()
+        self.t3.join()
+        self.t4.join()
         print("Exiting... quanser card closed")
         self.quanser_plant.card.close()
 
