@@ -22,7 +22,7 @@ class QuanserPlant:
         self.num_encoder_channels = len(self.encoder_channels)
         self.sample_period = 1 / sample_frequency
         self.analog_buffer = np.zeros(self.num_analog_channels, dtype=np.float64)
-        self.encoder_buffer = np.zeros(self.num_encoder_channels, dtype=np.int64)
+        self.encoder_buffer = np.zeros(self.num_encoder_channels, dtype=np.int32)
 
         self.normal_mode = True  # False if the pendulum is in the resetting phrase
         self.x_center = self.params.x_center
