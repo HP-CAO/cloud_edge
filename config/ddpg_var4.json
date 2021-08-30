@@ -1,6 +1,6 @@
 {
     "physics_params": {
-        "x_threshold": 0.28298515669544044,
+        "x_threshold": 0.3054709070690134,
         "theta_dot_threshold": 15,
         "kinematics_intergrator": "euler",
         "ini_states": [
@@ -11,12 +11,12 @@
             false
         ],
         "gravity": 9.8,
-        "mass_cart": 0.9710228774474121,
-        "mass_pole": 0.21412071101091995,
+        "mass_cart": 0.865738161928151,
+        "mass_pole": 0.25026638684458113,
         "force_mag": 5.0,
         "voltage_mag": 5.0,
         "tau": 0.03333,
-        "length": 0.580671599999404,
+        "length": 0.6627630289494543,
         "theta_random_std": 0.8,
         "friction_cart": 10,
         "friction_pole": 0.0011,

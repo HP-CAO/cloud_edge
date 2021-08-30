@@ -12,6 +12,9 @@ class TD3Agent(DDPGAgent):
         super(TD3Agent, self).__init__(params, observations_shape, target_shape, action_shape, on_edge)
 
     def initial_model(self):
+
+        self.actor = self.build_actor("normal-")
+
         if not self.on_edge:
             self.actor_target = self.build_actor("target-")
             self.critic = self.build_critic("normal-")

@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 from realips.utils import states2observations
-from realips.monitor.mointor import ModelStatsParams, ModelStats
+from realips.monitor.monitor import ModelStatsParams, ModelStats
 from realips.env.gym_physics import GymPhysics, GymPhysicsParams
 from realips.env.reward import RewardParams, RewardFcn
 
@@ -103,6 +103,7 @@ class IpsSystem:
                     action_observations = np.append(action_observations, action)[1:]
 
                 states_next = self.physics.step(action)
+
                 stats_observations_next, failed = states2observations(states_next)
 
                 observations_next = np.hstack((stats_observations_next, action_observations)).tolist()

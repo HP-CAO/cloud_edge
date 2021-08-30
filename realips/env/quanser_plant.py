@@ -32,10 +32,13 @@ class QuanserPlant:
         self.theta_threshold = theta_watchdog
         self.x_center = 0
         self.theta_ini = 0
+        # ditch default initialized reading if not start with [0, 0]
+        self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
         print("Quanser Plant Initialized!")
 
     def get_encoder_readings(self):
         x_old, theta_old = self.encoder_buffer
+
         x_old_rescaled = self.rescale_x(x_old, self.x_center)
 
         self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
@@ -45,7 +48,8 @@ class QuanserPlant:
         theta_new_rescaled = self.rescale_theta(theta_new, self.theta_ini)
 
         x_dot = (x_new_rescaled - x_old_rescaled) / self.sample_period
-        theta_dot = -1 * (theta_new - theta_old) * self.theta_resolution / self.sample_period
+        # theta_dot = -1 * (theta_new - theta_old) * self.theta_resolution / self.sample_period
+        theta_dot = self.get_theta_dot(theta_old, theta_new)
 
         failed = self.is_failed(x_new_rescaled, theta_dot)
 
@@ -94,3 +98,17 @@ class QuanserPlant:
     def is_failed(self, x, theta_dot):
         failed = bool(abs(x) >= self.x_threshold or theta_dot > self.theta_threshold)
         return failed
+
+    def get_theta_dot(self, theta_old, theta_new):
+
+        theta_reading_limit = 32768
+
+        if np.sign(theta_old) != np.sign(theta_new) and abs(theta_new) > 10000:
+            # if the pendulum goes across the theta_encoding limit
+            d_theta = np.sign(theta_old) * (2 * theta_reading_limit - abs(theta_old) - abs(theta_new))
+        else:
+            d_theta = theta_new - theta_old
+
+        theta_dot = -1 * d_theta * self.theta_resolution / self.sample_period
+
+        return theta_dot

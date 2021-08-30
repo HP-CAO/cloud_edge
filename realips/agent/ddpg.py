@@ -38,13 +38,13 @@ class DDPGAgent:
         self.shape_targets = shape_targets
         self.shape_action = shape_action
         self.on_edge = on_edge
-        self.actor = self.build_actor("normal-")
         self.action_noise = OrnsteinUhlenbeckActionNoise(self.shape_action)
         self.action_noise_factor = params.action_noise_factor
         self.add_actions_observations = self.params.add_actions_observations
         self.action_observations_dim = self.params.action_observations_dim
 
     def initial_model(self):
+        self.actor = self.build_actor("normal-")
         if not self.on_edge:
             self.critic = self.build_critic("normal-")
             self.critic_target = self.build_critic("target-")
