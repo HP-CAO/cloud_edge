@@ -2,21 +2,13 @@ import threading
 import tensorflow as tf
 from realips.agent.td3 import TD3Agent
 from realips.trainer.replay_mem import ReplayMemory
+from realips.trainer.trainer_params import OffPolicyTrainerParams
 
 
-class TD3TrainerParams:
+class TD3TrainerParams(OffPolicyTrainerParams):
     def __init__(self):
-        self.gamma_discount = 0.99
-        self.rm_size = 100000
-        self.batch_size = 128
-        self.learning_rate_actor = 0.001
-        self.learning_rate_critic = 0.0001
-        self.is_remote_train = False
-        self.actor_freeze_step_count = 5000
-        self.use_prioritized_replay = False
-        self.pre_fill_exp = 10000
+        super().__init__()
         self.actor_update_period = 5
-        self.training_epoch = 1
 
 
 class TD3Trainer:

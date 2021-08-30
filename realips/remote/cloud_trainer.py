@@ -3,7 +3,12 @@ import copy
 import struct
 import math
 import threading
+import time
+
+from realips.agent.td3 import TD3Agent, TD3AgentParams
 from realips.remote.transition import TrajectorySegment
+from realips.trainer.trainer_params import OffPolicyTrainerParams
+from realips.trainer.trainer_td3 import TD3TrainerParams, TD3Trainer
 from realips.utils import get_current_time
 from realips.system.ips import IpsSystemParams, IpsSystem
 from realips.remote.redis import RedisParams, RedisConnection
@@ -11,14 +16,23 @@ from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
 from realips.trainer.trainer_ddpg import DDPGTrainer, DDPGTrainerParams
 
 
-class CloudTrainerParams(IpsSystemParams):
+class CloudParams:
+    def __init__(self):
+        self.sleep_after_reset = 2  # seconds of sleep because it makes sense
+        self.agent_type = 0  # 0: DDPG, 1: TD3
+
+
+class CloudSystemParams(IpsSystemParams):
     def __init__(self):
         super().__init__()
         self.redis_params = RedisParams()
+        self.cloud_params = CloudParams()
+        self.agent_params = DDPGAgentParams() if self.cloud_params.agent_type == 0 else TD3AgentParams()
+        self.trainer_params = DDPGTrainerParams() if self.cloud_params.agent_type == 0 else TD3TrainerParams()
 
 
-class CloudTrainer(IpsSystem):
-    def __init__(self, params: CloudTrainerParams):
+class CloudSystem(IpsSystem):
+    def __init__(self, params: CloudSystemParams):
         super().__init__(params)
         self.params = params
         self.redis_connection = RedisConnection(self.params.redis_params)
@@ -27,6 +41,34 @@ class CloudTrainer(IpsSystem):
         self.edge_trajectory_subscriber = self.redis_connection.subscribe(
             channel=self.params.redis_params.ch_edge_trajectory)
         self.ep = 0
+
+        if self.params.agent_params.add_actions_observations:
+            self.shape_observations += self.params.agent_params.action_observations_dim
+
+        if self.params.cloud_params.agent_type == 0:
+            self.agent = DDPGAgent(self.params.agent_params, self.shape_observations, self.shape_targets, shape_action=1)
+            self.agent.initial_model()
+            self.trainer = DDPGTrainer(self.params.trainer_params, self.agent)
+        elif self.params.cloud_params.agent_type == 1:
+            self.agent = TD3Agent(self.params.agent_params, self.shape_observations, self.shape_targets, action_shape=1)
+            self.agent.initial_model()
+            self.trainer = TD3Trainer(self.params.trainer_params, self.agent)
+
+        self.edge_status_subscriber = self.redis_connection.subscribe(
+            channel=self.params.redis_params.ch_edge_ready_update)
+        self.edge_ready = None
+
+        # self.t1 = threading.Thread(target=self.store_trajectory)
+        self.t2 = threading.Thread(target=self.optimize)
+        self.t3 = threading.Thread(target=self.waiting_edge_ready)
+
+        self.optimize_condition = threading.Condition()
+
+        if self.params.stats_params.weights_path is not None:
+            self.agent.load_weights(self.params.stats_params.weights_path)
+
+        self.send_weights(self.agent.get_actor_weights())
+        self.target = [0., 0.]
 
     def receive_trajectory_segment(self):
         trajectory_pack = self.trajectory_subscriber.parse_response()[2]
@@ -41,39 +83,6 @@ class CloudTrainer(IpsSystem):
         edge_trajectory_pack = self.edge_trajectory_subscriber.parse_response()[2]
         edge_seg = TrajectorySegment.pickle_load_pack(edge_trajectory_pack)
         return edge_seg
-
-
-class CloudTrainerDDPGParams(CloudTrainerParams):
-    def __init__(self):
-        super().__init__()
-        self.agent_params = DDPGAgentParams()
-        self.trainer_params = DDPGTrainerParams()
-
-
-class CloudTrainerDDPG(CloudTrainer):
-    def __init__(self, params: CloudTrainerDDPGParams):
-        super().__init__(params)
-        self.params = params
-        if self.params.agent_params.add_actions_observations:
-            self.shape_observations += self.params.agent_params.action_observations_dim
-        self.agent = DDPGAgent(self.params.agent_params, self.shape_observations, self.shape_targets, shape_action=1)
-        self.agent.initial_model()
-        self.trainer = DDPGTrainer(self.params.trainer_params, self.agent)
-        self.edge_status_subscriber = self.redis_connection.subscribe(
-            channel=self.params.redis_params.ch_edge_ready_update)
-        self.edge_ready = None
-
-        # self.t1 = threading.Thread(target=self.store_trajectory)
-        self.t2 = threading.Thread(target=self.optimize_ddpg)
-        self.t3 = threading.Thread(target=self.waiting_edge_ready)
-
-        self.optimize_condition = threading.Condition()
-
-        if self.params.stats_params.weights_path is not None:
-            self.agent.load_weights(self.params.stats_params.weights_path)
-
-        self.send_weights(self.agent.get_actor_weights())
-        self.target = [0., 0.]
 
     def store_trajectory(self):
 
@@ -95,7 +104,10 @@ class CloudTrainerDDPG(CloudTrainer):
 
             traj_segment = self.receive_edge_trajectory()
 
-            for step in range(self.params.stats_params.max_episode_steps):
+            step_count = self.params.stats_params.max_episode_steps if training \
+                else self.params.stats_params.evaluation_steps
+
+            for step in range(step_count):
                 last_seg = traj_segment
                 traj_segment = self.receive_edge_trajectory()
                 stat_observations = last_seg.observations[0:5]
@@ -105,18 +117,22 @@ class CloudTrainerDDPG(CloudTrainer):
                                            traj_segment.last_action,
                                            traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
 
-                if training and traj_segment.sequence_number == (last_seg.sequence_number + 1):
-                    # only save the experience if the two trajectory are consecutive
-                    self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
-                                                  traj_segment.observations, traj_segment.failed)
+                if training:
+                    if traj_segment.sequence_number == (last_seg.sequence_number + 1):
+                        # only save the experience if the two trajectory are consecutive
+                        self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
+                                                      traj_segment.observations, traj_segment.failed)
 
-                    if self.optimize_condition.acquire(False):
-                        self.optimize_condition.notify_all()
-                        self.optimize_condition.release()
+                        if self.optimize_condition.acquire(False):
+                            self.optimize_condition.notify_all()
+                            self.optimize_condition.release()
+                    else:
+                        print("Package loss... terrible loss :/")
                 else:
 
                     self.model_stats.cart_positions.append(last_seg.observations[0])
-                    self.model_stats.pendulum_angele.append(math.atan2(last_seg.observations[2], last_seg.observations[3]))
+                    self.model_stats.pendulum_angele.append(
+                        math.atan2(last_seg.observations[2], last_seg.observations[3]))
                     self.model_stats.actions.append(traj_segment.last_action)
 
                 self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
@@ -130,11 +146,18 @@ class CloudTrainerDDPG(CloudTrainer):
                 if not traj_segment.normal_operation:
                     break
 
+            self.initiate_reset()
+            time.sleep(self.params.cloud_params.sleep_after_reset)
+            # Clean the received trajectory
+            stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
+            while stale_segments is not None:
+                stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
+
             if training:
                 self.model_stats.add_steps(step)
                 self.model_stats.training_monitor(self.ep)
             else:
-                self.model_stats.add_steps(1)  # Add one step so that it doesn't overlap with possible previous evals
+                # self.model_stats.add_steps(1)  # Add one step so that it doesn't overlap with possible previous evals
                 self.model_stats.evaluation_monitor_scalar(self.ep)
                 self.model_stats.evaluation_monitor_image(self.ep)
 
@@ -147,12 +170,7 @@ class CloudTrainerDDPG(CloudTrainer):
                     self.agent.save_weights(self.params.stats_params.model_name + '_best')
                     best_dsas = moving_average_dsas
 
-            self.initiate_reset()
-            # t0 = time.time()
-            # while time.time() - t0 < self.params.stats_params.reset_delay:
-            #     self.receive_edge_trajectory()
-
-    def optimize_ddpg(self):
+    def optimize(self):
 
         while True:
 

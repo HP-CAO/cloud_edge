@@ -1,13 +1,13 @@
 import argparse
 import os
 
-from realips.remote.cloud_trainer import CloudTrainerDDPG, CloudTrainerDDPGParams
+from realips.remote.cloud_trainer import CloudSystem, CloudSystemParams
 from utils import *
 
 
-def main_ddpg(p):
-    cloude_ddpg = CloudTrainerDDPG(p)
-    cloude_ddpg.run()
+def main(p):
+    cloud = CloudSystem(p)
+    cloud.run()
 
 
 if __name__ == '__main__':
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.generate_config:
-        generate_config(CloudTrainerDDPGParams(), "config/default_cloud_ddpg.json")
+        generate_config(CloudSystemParams(), "config/default_cloud.json")
         exit("cloud_ddpg_config file generated")
 
     if not args.gpu:
@@ -49,5 +49,5 @@ if __name__ == '__main__':
     if args.weights is not None:
         params.stats_params.weights_path = args.weights
 
-    main_ddpg(params)
+    main(params)
 

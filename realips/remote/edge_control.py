@@ -110,6 +110,7 @@ class DDPGEdgeControl(EdgeControl):
         self.ep = 0
         self.training = True if eval is None else False
         self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
+        self.last_action = 0
 
         if eval is not None:
             self.agent_a.load_weights(eval)
@@ -121,7 +122,6 @@ class DDPGEdgeControl(EdgeControl):
         self.calibration()
 
     def generate_action(self):
-        #  to make sure the states and the next states are consecutive
 
         while True:
 
@@ -136,19 +136,17 @@ class DDPGEdgeControl(EdgeControl):
             while not self.quanser_plant.normal_mode:
                 self.reset_control()
 
+            t0 = time.time()
+            time_out_counter = 0
             while self.quanser_plant.normal_mode:
 
                 self.step += 1
-
-                t0 = time.time()
 
                 states = self.quanser_plant.get_encoder_readings()
 
                 self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
 
                 normal_mode = self.quanser_plant.normal_mode
-
-                last_action = self.quanser_plant.analog_buffer / self.params.control_params.action_factor
 
                 stats_observation, failed = states2observations(states)
 
@@ -161,15 +159,17 @@ class DDPGEdgeControl(EdgeControl):
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
 
-                delta_t = time.time() - t0
+                # delta_t = time.time() - t0
 
                 action_real = action * self.params.control_params.action_factor
 
-                print("normal_mode: ", self.quanser_plant.normal_mode)
+                # print("normal_mode: ", self.quanser_plant.normal_mode)
 
                 self.quanser_plant.write_analog_output(action_real)
 
-                edge_trajectory = [observations, last_action, failed, normal_mode, self.step]
+                edge_trajectory = [observations, self.last_action, failed, normal_mode, self.step]
+
+                self.last_action = action
 
                 self.send_edge_trajectory(edge_trajectory)  # this is sent to the cloud trainer
                 # print("Inference took {}s".format(delta_t))
@@ -180,8 +180,17 @@ class DDPGEdgeControl(EdgeControl):
 
                 one_loop_time = time.time() - t0
 
-                time.sleep(self.sample_period - one_loop_time) \
-                    if one_loop_time < self.sample_period else print("time_out:", one_loop_time)
+                if one_loop_time < self.sample_period:
+                    time.sleep(self.sample_period - one_loop_time)
+                    time_out_counter = 0
+                else:
+                    time_out_counter += 1
+
+                if time_out_counter >= 10:
+                    t0 = time.time()
+                    print("TIMEOUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                else:
+                    t0 = t0 + self.sample_period
 
     def update_weights(self):
 
@@ -220,15 +229,11 @@ class DDPGEdgeControl(EdgeControl):
 
         t0 = time.time()
 
-        while True:
-
+        while time.time() - t0 < 10:
             x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
             control_action = np.clip(control_action, -2.5, 2.5)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
-
-            if time.time() - t0 > 10:  # simply setting time threshold for resetting control
-                break
 
             self.quanser_plant.get_encoder_readings()
 
@@ -236,6 +241,7 @@ class DDPGEdgeControl(EdgeControl):
 
         self.quanser_plant.write_analog_output(0)
         self.quanser_plant.normal_mode = True
+        self.last_action = 0
         print("<========== resetting finished ==========>")
 
         if self.ep % self.params.control_params.calibrating_period == 0:
@@ -262,7 +268,7 @@ class DDPGEdgeControl(EdgeControl):
 
             time.sleep(self.sample_period - dt) if dt < self.sample_period else print("time_out")
 
-        self.quanser_plant.x_center, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
+        _, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
         print("<========= calibration done =========>")
 
