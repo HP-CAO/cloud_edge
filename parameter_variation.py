@@ -15,9 +15,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.config is None:
-        exit("config file needed")
-
     params = read_config(args.config)
 
     physics_params = copy.deepcopy(params.physics_params)
