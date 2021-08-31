@@ -7,7 +7,6 @@ import time
 
 from realips.agent.td3 import TD3Agent, TD3AgentParams
 from realips.remote.transition import TrajectorySegment
-from realips.trainer.trainer_params import OffPolicyTrainerParams
 from realips.trainer.trainer_td3 import TD3TrainerParams, TD3Trainer
 from realips.utils import get_current_time
 from realips.system.ips import IpsSystemParams, IpsSystem
@@ -67,22 +66,15 @@ class CloudSystem(IpsSystem):
         if self.params.stats_params.weights_path is not None:
             self.agent.load_weights(self.params.stats_params.weights_path)
 
-        self.send_weights(self.agent.get_actor_weights())
+        self.send_weights_and_noise_factor(self.agent.get_actor_weights(), self.agent.action_noise_factor)
         self.target = [0., 0.]
 
-    def receive_trajectory_segment(self):
-        trajectory_pack = self.trajectory_subscriber.parse_response()[2]
-        seg = TrajectorySegment.from_packet(trajectory_pack)
-        return seg
-
-    def send_weights(self, weights):
-        weights_pack = pickle.dumps(weights)
-        self.redis_connection.publish(channel=self.params.redis_params.ch_edge_weights, message=weights_pack)
-
-    def receive_edge_trajectory(self):
-        edge_trajectory_pack = self.edge_trajectory_subscriber.parse_response()[2]
-        edge_seg = TrajectorySegment.pickle_load_pack(edge_trajectory_pack)
-        return edge_seg
+    def run(self):
+        """It's triple threads"""
+        # self.t1.start()
+        self.t2.start()
+        self.t3.start()
+        self.store_trajectory()
 
     def store_trajectory(self):
 
@@ -90,6 +82,7 @@ class CloudSystem(IpsSystem):
         moving_average_dsas = 0.0
 
         while True:
+
             self.model_stats.reset_status()
             self.ep += 1
             step = 0
@@ -146,6 +139,8 @@ class CloudSystem(IpsSystem):
                 if not traj_segment.normal_operation:
                     break
 
+            self.agent.noise_factor_decay(self.model_stats.total_steps)
+
             self.initiate_reset()
             time.sleep(self.params.cloud_params.sleep_after_reset)
             # Clean the received trajectory
@@ -182,7 +177,7 @@ class CloudSystem(IpsSystem):
             if self.edge_ready:
                 weights = self.agent.get_actor_weights()
                 self.edge_ready = False
-                self.send_weights(weights)
+                self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
                 self.agent.save_weights(self.params.stats_params.model_name)
                 print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}"
                       .format(get_current_time(), self.trainer.replay_mem.get_size()))
@@ -199,12 +194,19 @@ class CloudSystem(IpsSystem):
         edge_status = pickle.loads(edge_status_pack[2])
         return edge_status
 
-    def run(self):
-        """It's triple threads"""
-        # self.t1.start()
-        self.t2.start()
-        self.t3.start()
-        self.store_trajectory()
+    def receive_trajectory_segment(self):
+        trajectory_pack = self.trajectory_subscriber.parse_response()[2]
+        seg = TrajectorySegment.from_packet(trajectory_pack)
+        return seg
+
+    def send_weights_and_noise_factor(self, weights, noise_factor):
+        weights_and_noise_pack = pickle.dumps([weights, noise_factor])
+        self.redis_connection.publish(channel=self.params.redis_params.ch_edge_weights, message=weights_and_noise_pack)
+
+    def receive_edge_trajectory(self):
+        edge_trajectory_pack = self.edge_trajectory_subscriber.parse_response()[2]
+        edge_seg = TrajectorySegment.pickle_load_pack(edge_trajectory_pack)
+        return edge_seg
 
     def initiate_reset(self):
         reset_pack = pickle.dumps(True)

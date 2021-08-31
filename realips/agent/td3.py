@@ -1,13 +1,13 @@
 import os
-from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
+from realips.agent.base import BaseAgent, BaseAgentParams
 
 
-class TD3AgentParams(DDPGAgentParams):
+class TD3AgentParams(BaseAgentParams):
     def __init__(self):
         super(TD3AgentParams, self).__init__()
 
 
-class TD3Agent(DDPGAgent):
+class TD3Agent(BaseAgent):
     def __init__(self, params: TD3AgentParams, observations_shape=5, target_shape=2, action_shape=1, on_edge=False):
         super(TD3Agent, self).__init__(params, observations_shape, target_shape, action_shape, on_edge)
 
