@@ -56,6 +56,7 @@ class EdgeControl:
 
         self.control_frequency = self.params.control_params.frequency
         self.sample_period = self.quanser_plant.sample_period
+        self.action_noise_factor = self.params.ddpg_params.action_noise_factor
 
     def reset_targets(self):
         if self.params.control_params.random_reset_target:
@@ -65,10 +66,10 @@ class EdgeControl:
         else:
             self.control_targets = self.params.control_params.control_targets
 
-    def receives_weights(self):
+    def receives_weights_and_noise_factor(self):
         weights_pack = self.weights_subscriber.parse_response()[2]
-        weights = pickle.loads(weights_pack)
-        return weights
+        weights, action_noise_factor = pickle.loads(weights_pack)
+        return weights, action_noise_factor
 
     def send_ready_update(self, ready):
         ready_pack = pickle.dumps(ready)
@@ -85,14 +86,14 @@ class EdgeControl:
         self.redis_connection.publish(channel=self.params.redis_params.ch_plant_trajectory_segment,
                                       message=plant_trajectory_pack)
 
-    def initialize_weights_from_cloud(self, *args):
-        weights = self.receives_weights()
+    def ini_weights_and_noise_factor_from_cloud(self, *args):
+        weights, action_noise_factor = self.receives_weights_and_noise_factor()
         for agent in args:
             agent.set_actor_weights(weights)
-
+            agent.set_action_noise_factor(action_noise_factor)
 
 class DDPGEdgeControl(EdgeControl):
-    def __init__(self, params: EdgeControlParams, eval=None):
+    def __init__(self, params: EdgeControlParams, eval_weights=None):
         super().__init__(params)
         self.params = params
         self.shape_observations = 5
@@ -108,16 +109,16 @@ class DDPGEdgeControl(EdgeControl):
         self.t4 = threading.Thread(target=self.receive_reset_command)
         self.step = 0
         self.ep = 0
-        self.training = True if eval is None else False
+        self.training = True if eval_weights is None else False
         self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
         self.last_action = 0
 
-        if eval is not None:
-            self.agent_a.load_weights(eval)
-            self.agent_b.load_weights(eval)
+        if eval_weights is not None:
+            self.agent_a.load_weights(eval_weights)
+            self.agent_b.load_weights(eval_weights)
         elif params.control_params.initialize_from_cloud:
             print("waiting for weights from cloud")
-            self.initialize_weights_from_cloud(self.agent_a, self.agent_b)
+            self.ini_weights_and_noise_factor_from_cloud(self.agent_a, self.agent_b)
 
         self.calibration()
 
@@ -173,7 +174,6 @@ class DDPGEdgeControl(EdgeControl):
 
                 self.send_edge_trajectory(edge_trajectory)  # this is sent to the cloud trainer
                 # print("Inference took {}s".format(delta_t))
-                self.action_noise_decay()
 
                 if self.params.ddpg_params.add_actions_observations:
                     action_observations = np.append(action_observations, action)[1:]
@@ -198,18 +198,16 @@ class DDPGEdgeControl(EdgeControl):
 
             self.send_ready_update(True)
 
-            weights = self.receives_weights()
+            weights, action_noise_factor = self.receives_weights_and_noise_factor()
 
             if self.active_agent:
                 self.agent_b.set_actor_weights(weights)
+                self.agent_b.set_action_noise_factor(action_noise_factor)
             else:
                 self.agent_a.set_actor_weights(weights)
+                self.agent_b.set_action_noise_factor(action_noise_factor)
 
             self.active_agent = not self.active_agent
-
-    def action_noise_decay(self):
-        self.agent_a.noise_factor_decay(self.step)
-        self.agent_b.noise_factor_decay(self.step)
 
     def run(self):
         self.t2.start()
