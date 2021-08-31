@@ -33,7 +33,7 @@
         "max_episode_steps": 700,
         "total_steps": 5000000.0,
         "evaluation_steps": 700,
-        "target_distance_score": 0.5,
+        "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
             0.0
@@ -111,8 +111,8 @@
         "gamma_discount": 0.99,
         "rm_size": 1000000,
         "batch_size": 128,
-        "learning_rate_actor": 0.00003,
-        "learning_rate_critic": 0.00003,
+        "learning_rate_actor": 3e-05,
+        "learning_rate_critic": 3e-05,
         "is_remote_train": true,
         "actor_freeze_step_count": 500,
         "use_prioritized_replay": false,
