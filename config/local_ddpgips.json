@@ -34,7 +34,7 @@
         "max_episode_steps": 1000,
         "total_steps": 5000000.0,
         "evaluation_steps": 1000,
-        "target_distance_score": 0.5,
+        "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
             0.0
@@ -74,6 +74,6 @@
         "actor_freeze_step_count": 1000,
         "use_prioritized_replay": false,
         "pre_fill_exp": 10000,
-        "training_epoch" : 1
+        "training_epoch": 1
     }
 }
