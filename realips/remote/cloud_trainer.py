@@ -5,11 +5,13 @@ import math
 import threading
 import time
 
+import numpy as np
+
 from realips.agent.td3 import TD3Agent, TD3AgentParams
 from realips.remote.transition import TrajectorySegment
 from realips.trainer.trainer_params import OffPolicyTrainerParams
 from realips.trainer.trainer_td3 import TD3TrainerParams, TD3Trainer
-from realips.utils import get_current_time
+from realips.utils import get_current_time, states2observations
 from realips.system.ips import IpsSystemParams, IpsSystem
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
@@ -20,6 +22,7 @@ class CloudParams:
     def __init__(self):
         self.sleep_after_reset = 2  # seconds of sleep because it makes sense
         self.agent_type = 0  # 0: DDPG, 1: TD3
+        self.pre_fill_steps = 0
 
 
 class CloudSystemParams(IpsSystemParams):
@@ -46,7 +49,8 @@ class CloudSystem(IpsSystem):
             self.shape_observations += self.params.agent_params.action_observations_dim
 
         if self.params.cloud_params.agent_type == 0:
-            self.agent = DDPGAgent(self.params.agent_params, self.shape_observations, self.shape_targets, shape_action=1)
+            self.agent = DDPGAgent(self.params.agent_params, self.shape_observations, self.shape_targets,
+                                   shape_action=1)
             self.agent.initial_model()
             self.trainer = DDPGTrainer(self.params.trainer_params, self.agent)
         elif self.params.cloud_params.agent_type == 1:
@@ -66,6 +70,9 @@ class CloudSystem(IpsSystem):
 
         if self.params.stats_params.weights_path is not None:
             self.agent.load_weights(self.params.stats_params.weights_path)
+
+        if self.params.cloud_params.pre_fill_steps > 0:
+            self.prefill_sim(self.params.cloud_params.pre_fill_steps)
 
         self.send_weights(self.agent.get_actor_weights())
         self.target = [0., 0.]
@@ -209,3 +216,42 @@ class CloudSystem(IpsSystem):
     def initiate_reset(self):
         reset_pack = pickle.dumps(True)
         self.redis_connection.publish(channel=self.params.redis_params.ch_plant_reset, message=reset_pack)
+
+    def prefill_sim(self, pre_fill_steps):
+        steps = 0
+        while steps < pre_fill_steps:
+
+            self.model_stats.init_episode()
+
+            if self.params.agent_params.add_actions_observations:
+                action_observations = np.zeros(shape=self.params.agent_params.action_observations_dim)
+            else:
+                action_observations = []
+
+            step = 0
+            for step in range(self.params.stats_params.max_episode_steps):
+
+                observations = np.hstack((self.model_stats.observations, action_observations)).tolist()
+
+                action = self.agent.get_exploration_action(observations, self.model_stats.targets)
+
+                if self.params.agent_params.add_actions_observations:
+                    action_observations = np.append(action_observations, action)[1:]
+
+                states_next = self.physics.step(action)
+
+                stats_observations_next, failed = states2observations(states_next)
+
+                observations_next = np.hstack((stats_observations_next, action_observations)).tolist()
+
+                r = self.reward_fcn.reward(self.model_stats.observations, self.model_stats.targets, action, failed,
+                                           pole_length=self.params.physics_params.length)
+
+                self.trainer.store_experience(observations, self.model_stats.targets, action, r,
+                                              observations_next, failed)
+
+                self.model_stats.observations = copy.deepcopy(stats_observations_next)
+
+                if failed:
+                    break
+            steps += step
