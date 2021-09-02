@@ -9,7 +9,6 @@ import numpy as np
 
 from realips.agent.td3 import TD3Agent, TD3AgentParams
 from realips.remote.transition import TrajectorySegment
-from realips.trainer.trainer_params import OffPolicyTrainerParams
 from realips.trainer.trainer_td3 import TD3TrainerParams, TD3Trainer
 from realips.utils import get_current_time, states2observations
 from realips.system.ips import IpsSystemParams, IpsSystem
@@ -74,32 +73,25 @@ class CloudSystem(IpsSystem):
         if self.params.cloud_params.pre_fill_steps > 0:
             self.prefill_sim(self.params.cloud_params.pre_fill_steps)
 
-        self.send_weights(self.agent.get_actor_weights())
+        self.send_weights_and_noise_factor(self.agent.get_actor_weights(), self.agent.action_noise_factor)
         self.target = [0., 0.]
 
-    def receive_trajectory_segment(self):
-        trajectory_pack = self.trajectory_subscriber.parse_response()[2]
-        seg = TrajectorySegment.from_packet(trajectory_pack)
-        return seg
-
-    def send_weights(self, weights):
-        weights_pack = pickle.dumps(weights)
-        self.redis_connection.publish(channel=self.params.redis_params.ch_edge_weights, message=weights_pack)
-
-    def receive_edge_trajectory(self):
-        edge_trajectory_pack = self.edge_trajectory_subscriber.parse_response()[2]
-        edge_seg = TrajectorySegment.pickle_load_pack(edge_trajectory_pack)
-        return edge_seg
+    def run(self):
+        """It's triple threads"""
+        # self.t1.start()
+        self.t2.start()
+        self.t3.start()
+        self.store_trajectory()
 
     def store_trajectory(self):
 
         best_dsas = 0.0  # Best distance score and survived
         moving_average_dsas = 0.0
 
-        while True:
+        while self.model_stats.total_steps < self.model_stats.params.total_steps:
+
             self.model_stats.reset_status()
             self.ep += 1
-            step = 0
 
             if self.ep % self.params.stats_params.eval_period == 0:
                 self.redis_connection.publish(self.params.redis_params.ch_edge_mode, struct.pack("?", False))
@@ -109,73 +101,81 @@ class CloudSystem(IpsSystem):
                 self.redis_connection.publish(self.params.redis_params.ch_edge_mode, struct.pack("?", True))
                 training = True
 
-            traj_segment = self.receive_edge_trajectory()
+            dsas = self.run_episode(training)
 
-            step_count = self.params.stats_params.max_episode_steps if training \
-                else self.params.stats_params.evaluation_steps
-
-            for step in range(step_count):
-                last_seg = traj_segment
-                traj_segment = self.receive_edge_trajectory()
-                stat_observations = last_seg.observations[0:5]
-
-                r = self.reward_fcn.reward(stat_observations,
-                                           self.target,
-                                           traj_segment.last_action,
-                                           traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
-
-                if training:
-                    if traj_segment.sequence_number == (last_seg.sequence_number + 1):
-                        # only save the experience if the two trajectory are consecutive
-                        self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
-                                                      traj_segment.observations, traj_segment.failed)
-
-                        if self.optimize_condition.acquire(False):
-                            self.optimize_condition.notify_all()
-                            self.optimize_condition.release()
-                    else:
-                        print("Package loss... terrible loss :/")
-                else:
-
-                    self.model_stats.cart_positions.append(last_seg.observations[0])
-                    self.model_stats.pendulum_angele.append(
-                        math.atan2(last_seg.observations[2], last_seg.observations[3]))
-                    self.model_stats.actions.append(traj_segment.last_action)
-
-                self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
-                self.model_stats.targets = copy.deepcopy(self.target)
-                self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, traj_segment.failed,
-                                         pole_length=self.params.physics_params.length,
-                                         distance_score_factor=self.params.reward_params.distance_score_factor)
-
-                self.model_stats.reward.append(r)
-
-                if not traj_segment.normal_operation:
-                    break
-
-            self.initiate_reset()
-            time.sleep(self.params.cloud_params.sleep_after_reset)
-            # Clean the received trajectory
-            stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
-            while stale_segments is not None:
-                stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
-
-            if training:
-                self.model_stats.add_steps(step)
-                self.model_stats.training_monitor(self.ep)
-            else:
-                # self.model_stats.add_steps(1)  # Add one step so that it doesn't overlap with possible previous evals
-                self.model_stats.evaluation_monitor_scalar(self.ep)
-                self.model_stats.evaluation_monitor_image(self.ep)
-
-                dsas = float(self.model_stats.survived) * self.model_stats.get_average_distance_score()
-                # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))
-
+            if not training:
                 moving_average_dsas = 0.95 * moving_average_dsas + 0.05 * dsas
 
                 if moving_average_dsas > best_dsas:
                     self.agent.save_weights(self.params.stats_params.model_name + '_best')
                     best_dsas = moving_average_dsas
+
+    def run_episode(self, training):
+
+        traj_segment = self.receive_edge_trajectory()
+
+        step_count = self.params.stats_params.max_episode_steps if training \
+            else self.params.stats_params.evaluation_steps
+        step = 0
+        for step in range(step_count):
+            last_seg = traj_segment
+            traj_segment = self.receive_edge_trajectory()
+            stat_observations = last_seg.observations[0:5]
+
+            r = self.reward_fcn.reward(stat_observations,
+                                       self.target,
+                                       traj_segment.last_action,
+                                       traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
+
+            if training:
+                if traj_segment.sequence_number == (last_seg.sequence_number + 1):
+                    # only save the experience if the two trajectory are consecutive
+                    self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
+                                                  traj_segment.observations, traj_segment.failed)
+
+                    if self.optimize_condition.acquire(False):
+                        self.optimize_condition.notify_all()
+                        self.optimize_condition.release()
+                else:
+                    print("Package loss... terrible loss :/")
+            else:
+
+                self.model_stats.cart_positions.append(last_seg.observations[0])
+                self.model_stats.pendulum_angele.append(
+                    math.atan2(last_seg.observations[2], last_seg.observations[3]))
+                self.model_stats.actions.append(traj_segment.last_action)
+
+            self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
+            self.model_stats.targets = copy.deepcopy(self.target)
+            self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, traj_segment.failed,
+                                     pole_length=self.params.physics_params.length,
+                                     distance_score_factor=self.params.reward_params.distance_score_factor)
+
+            self.model_stats.reward.append(r)
+
+            if not traj_segment.normal_operation:
+                break
+
+        self.agent.noise_factor_decay(self.model_stats.total_steps)
+
+        self.initiate_reset()
+        time.sleep(self.params.cloud_params.sleep_after_reset)
+        # Clean the received trajectory
+        stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
+        while stale_segments is not None:
+            stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
+
+        if training:
+            self.model_stats.add_steps(step)
+            self.model_stats.training_monitor(self.ep)
+        else:
+            # self.model_stats.add_steps(1)  # Add one step so that it doesn't overlap with possible previous evals
+            self.model_stats.evaluation_monitor_scalar(self.ep)
+            self.model_stats.evaluation_monitor_image(self.ep)
+
+        dsas = float(self.model_stats.survived) * self.model_stats.get_average_distance_score()
+        # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))
+        return dsas
 
     def optimize(self):
 
@@ -189,7 +189,7 @@ class CloudSystem(IpsSystem):
             if self.edge_ready:
                 weights = self.agent.get_actor_weights()
                 self.edge_ready = False
-                self.send_weights(weights)
+                self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
                 self.agent.save_weights(self.params.stats_params.model_name)
                 print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}"
                       .format(get_current_time(), self.trainer.replay_mem.get_size()))
@@ -206,12 +206,19 @@ class CloudSystem(IpsSystem):
         edge_status = pickle.loads(edge_status_pack[2])
         return edge_status
 
-    def run(self):
-        """It's triple threads"""
-        # self.t1.start()
-        self.t2.start()
-        self.t3.start()
-        self.store_trajectory()
+    def receive_trajectory_segment(self):
+        trajectory_pack = self.trajectory_subscriber.parse_response()[2]
+        seg = TrajectorySegment.from_packet(trajectory_pack)
+        return seg
+
+    def send_weights_and_noise_factor(self, weights, noise_factor):
+        weights_and_noise_pack = pickle.dumps([weights, noise_factor])
+        self.redis_connection.publish(channel=self.params.redis_params.ch_edge_weights, message=weights_and_noise_pack)
+
+    def receive_edge_trajectory(self):
+        edge_trajectory_pack = self.edge_trajectory_subscriber.parse_response()[2]
+        edge_seg = TrajectorySegment.pickle_load_pack(edge_trajectory_pack)
+        return edge_seg
 
     def initiate_reset(self):
         reset_pack = pickle.dumps(True)

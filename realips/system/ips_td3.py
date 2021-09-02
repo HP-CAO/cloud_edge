@@ -1,9 +1,6 @@
 from realips.agent.td3 import TD3Agent, TD3AgentParams
 from realips.trainer.trainer_td3 import TD3Trainer, TD3TrainerParams
 from realips.system.ips import IpsSystem, IpsSystemParams
-from realips.utils import states2observations
-import numpy as np
-import copy
 
 
 class IpsTD3Params(IpsSystemParams):

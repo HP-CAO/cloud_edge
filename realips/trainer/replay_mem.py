@@ -8,6 +8,7 @@ def shape(exp):
     else:
         return 1
 
+
 def type_of(exp):
     if type(exp) is bool:
         return bool

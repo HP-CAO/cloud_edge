@@ -1,6 +1,6 @@
 {
     "physics_params": {
-        "x_threshold": 0.3054709070690134,
+        "x_threshold": 0.3,
         "theta_dot_threshold": 15,
         "kinematics_intergrator": "euler",
         "ini_states": [
@@ -11,17 +11,18 @@
             false
         ],
         "gravity": 9.8,
-        "mass_cart": 0.865738161928151,
-        "mass_pole": 0.25026638684458113,
+        "mass_cart": 0.94,
+        "mass_pole": 0.23,
         "force_mag": 5.0,
         "voltage_mag": 5.0,
-        "tau": 0.03333,
-        "length": 0.6627630289494543,
+        "tau": 0.03333333333333333,
+        "length": 0.64,
         "theta_random_std": 0.8,
         "friction_cart": 10,
         "friction_pole": 0.0011,
         "with_friction": true,
-        "force_input": true,
+        "force_input": false,
+        "sim_with_delay": false,
         "simulation_frequency": 30
     },
     "reward_params": {
@@ -41,12 +42,12 @@
         ],
         "model_name": "model_name",
         "eval_period": 5,
-        "log_file_name": "20210808-150158",
+        "log_file_name": "20210830-145746",
         "force_override": false,
         "weights_path": null,
         "running_mode": "train",
         "random_initial_ips": true,
-        "visualize_eval": false,
+        "visualize_eval": true,
         "reset_delay": 1.0
     },
     "agent_params": {
@@ -61,17 +62,65 @@
         "soft_alpha": 0.005,
         "action_noise_factor": 1,
         "action_noise_half_decay_time": 1000000.0,
-        "add_actions_observations": false,
+        "add_actions_observations": true,
         "action_observations_dim": 5
+    },
+    "redis_params": {
+        "servers": [
+            {
+                "port": "6379",
+                "password": "",
+                "host_ip": "127.0.0.1",
+                "name": "server_1"
+            },
+            {
+                "port": "6379",
+                "password": "",
+                "host_ip": "127.0.0.1",
+                "name": "server_1"
+            }
+        ],
+        "ch_edge_control": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_plant_trajectory_segment": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_edge_weights": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_edge_ready_update": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_plant_reset": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_edge_mode": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        },
+        "ch_edge_trajectory": {
+            "server_name": "server_1",
+            "channel_name": "channel"
+        }
+    },
+    "cloud_params": {
+        "sleep_after_reset": 2,
+        "agent_type": 0
     },
     "trainer_params": {
         "gamma_discount": 0.99,
         "rm_size": 1000000,
         "batch_size": 128,
-        "learning_rate_critic": 0.0003,
-        "learning_rate_actor": 0.0003,
+        "learning_rate_actor": 0.001,
+        "learning_rate_critic": 0.0001,
         "is_remote_train": false,
-        "actor_freeze_step_count": 1000,
+        "actor_freeze_step_count": 5000,
         "use_prioritized_replay": false,
         "pre_fill_exp": 10000,
         "target_action_noise": false,
