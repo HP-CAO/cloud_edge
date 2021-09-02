@@ -46,6 +46,20 @@ class BaseAgent:
         self.critic = None
         self.critic_target = None
 
+    def initial_model(self):
+
+        self.actor = self.build_actor("normal-")
+
+    def load_weights(self, path_to_weights):
+        print("loading pretrained weights......")
+
+        if not os.path.exists(path_to_weights):
+            raise IOError("Weights path not exist")
+
+        path_to_actor = path_to_weights + 'actor_weights'
+
+        self.actor.load_weights(path_to_actor)
+
     def build_critic(self, name):
         """
         return: Model of critic neural network

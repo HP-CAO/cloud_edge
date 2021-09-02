@@ -81,11 +81,10 @@ class CloudSystem(IpsSystem):
         best_dsas = 0.0  # Best distance score and survived
         moving_average_dsas = 0.0
 
-        while True:
+        while self.model_stats.total_steps < self.model_stats.params.total_steps:
 
             self.model_stats.reset_status()
             self.ep += 1
-            step = 0
 
             if self.ep % self.params.stats_params.eval_period == 0:
                 self.redis_connection.publish(self.params.redis_params.ch_edge_mode, struct.pack("?", False))
@@ -95,75 +94,81 @@ class CloudSystem(IpsSystem):
                 self.redis_connection.publish(self.params.redis_params.ch_edge_mode, struct.pack("?", True))
                 training = True
 
-            traj_segment = self.receive_edge_trajectory()
+            dsas = self.run_episode(training)
 
-            step_count = self.params.stats_params.max_episode_steps if training \
-                else self.params.stats_params.evaluation_steps
-
-            for step in range(step_count):
-                last_seg = traj_segment
-                traj_segment = self.receive_edge_trajectory()
-                stat_observations = last_seg.observations[0:5]
-
-                r = self.reward_fcn.reward(stat_observations,
-                                           self.target,
-                                           traj_segment.last_action,
-                                           traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
-
-                if training:
-                    if traj_segment.sequence_number == (last_seg.sequence_number + 1):
-                        # only save the experience if the two trajectory are consecutive
-                        self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
-                                                      traj_segment.observations, traj_segment.failed)
-
-                        if self.optimize_condition.acquire(False):
-                            self.optimize_condition.notify_all()
-                            self.optimize_condition.release()
-                    else:
-                        print("Package loss... terrible loss :/")
-                else:
-
-                    self.model_stats.cart_positions.append(last_seg.observations[0])
-                    self.model_stats.pendulum_angele.append(
-                        math.atan2(last_seg.observations[2], last_seg.observations[3]))
-                    self.model_stats.actions.append(traj_segment.last_action)
-
-                self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
-                self.model_stats.targets = copy.deepcopy(self.target)
-                self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, traj_segment.failed,
-                                         pole_length=self.params.physics_params.length,
-                                         distance_score_factor=self.params.reward_params.distance_score_factor)
-
-                self.model_stats.reward.append(r)
-
-                if not traj_segment.normal_operation:
-                    break
-
-            self.agent.noise_factor_decay(self.model_stats.total_steps)
-
-            self.initiate_reset()
-            time.sleep(self.params.cloud_params.sleep_after_reset)
-            # Clean the received trajectory
-            stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
-            while stale_segments is not None:
-                stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
-
-            if training:
-                self.model_stats.add_steps(step)
-                self.model_stats.training_monitor(self.ep)
-            else:
-                # self.model_stats.add_steps(1)  # Add one step so that it doesn't overlap with possible previous evals
-                self.model_stats.evaluation_monitor_scalar(self.ep)
-                self.model_stats.evaluation_monitor_image(self.ep)
-
-                dsas = float(self.model_stats.survived) * self.model_stats.get_average_distance_score()
-                # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))
-
+            if not training:
                 moving_average_dsas = 0.95 * moving_average_dsas + 0.05 * dsas
 
                 if moving_average_dsas > best_dsas:
                     self.agent.save_weights(self.params.stats_params.model_name + '_best')
                     best_dsas = moving_average_dsas
+
+    def run_episode(self, training):
+
+        traj_segment = self.receive_edge_trajectory()
+
+        step_count = self.params.stats_params.max_episode_steps if training \
+            else self.params.stats_params.evaluation_steps
+        step = 0
+        for step in range(step_count):
+            last_seg = traj_segment
+            traj_segment = self.receive_edge_trajectory()
+            stat_observations = last_seg.observations[0:5]
+
+            r = self.reward_fcn.reward(stat_observations,
+                                       self.target,
+                                       traj_segment.last_action,
+                                       traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
+
+            if training:
+                if traj_segment.sequence_number == (last_seg.sequence_number + 1):
+                    # only save the experience if the two trajectory are consecutive
+                    self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
+                                                  traj_segment.observations, traj_segment.failed)
+
+                    if self.optimize_condition.acquire(False):
+                        self.optimize_condition.notify_all()
+                        self.optimize_condition.release()
+                else:
+                    print("Package loss... terrible loss :/")
+            else:
+
+                self.model_stats.cart_positions.append(last_seg.observations[0])
+                self.model_stats.pendulum_angele.append(
+                    math.atan2(last_seg.observations[2], last_seg.observations[3]))
+                self.model_stats.actions.append(traj_segment.last_action)
+
+            self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
+            self.model_stats.targets = copy.deepcopy(self.target)
+            self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, traj_segment.failed,
+                                     pole_length=self.params.physics_params.length,
+                                     distance_score_factor=self.params.reward_params.distance_score_factor)
+
+            self.model_stats.reward.append(r)
+
+            if not traj_segment.normal_operation:
+                break
+
+        self.agent.noise_factor_decay(self.model_stats.total_steps)
+
+        self.initiate_reset()
+        time.sleep(self.params.cloud_params.sleep_after_reset)
+        # Clean the received trajectory
+        stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
+        while stale_segments is not None:
+            stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
+
+        if training:
+            self.model_stats.add_steps(step)
+            self.model_stats.training_monitor(self.ep)
+        else:
+            # self.model_stats.add_steps(1)  # Add one step so that it doesn't overlap with possible previous evals
+            self.model_stats.evaluation_monitor_scalar(self.ep)
+            self.model_stats.evaluation_monitor_image(self.ep)
+
+        dsas = float(self.model_stats.survived) * self.model_stats.get_average_distance_score()
+        # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))
+        return dsas
 
     def optimize(self):
 

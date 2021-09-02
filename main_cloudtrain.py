@@ -10,6 +10,14 @@ def main(p):
     cloud.run()
 
 
+def main_eval(p, episodes):
+    cloud = CloudSystem(p)
+    for cloud.ep in range(episodes):
+        cloud.model_stats.reset_status()
+        cloud.run_episode(training=False)
+        cloud.model_stats.add_steps(1)  # For proper logging
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -21,6 +29,7 @@ if __name__ == '__main__':
     parser.add_argument('--force', action='store_true', help='Override log file without asking')
     parser.add_argument('--weights', default=None, help='Path to pretrained weights')
     parser.add_argument('--params', nargs='*', default=None)
+    parser.add_argument('--eval_episodes', default=None, help='Set to number of evaluation episodes if eval only')
 
     args = parser.parse_args()
 
@@ -49,5 +58,7 @@ if __name__ == '__main__':
     if args.weights is not None:
         params.stats_params.weights_path = args.weights
 
-    main(params)
-
+    if args.eval_episodes is not None:
+        main_eval(params, int(args.eval_episodes))
+    else:
+        main(params)

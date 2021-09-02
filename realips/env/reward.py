@@ -57,6 +57,7 @@ class RewardFcn:
 
         pendulum_tip_position = np.array(
             [cart_position + pendulum_length * pendulum_angle_sin, pendulum_length * pendulum_angle_cos])
+
         target_tip_position = np.array(
             [target_cart_position + pendulum_length * np.sin(target_pendulum_angle),
              pendulum_length * np.cos(target_pendulum_angle)])

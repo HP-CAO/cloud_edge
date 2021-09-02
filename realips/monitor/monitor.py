@@ -14,7 +14,7 @@ from realips.env.reward import RewardFcn
 class ModelStatsParams:
     def __init__(self):
         self.max_episode_steps = 1000
-        self.total_steps = 5e6
+        self.total_steps = int(5e6)
         self.evaluation_steps = 600
         self.target_distance_score = 0.5
         self.targets = [0., 0.]  # [x, theta]

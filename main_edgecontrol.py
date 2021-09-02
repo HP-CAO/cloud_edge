@@ -1,14 +1,12 @@
 import argparse
-import os
-import signal
-from realips.remote.edge_control import EdgeControlParams, DDPGEdgeControl
+from realips.remote.edge_control import EdgeControlParams, EdgeControl
 
 from utils import *
 
 
-def main_ddpg(p, eval=None):
-    edge_ddpg = DDPGEdgeControl(p, eval)
-    edge_ddpg.run()
+def main(p, eval=None):
+    edge = EdgeControl(p, eval)
+    edge.run()
 
 
 if __name__ == '__main__':
@@ -34,4 +32,4 @@ if __name__ == '__main__':
     if args.params is not None:
         params = override_params(params, args.params)
 
-    main_ddpg(params, args.eval)
+    main(params, args.eval)

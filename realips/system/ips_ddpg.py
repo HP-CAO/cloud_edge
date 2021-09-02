@@ -1,10 +1,6 @@
 from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
 from realips.trainer.trainer_ddpg import DDPGTrainer, DDPGTrainerParams
 from realips.system.ips import IpsSystem, IpsSystemParams
-from realips.utils import states2observations
-import numpy as np
-import copy
-import time
 
 
 class IpsDDPGParams(IpsSystemParams):
