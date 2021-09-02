@@ -86,7 +86,8 @@ class EdgeControl:
             print("waiting for weights from cloud")
             self.ini_weights_and_noise_factor_from_cloud(self.agent_a, self.agent_b)
 
-        self.calibration()
+        # self.calibration()
+        self.initialize_plant()
 
     def reset_targets(self):
         if self.params.control_params.random_reset_target:
@@ -277,6 +278,9 @@ class EdgeControl:
         _, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
         print("<========= calibration done =========>")
+
+    def initialize_plant(self):
+        self.reset_control()
 
     def receive_reset_command(self):
         """
