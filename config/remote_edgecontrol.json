@@ -72,7 +72,8 @@
         "initialize_from_cloud": true,
         "train_real": true,
         "action_factor": 5,
-        "calibrating_period" : 10
+        "calibrating_period" : 10,
+        "random_reset_ini": true
     },
     "quanser_params": {
         "x_left": -23749,

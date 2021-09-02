@@ -1,5 +1,6 @@
 import copy
 import pickle
+import random
 import threading
 import struct
 import time
@@ -31,6 +32,7 @@ class ControlParams:
         self.train_real = True
         self.action_factor = 7
         self.calibrating_period = 5
+        self.random_reset_ini = True
 
 
 class EdgeControlParams:
@@ -225,6 +227,13 @@ class EdgeControl:
     def reset_control(self):
 
         t0 = time.time()
+
+        if self.params.control_params.random_reset_ini:
+            reset_point \
+                = np.random.uniform(-0.8 * self.params.control_params.x_threshold / self.quanser_plant.x_resolution,
+                                    0.8 * self.params.control_params.x_threshold / self.quanser_plant.x_resolution)
+
+            self.pid_controller.setpoint = reset_point
 
         while time.time() - t0 < 10:
             x = self.quanser_plant.encoder_buffer[0].copy()

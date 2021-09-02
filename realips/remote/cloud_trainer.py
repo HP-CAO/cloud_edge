@@ -5,6 +5,7 @@ import math
 import threading
 import time
 
+import numpy as np
 from realips.agent.td3 import TD3Agent, TD3AgentParams
 from realips.remote.transition import TrajectorySegment
 from realips.trainer.trainer_td3 import TD3TrainerParams, TD3Trainer
@@ -45,7 +46,8 @@ class CloudSystem(IpsSystem):
             self.shape_observations += self.params.agent_params.action_observations_dim
 
         if self.params.cloud_params.agent_type == 0:
-            self.agent = DDPGAgent(self.params.agent_params, self.shape_observations, self.shape_targets, shape_action=1)
+            self.agent = DDPGAgent(self.params.agent_params, self.shape_observations, self.shape_targets,
+                                   shape_action=1)
             self.agent.initial_model()
             self.trainer = DDPGTrainer(self.params.trainer_params, self.agent)
         elif self.params.cloud_params.agent_type == 1:
