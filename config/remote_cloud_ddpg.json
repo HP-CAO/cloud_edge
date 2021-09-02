@@ -92,6 +92,10 @@
             "channel_name": "ch_edge_trajectory"
         }
     },
+    "cloud_params": {
+        "sleep_after_reset": 2,
+        "agent_type": 1
+    },
     "agent_params": {
         "critic_dense1_obs": 256,
         "critic_dense2_obs": 128,
@@ -102,7 +106,7 @@
         "actor_dense2": 128,
         "actor_dense3": 64,
         "soft_alpha": 0.005,
-        "action_noise_factor": 1,
+        "action_noise_factor": 0,
         "action_noise_half_decay_time": 1000000.0,
         "add_actions_observations": false,
         "action_observations_dim": 5
@@ -117,7 +121,8 @@
         "actor_freeze_step_count": 500,
         "use_prioritized_replay": false,
         "pre_fill_exp": 3500,
-        "target_action_noise": false,
-        "training_epoch": 1
+        "target_action_noise": true,
+        "training_epoch": 1,
+        "actor_update_period": 2
     }
 }
