@@ -38,7 +38,6 @@ class EdgeControlParams:
         self.redis_params = RedisParams()
         self.ddpg_params = DDPGAgentParams()
         self.control_params = ControlParams()
-        self.quanser_params = QuanserParams()
 
 
 class EdgeControl:
@@ -51,13 +50,9 @@ class EdgeControl:
         self.plant_reset_subscriber = self.redis_connection.subscribe(channel=self.params.redis_params.ch_plant_reset)
         self.control_targets = self.params.control_params.control_targets
         self.agent_a_active = True  # True: agent_a is controller, False: agent_b is controller
-        self.quanser_plant = QuanserPlant(self.params.quanser_params,
-                                          self.params.control_params.frequency,
-                                          self.params.control_params.x_threshold,
-                                          self.params.control_params.theta_dot_threshold)
 
         self.control_frequency = self.params.control_params.frequency
-        self.sample_period = self.quanser_plant.sample_period
+        self.sample_period = 1. / self.control_frequency
         self.action_noise_factor = self.params.ddpg_params.action_noise_factor
 
         self.shape_observations = 5
@@ -74,7 +69,6 @@ class EdgeControl:
         self.step = 0
         self.ep = 0
         self.training = True if eval_weights is None else False
-        self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
         self.last_action = 0
 
         if eval_weights is not None:
@@ -83,8 +77,6 @@ class EdgeControl:
         elif params.control_params.initialize_from_cloud:
             print("waiting for weights from cloud")
             self.ini_weights_and_noise_factor_from_cloud(self.agent_a, self.agent_b)
-
-        self.calibration()
 
     def reset_targets(self):
         if self.params.control_params.random_reset_target:
@@ -120,6 +112,75 @@ class EdgeControl:
         for agent in args:
             agent.set_actor_weights(weights)
             agent.set_action_noise_factor(action_noise_factor)
+
+    def generate_action(self):
+        pass
+
+    def update_weights(self):
+
+        while True:
+
+            self.send_ready_update(True)
+
+            weights, action_noise_factor = self.receives_weights_and_noise_factor()
+
+            if self.agent_a_active:
+                self.agent_b.set_actor_weights(weights)
+                self.agent_b.set_action_noise_factor(action_noise_factor)
+            else:
+                self.agent_a.set_actor_weights(weights)
+                self.agent_a.set_action_noise_factor(action_noise_factor)
+
+            self.agent_a_active = not self.agent_a_active
+
+    def run(self):
+        self.t2.start()
+        self.t3.start()
+        self.t4.start()
+        self.generate_action()
+
+    def receive_mode(self):
+        """
+        receive_mode to switch between training and testing
+        """
+        while True:
+            message = self.training_mode_subscriber.parse_response()[2]
+            self.training = struct.unpack("?", message)
+
+    def reset_control(self):
+        pass
+
+    def receive_reset_command(self):
+        """
+        receive reset command from the cloud trainer to reset the plant;
+        resetting command comes when the current steps reach the max_steps of a single episode
+        """
+
+        while True:
+            _ = self.plant_reset_subscriber.parse_response()[2]
+            self.set_normal_mode(False)
+
+    def set_normal_mode(self, normal_mode):
+        pass
+
+
+class QuanserEdgeControlParams(EdgeControlParams):
+    def __init__(self):
+        super().__init__()
+        self.quanser_params = QuanserParams()
+
+
+class QuanserEdgeControl(EdgeControl):
+    def __init__(self, params: QuanserEdgeControlParams):
+        super().__init__(params)
+        self.params = params
+        self.quanser_plant = QuanserPlant(self.params.quanser_params,
+                                          self.params.control_params.frequency,
+                                          self.params.control_params.x_threshold,
+                                          self.params.control_params.theta_dot_threshold)
+        self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
+
+        self.calibration()
 
     def generate_action(self):
 
@@ -191,37 +252,6 @@ class EdgeControl:
                 else:
                     t0 = t0 + self.sample_period
 
-    def update_weights(self):
-
-        while True:
-
-            self.send_ready_update(True)
-
-            weights, action_noise_factor = self.receives_weights_and_noise_factor()
-
-            if self.agent_a_active:
-                self.agent_b.set_actor_weights(weights)
-                self.agent_b.set_action_noise_factor(action_noise_factor)
-            else:
-                self.agent_a.set_actor_weights(weights)
-                self.agent_a.set_action_noise_factor(action_noise_factor)
-
-            self.agent_a_active = not self.agent_a_active
-
-    def run(self):
-        self.t2.start()
-        self.t3.start()
-        self.t4.start()
-        self.generate_action()
-
-    def receive_mode(self):
-        """
-        receive_mode to switch between training and testing
-        """
-        while True:
-            message = self.training_mode_subscriber.parse_response()[2]
-            self.training = struct.unpack("?", message)
-
     def reset_control(self):
 
         t0 = time.time()
@@ -269,12 +299,5 @@ class EdgeControl:
         self.quanser_plant.get_encoder_readings()
         print("<========= calibration done =========>")
 
-    def receive_reset_command(self):
-        """
-        receive reset command from the cloud trainer to reset the plant;
-        resetting command comes when the current steps reach the max_steps of a single episode
-        """
-
-        while True:
-            _ = self.plant_reset_subscriber.parse_response()[2]
-            self.quanser_plant.normal_mode = False
+    def set_normal_mode(self, normal_mode):
+        self.quanser_plant.normal_mode = False
