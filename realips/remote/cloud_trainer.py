@@ -6,7 +6,6 @@ import threading
 import time
 
 import numpy as np
-
 from realips.agent.td3 import TD3Agent, TD3AgentParams
 from realips.remote.transition import TrajectorySegment
 from realips.trainer.trainer_td3 import TD3TrainerParams, TD3Trainer
