@@ -101,6 +101,7 @@ class CloudSystem(IpsSystem):
                 training = True
 
             dsas = self.run_episode(training)
+            self.agent.save_weights(self.params.stats_params.model_name)
 
             if not training:
                 moving_average_dsas = 0.95 * moving_average_dsas + 0.05 * dsas
@@ -189,7 +190,7 @@ class CloudSystem(IpsSystem):
                 weights = self.agent.get_actor_weights()
                 self.edge_ready = False
                 self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
-                self.agent.save_weights(self.params.stats_params.model_name)
+                # self.agent.save_weights(self.params.stats_params.model_name)
                 print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}"
                       .format(get_current_time(), self.trainer.replay_mem.get_size()))
 
