@@ -18,6 +18,7 @@ class SimEdgeControl(EdgeControl):
         super().__init__(params)
         self.params = params
         self.physics = GymPhysics(self.params.physics_params)
+        self.physics.random_reset()
         self.normal_mode = True
 
     def generate_action(self):
@@ -41,6 +42,7 @@ class SimEdgeControl(EdgeControl):
                 self.step += 1
 
                 states = self.physics.states
+                self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
 
                 normal_mode = self.normal_mode
 
@@ -84,48 +86,9 @@ class SimEdgeControl(EdgeControl):
 
         self.physics.random_reset()
 
-        while time.time() - t0 < 10:
-            x = self.quanser_plant.encoder_buffer[0].copy()
-            control_action = self.pid_controller(x)
-            control_action = np.clip(control_action, -2.5, 2.5)  # set an action range
-            self.quanser_plant.write_analog_output(control_action)
-
-            self.quanser_plant.get_encoder_readings()
-
-            print("resetting.....")
-
-        self.quanser_plant.write_analog_output(0)
-        self.quanser_plant.normal_mode = True
+        time.sleep(5)
+        self.normal_mode = True
         self.last_action = 0
-        print("<========== resetting finished ==========>")
-
-        if self.ep % self.params.control_params.calibrating_period == 0:
-            self.calibration()
-
-    def calibration(self):
-
-        still_step = 0
-
-        while True:
-
-            t0 = time.time()
-
-            print("calibrating...")
-
-            _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
-
-            still_step = still_step + 1 if x_dot == 0. and theta_dot == 0. else 0
-
-            if still_step > 50:
-                break
-
-            dt = time.time() - t0
-
-            time.sleep(self.sample_period - dt) if dt < self.sample_period else print("time_out")
-
-        _, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
-        self.quanser_plant.get_encoder_readings()
-        print("<========= calibration done =========>")
 
     def set_normal_mode(self, normal_mode):
-        self.quanser_plant.normal_mode = False
+        self.normal_mode = False

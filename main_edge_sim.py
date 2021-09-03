@@ -1,11 +1,11 @@
 import argparse
-from realips.remote.edge_quanser import QuanserEdgeControlParams, QuanserEdgeControl
+from realips.remote.edge_sim import SimEdgeControlParams, SimEdgeControl
 
 from utils import *
 
 
-def main(p, eval=None):
-    edge = QuanserEdgeControl(p, eval)
+def main(p):
+    edge = SimEdgeControl(p)
     edge.run()
 
 
@@ -14,14 +14,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--generate_config', action='store_true', help='Enable to write default config only')
     parser.add_argument('--config', default=None, help='Path to config file')
-    parser.add_argument('--weights', default=None, help='Path to pretrained weights')
     parser.add_argument('--params', nargs='*', default=None)
-    parser.add_argument('--eval', default=None, help='Path to pretrained weights to evaluate')
 
     args = parser.parse_args()
 
     if args.generate_config:
-        generate_config(QuanserEdgeControlParams(), "config/default_edgecontrol.json")
+        generate_config(SimEdgeControlParams(), "config/default_edgecontrol_sim.json")
         exit("Edgecontrol config file generated")
 
     if args.config is None:
@@ -32,4 +30,4 @@ if __name__ == '__main__':
     if args.params is not None:
         params = override_params(params, args.params)
 
-    main(params, args.eval)
+    main(params)
