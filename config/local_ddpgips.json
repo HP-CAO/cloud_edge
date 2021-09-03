@@ -74,6 +74,7 @@
         "actor_freeze_step_count": 1000,
         "use_prioritized_replay": false,
         "pre_fill_exp": 10000,
+        "target_action_noise" : true,
         "training_epoch": 1
     }
 }
