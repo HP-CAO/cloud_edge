@@ -69,6 +69,9 @@ class EdgeControl:
             print("waiting for weights from cloud")
             self.ini_weights_and_noise_factor_from_cloud(self.agent_a, self.agent_b)
 
+        # self.calibration()
+        self.initialize_plant()
+
     def reset_targets(self):
         if self.params.control_params.random_reset_target:
             x_target = np.random.uniform(-self.params.control_params.x_threshold,
@@ -140,6 +143,9 @@ class EdgeControl:
 
     def reset_control(self):
         pass
+
+    def initialize_plant(self):
+        self.reset_control()
 
     def receive_reset_command(self):
         """
