@@ -79,6 +79,7 @@
         "x_left": -23749,
         "x_right": 11946,
         "x_length": 0.814,
-        "x_center": 0
+        "x_center": 0,
+        "theta_dot_filter_alpha": 1
     }
 }

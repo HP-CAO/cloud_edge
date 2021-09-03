@@ -52,8 +52,8 @@
         "servers": [
             {
                 "port": "6379",
-                "password": "",
-                "host_ip": "10.162.12.247",
+                "password": "hongi123",
+                "host_ip": "10.162.12.193",
                 "name": "cloud"
             }
         ],

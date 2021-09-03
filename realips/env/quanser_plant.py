@@ -9,6 +9,7 @@ class QuanserParams:
         self.x_right = 16528
         self.x_length = 0.814
         self.x_center = 0
+        self.theta_dot_filter_alpha = None
 
 
 class QuanserPlant:
@@ -32,6 +33,7 @@ class QuanserPlant:
         self.theta_threshold = theta_watchdog
         self.x_center = 0
         self.theta_ini = 0
+        self.theta_dot = 0
         # ditch default initialized reading if not start with [0, 0]
         self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
         print("Quanser Plant Initialized!")
@@ -111,4 +113,10 @@ class QuanserPlant:
 
         theta_dot = -1 * d_theta * self.theta_resolution / self.sample_period
 
-        return theta_dot
+        if self.params.theta_dot_filter_alpha is not None:
+            alpha = self.params.theta_dot_filter_alpha
+            self.theta_dot = (1 - alpha) * self.theta_dot + alpha * theta_dot
+        else:
+            self.theta_dot = theta_dot
+
+        return self.theta_dot
