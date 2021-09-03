@@ -70,7 +70,7 @@ class EdgeControl:
             self.ini_weights_and_noise_factor_from_cloud(self.agent_a, self.agent_b)
 
         # self.calibration()
-        self.initialize_plant()
+        # self.initialize_plant()
 
     def reset_targets(self):
         if self.params.control_params.random_reset_target:

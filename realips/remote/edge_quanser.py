@@ -36,7 +36,8 @@ class QuanserEdgeControl(EdgeControl):
                                           self.params.control_params.theta_dot_threshold)
         self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
 
-        self.calibration()
+        self.initialize_plant()
+        # self.calibration()
 
     def generate_action(self):
 
