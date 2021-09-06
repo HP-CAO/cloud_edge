@@ -28,4 +28,5 @@ if __name__ == '__main__':
         params.physics_params.length = var[2, n] * physics_params.length
         params.physics_params.x_threshold = var[3, n] * physics_params.x_threshold
         params.stats_params.log_file_name = args.name[args.name.rfind('/') + 1: args.name.rfind('.')].format(n+1)
+        params.stats_params.model_name = args.name[args.name.rfind('/') + 1: args.name.rfind('.')].format(n+1)
         write_config(params, args.name.format(n + 1))

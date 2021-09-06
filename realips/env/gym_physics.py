@@ -28,6 +28,8 @@ class GymPhysicsParams:
         self.sim_with_delay = False
         self.simulation_frequency = 30
 
+        self.actuation_delay = 1
+
 
 class GymPhysics(gym.Env):
     metadata = {
@@ -45,6 +47,7 @@ class GymPhysics(gym.Env):
         self.viewer = None
         self.states = None
         self.steps_beyond_terminal = None
+        self.last_actions = [0.0] * params.actuation_delay
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -54,6 +57,11 @@ class GymPhysics(gym.Env):
         param: action: a scalar value (not numpy type) [-1,1]
         return: a list of states
         """
+
+        if self.params.actuation_delay > 0:
+            self.last_actions.append(action)
+            self.last_actions = self.last_actions[1:]
+            action = self.last_actions[0]
 
         x, x_dot, theta, theta_dot, failed = self.states
 
@@ -110,6 +118,7 @@ class GymPhysics(gym.Env):
 
     def reset(self):
         self.states = self.params.ini_states
+        self.last_actions = [0.0] * self.params.actuation_delay
 
     def random_reset(self):
         ran_x = np.random.uniform(-0.8 * self.params.x_threshold, 0.8 * self.params.x_threshold)
@@ -120,6 +129,7 @@ class GymPhysics(gym.Env):
         ran_theta_v = 0
         failed = False
         self.states = [ran_x, ran_v, ran_theta, ran_theta_v, failed]
+        self.last_actions = [0.0] * self.params.actuation_delay
 
     def render(self, mode='human', states=None, is_normal_operation=True):
 
