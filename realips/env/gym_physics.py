@@ -18,7 +18,6 @@ class GymPhysicsParams:
         self.force_mag = 5.0
         self.voltage_mag = 5.0
 
-        self.tau = 1 / 30
         self.length = 0.64
         self.theta_random_std = 0.8
         self.friction_cart = 10
@@ -48,6 +47,7 @@ class GymPhysics(gym.Env):
         self.states = None
         self.steps_beyond_terminal = None
         self.last_actions = [0.0] * params.actuation_delay
+        self.tau = 1 / self.params.simulation_frequency
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -96,17 +96,17 @@ class GymPhysics(gym.Env):
             xacc = temp - self.pole_mass_length * thetaacc * costheta / self.total_mass
 
         if self.params.kinematics_intergrator == 'euler':
-            x = x + self.params.tau * x_dot
-            x_dot = x_dot + self.params.tau * xacc
-            theta = theta + self.params.tau * theta_dot
-            theta_dot = theta_dot + self.params.tau * thetaacc
+            x = x + self.tau * x_dot
+            x_dot = x_dot + self.tau * xacc
+            theta = theta + self.tau * theta_dot
+            theta_dot = theta_dot + self.tau * thetaacc
             failed = self.is_failed(x, theta_dot)
 
         else:  # semi-implicit euler
-            x_dot = x_dot + self.params.tau * xacc
-            x = x + self.params.tau * x_dot
-            theta_dot = theta_dot + self.params.tau * thetaacc
-            theta = theta + self.params.tau * theta_dot
+            x_dot = x_dot + self.tau * xacc
+            x = x + self.tau * x_dot
+            theta_dot = theta_dot + self.tau * thetaacc
+            theta = theta + self.tau * theta_dot
             failed = self.is_failed(x, theta_dot)
 
         theta_rescale = math.atan2(math.sin(theta), math.cos(theta))
