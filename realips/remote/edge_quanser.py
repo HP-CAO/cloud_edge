@@ -106,6 +106,7 @@ class QuanserEdgeControl(EdgeControl):
                 if time_out_counter >= 10:
                     t0 = time.time()
                     print("TIMEOUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    time_out_counter = 0
                 else:
                     t0 = t0 + self.sample_period
 
