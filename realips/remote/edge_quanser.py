@@ -121,7 +121,7 @@ class QuanserEdgeControl(EdgeControl):
 
             self.pid_controller.setpoint = reset_point
 
-        while time.time() - t0 < 10:
+        while time.time() - t0 < 5:
             x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
             control_action = np.clip(control_action, -2.5, 2.5)  # set an action range

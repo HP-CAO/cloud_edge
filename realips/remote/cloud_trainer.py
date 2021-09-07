@@ -18,6 +18,7 @@ from realips.trainer.trainer_ddpg import DDPGTrainer, DDPGTrainerParams
 
 class CloudParams:
     def __init__(self):
+        self.on_target_reset_steps = 100  # num steps on target after which the episode is terminated
         self.sleep_after_reset = 2  # seconds of sleep because it makes sense
         self.agent_type = 0  # 0: DDPG, 1: TD3
         self.pre_fill_steps = 0
@@ -117,6 +118,7 @@ class CloudSystem(IpsSystem):
         step_count = self.params.stats_params.max_episode_steps if training \
             else self.params.stats_params.evaluation_steps
         step = 0
+        on_target_steps = 0
         for step in range(step_count):
             last_seg = traj_segment
             traj_segment = self.receive_edge_trajectory()
@@ -147,11 +149,15 @@ class CloudSystem(IpsSystem):
 
             self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
             self.model_stats.targets = copy.deepcopy(self.target)
-            self.model_stats.measure(self.model_stats.observations, self.model_stats.targets, traj_segment.failed,
+            self.model_stats.measure(self.model_stats.observations, self.model_stats.targets,
+                                     traj_segment.failed,
                                      pole_length=self.params.physics_params.length,
                                      distance_score_factor=self.params.reward_params.distance_score_factor)
 
             self.model_stats.reward.append(r)
+
+            if training and self.model_stats.consecutive_on_target_steps > self.params.cloud_params.on_target_reset_steps:
+                break
 
             if not traj_segment.normal_operation:
                 break
