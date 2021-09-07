@@ -65,6 +65,7 @@
         "friction_cart": 10,
         "friction_pole": 0.0011,
         "with_friction": true,
-        "force_input": false
+        "force_input": false,
+        "actuation_delay": 1
     }
 }
