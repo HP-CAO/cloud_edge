@@ -30,7 +30,7 @@ class IpsSystem:
 
         self.model_stats.init_episode()
 
-        for step in range(self.params.stats_params.evaluation_steps):
+        for step in range(self.params.stats_params.max_episode_steps):
 
             if self.params.stats_params.visualize_eval:
                 self.physics.render()

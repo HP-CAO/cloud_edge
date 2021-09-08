@@ -15,7 +15,6 @@ class ModelStatsParams:
     def __init__(self):
         self.max_episode_steps = 1000
         self.total_steps = int(5e6)
-        self.evaluation_steps = 600
         self.target_distance_score = 0.5
         self.targets = [0., 0.]  # [x, theta]
         self.model_name = "model_name"
@@ -155,7 +154,7 @@ class ModelStats:
         average_distance_score = self.get_average_distance_score()
         survived = self.get_survived()
         can_swing_up = self.consecutive_on_target_steps >= self.params.can_swing_up_steps
-        swing_up_time = self.get_steps() - self.consecutive_on_target_steps if can_swing_up else self.get_steps()
+        swing_up_time = self.get_steps() - self.consecutive_on_target_steps if can_swing_up else self.params.max_episode_steps
         return average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time
 
     def random_set_targets(self):

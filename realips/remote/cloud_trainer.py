@@ -115,8 +115,7 @@ class CloudSystem(IpsSystem):
 
         traj_segment = self.receive_edge_trajectory()
 
-        step_count = self.params.stats_params.max_episode_steps if training \
-            else self.params.stats_params.evaluation_steps
+        step_count = self.params.stats_params.max_episode_steps
         step = 0
         on_target_steps = 0
         for step in range(step_count):
