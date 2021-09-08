@@ -71,6 +71,12 @@ def states2observations(states):
     return observations, failed
 
 
+def observations2states(observations, failed):
+    x, x_dot, s_theta, c_theta, theta_dot = observations[:5]
+    states = [x, x_dot, np.arctan2(s_theta, c_theta), theta_dot, failed]
+    return states
+
+
 def get_current_time():
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
@@ -93,4 +99,3 @@ def get_current_time():
 #         dx = dx + self.sigma * np.random.randn(len(self.X))
 #         self.X = self.X + dx
 #         return self.X
-

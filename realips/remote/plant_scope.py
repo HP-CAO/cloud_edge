@@ -1,8 +1,13 @@
+import time
 from realips.env.gym_physics import GymPhysics, GymPhysicsParams
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.remote.transition import TrajectorySegment
 import pickle
 import tensorflow as tf
+
+from realips.utils import observations2states
+
+import matplotlib.pyplot as plt
 
 
 class PlantScopeParams:
@@ -20,7 +25,10 @@ class PlantScope:
             channel=self.params.redis_params.ch_plant_trajectory_segment)
         self.edge_trajectory_subscriber = self.redis_connection.subscribe(
             channel=self.params.redis_params.ch_edge_trajectory)
-        self.tf_monitor = tf.summary.create_file_writer("./logs/scope")
+
+        self.actions = [0.0] * 100
+        self.state = [0.0] * 5
+        self.last_update = time.time()
 
     def receive_plant_trajectory(self):
         plant_states_pack = self.states_subscriber.parse_response()[2]
@@ -32,16 +40,45 @@ class PlantScope:
         edge_seg = TrajectorySegment.pickle_load_pack(edge_trajectory_pack)
         return edge_seg
 
+    def receive_edge_trajectory_non_blocking(self):
+        message = self.edge_trajectory_subscriber.parse_response(block=False)
+        if message is None:
+            return None
+        edge_trajectory_pack = message[2]
+        edge_seg = TrajectorySegment.pickle_load_pack(edge_trajectory_pack)
+        return edge_seg
+
     def visualize_states(self):
 
         print("Connected, waiting for messages")
         step = 0
+        plt.figure("Action")
+        plt.axis([-0, 100, -1.5, 1.5])
+        plt.ion()
+        plt.show()
         while True:
-            states = self.receive_plant_trajectory()
-            print(states)
-            self.physics.render(states=states)
+            traj = self.receive_edge_trajectory_non_blocking()
+            if traj is None:
+                self.physics.render(states=self.state)
+                self.visualize_actions()
+                traj = self.receive_edge_trajectory()
+
+            self.actions.append(traj.last_action)
+            self.actions = self.actions[1:]
+            self.state = traj.state
+
 
             # edge_seg = self.receive_edge_trajectory()
             # with self.tf_monitor.as_default():
             #     tf.summary.scalar('action_live', edge_seg.last_action, step)
             # step += 1
+
+    def visualize_actions(self):
+
+        t = time.time()
+        if t - self.last_update > 1 / 30.:
+            plt.cla()
+            plt.plot(range(100), self.actions)
+            plt.draw()
+            plt.pause(0.001)
+            self.last_update = t
