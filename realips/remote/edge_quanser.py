@@ -58,6 +58,13 @@ class QuanserEdgeControl(EdgeControl):
             time_out_counter = 0
             while self.quanser_plant.normal_mode:
 
+
+                action_real = self.last_action * self.params.control_params.action_factor
+
+                # print("normal_mode: ", self.quanser_plant.normal_mode)
+
+                self.quanser_plant.write_analog_output(action_real)
+
                 self.step += 1
 
                 states = self.quanser_plant.get_encoder_readings()
@@ -78,12 +85,6 @@ class QuanserEdgeControl(EdgeControl):
                     action = agent.get_exploitation_action(observations, self.control_targets)
 
                 # delta_t = time.time() - t0
-
-                action_real = action * self.params.control_params.action_factor
-
-                # print("normal_mode: ", self.quanser_plant.normal_mode)
-
-                self.quanser_plant.write_analog_output(action_real)
 
                 edge_trajectory = [observations, self.last_action, failed, normal_mode, self.step]
 

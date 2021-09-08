@@ -116,7 +116,7 @@ class BaseAgent:
         :param observations: a list
         :return: a scalar value
         """
-        var = self.params.action_noise_factor
+        var = self.action_noise_factor
         observations = tf.expand_dims(observations, 0)  # add batch dim
         targets = tf.expand_dims(targets, 0)
         action = self.actor([observations, targets]).numpy().squeeze()

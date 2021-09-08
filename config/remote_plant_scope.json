@@ -59,13 +59,13 @@
         "mass_pole": 0.23,
         "force_mag": 5.0,
         "voltage_mag": 5.0,
-        "simulation_frequency": 30,
         "length": 0.64,
         "theta_random_std": 0.8,
         "friction_cart": 10,
         "friction_pole": 0.0011,
         "with_friction": true,
-        "force_input": false,
+        "force_input": true,
+        "simulation_frequency": 30,
         "actuation_delay": 1
     }
 }

@@ -47,7 +47,8 @@
         "running_mode": "train",
         "random_initial_ips": true,
         "visualize_eval": true,
-        "reset_delay": 1.0
+        "reset_delay": 1.0,
+        "can_swing_up_steps": 100
     },
     "redis_params": {
         "servers": [
@@ -96,7 +97,8 @@
     "cloud_params": {
         "sleep_after_reset": 2,
         "agent_type": 0,
-        "pre_fill_steps" : 0
+        "pre_fill_steps" : 0,
+        "on_target_reset_steps": 100
     },
     "agent_params": {
         "critic_dense1_obs": 256,
