@@ -20,7 +20,7 @@ class ControlParams:
         self.initialize_from_cloud = True
         self.train_real = True
         self.action_factor = 7
-        self.calibrating_period = 5
+        self.calibrating_period_steps = 10000
         self.random_reset_ini = True
 
 
@@ -138,8 +138,10 @@ class EdgeControl:
         receive_mode to switch between training and testing
         """
         while True:
-            message = self.training_mode_subscriber.parse_response()[2]
-            self.training = struct.unpack("?", message)
+            mode_pack = self.training_mode_subscriber.parse_response()[2]
+            mode = pickle.loads(mode_pack)
+            self.training = mode[0]
+            print("training:", self.training)
 
     def reset_control(self):
         pass

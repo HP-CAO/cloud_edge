@@ -29,6 +29,7 @@ class QuanserEdgeControlParams(EdgeControlParams):
 class QuanserEdgeControl(EdgeControl):
     def __init__(self, params: QuanserEdgeControlParams, run_eval):
         super().__init__(params, run_eval)
+        self.steps_since_calibration = self.params.control_params.calibrating_period_steps + 1
         self.params = params
         self.quanser_plant = QuanserPlant(self.params.quanser_params,
                                           self.params.control_params.frequency,
@@ -59,6 +60,7 @@ class QuanserEdgeControl(EdgeControl):
             while self.quanser_plant.normal_mode:
 
                 self.step += 1
+                self.steps_since_calibration += 1
 
                 states = self.quanser_plant.get_encoder_readings()
 
@@ -78,6 +80,7 @@ class QuanserEdgeControl(EdgeControl):
                     action = agent.get_exploitation_action(observations, self.control_targets)
 
                 # delta_t = time.time() - t0
+
 
                 action_real = action * self.params.control_params.action_factor
 
@@ -112,6 +115,9 @@ class QuanserEdgeControl(EdgeControl):
 
     def reset_control(self):
 
+        if self.steps_since_calibration % self.params.control_params.calibrating_period_steps == 0:
+            self.calibration()
+
         t0 = time.time()
 
         if self.params.control_params.random_reset_ini:
@@ -121,7 +127,7 @@ class QuanserEdgeControl(EdgeControl):
 
             self.pid_controller.setpoint = reset_point
 
-        while time.time() - t0 < 10:
+        while time.time() - t0 < 5:
             x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
             control_action = np.clip(control_action, -2.5, 2.5)  # set an action range
@@ -135,9 +141,6 @@ class QuanserEdgeControl(EdgeControl):
         self.quanser_plant.normal_mode = True
         self.last_action = 0
         print("<========== resetting finished ==========>")
-
-        if self.ep % self.params.control_params.calibrating_period == 0:
-            self.calibration()
 
     def calibration(self):
 
@@ -164,6 +167,7 @@ class QuanserEdgeControl(EdgeControl):
 
         _, self.quanser_plant.theta_ini = self.quanser_plant.encoder_buffer.copy()
         self.quanser_plant.get_encoder_readings()
+        self.steps_since_calibration = 0
         print("<========= calibration done =========>")
 
     def set_normal_mode(self, normal_mode):

@@ -75,6 +75,8 @@ class CloudSystem(IpsSystem):
 
         self.send_weights_and_noise_factor(self.agent.get_actor_weights(), self.agent.action_noise_factor)
         self.target = [0., 0.]
+        self.training = True
+        self.trainable = 0
 
     def run(self):
         """It's triple threads"""
@@ -94,17 +96,19 @@ class CloudSystem(IpsSystem):
             self.ep += 1
 
             if self.ep % self.params.stats_params.eval_period == 0:
-                self.redis_connection.publish(self.params.redis_params.ch_edge_mode, struct.pack("?", False))
-                training = False
+                mode_pack = pickle.dumps([False])
+                self.redis_connection.publish(self.params.redis_params.ch_edge_mode, mode_pack)
+                self.training = False
                 print("EVALUATING!!!!!!")
             else:
-                self.redis_connection.publish(self.params.redis_params.ch_edge_mode, struct.pack("?", True))
-                training = True
+                mode_pack = pickle.dumps([True])
+                self.redis_connection.publish(self.params.redis_params.ch_edge_mode, mode_pack)
+                self.training = True
 
-            dsas = self.run_episode(training)
+            dsas = self.run_episode(self.training)
             self.agent.save_weights(self.params.stats_params.model_name)
 
-            if not training:
+            if not self.training:
                 moving_average_dsas = 0.95 * moving_average_dsas + 0.05 * dsas
 
                 if moving_average_dsas > best_dsas:
@@ -133,6 +137,8 @@ class CloudSystem(IpsSystem):
                     # only save the experience if the two trajectory are consecutive
                     self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
                                                   traj_segment.observations, traj_segment.failed)
+
+                    self.trainable += 1
 
                     if self.optimize_condition.acquire(False):
                         self.optimize_condition.notify_all()
@@ -186,18 +192,24 @@ class CloudSystem(IpsSystem):
 
         while True:
 
-            self.optimize_condition.acquire()
-            self.optimize_condition.wait()
+            if self.trainable == 0:
+                self.optimize_condition.acquire()
+                self.optimize_condition.wait()
 
             self.trainer.optimize()
 
-            if self.edge_ready:
+            self.trainable -= 1
+
+            if self.edge_ready and self.training:
                 weights = self.agent.get_actor_weights()
                 self.edge_ready = False
                 self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
                 # self.agent.save_weights(self.params.stats_params.model_name)
-                print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}"
-                      .format(get_current_time(), self.trainer.replay_mem.get_size()))
+                print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}, backlog: {}"
+                      .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
+            else:
+                print("[{}] ===>  Training: current training finished, not sending weights, mem_size: {}, backlog: {}"
+                      .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
 
     def waiting_edge_ready(self):
 
@@ -210,11 +222,6 @@ class CloudSystem(IpsSystem):
         edge_status_pack = self.edge_status_subscriber.parse_response()
         edge_status = pickle.loads(edge_status_pack[2])
         return edge_status
-
-    def receive_trajectory_segment(self):
-        trajectory_pack = self.trajectory_subscriber.parse_response()[2]
-        seg = TrajectorySegment.from_packet(trajectory_pack)
-        return seg
 
     def send_weights_and_noise_factor(self, weights, noise_factor):
         weights_and_noise_pack = pickle.dumps([weights, noise_factor])

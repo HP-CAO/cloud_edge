@@ -26,6 +26,7 @@ class ReplayMemory(object):
         initializing the replay memory
         :param: beta, alpha are for prioritized replay_mem
         """
+        self.new_head = False
         self.beta = beta
         self.alpha = alpha
         self.k = 0
@@ -53,6 +54,7 @@ class ReplayMemory(object):
         self.memory[-1][self.k] = priority
 
         self.head = self.k
+        self.new_head = True
         self.k += 1
         if self.k >= self.size:
             self.k = 0  # replace the oldest one with the latest one
@@ -63,7 +65,9 @@ class ReplayMemory(object):
         if not self.full:
             r = self.k
         random_idx = np.random.choice(r, size=batch_size, replace=False)
-        random_idx[0] = self.head  # always add the latest one
+        if self.new_head:
+            random_idx[0] = self.head  # always add the latest one
+            self.new_head = False
 
         return [mem[random_idx] for mem in self.memory]
 
@@ -85,6 +89,7 @@ class ReplayMemory(object):
         self.memory = None
         self.alpha = 1  # put a parameter to reset alpha beta
         self.beta = 1
+        self.new_head = False
 
     def shuffle(self):
         """

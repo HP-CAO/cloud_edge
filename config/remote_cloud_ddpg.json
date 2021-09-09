@@ -122,9 +122,9 @@
         "learning_rate_actor": 3e-04,
         "learning_rate_critic": 3e-04,
         "is_remote_train": true,
-        "actor_freeze_step_count": 0,
+        "actor_freeze_step_count": 5000,
         "use_prioritized_replay": false,
-        "pre_fill_exp": 0,
+        "pre_fill_exp": 3500,
         "target_action_noise": true,
         "training_epoch": 1,
         "actor_update_period": 2
