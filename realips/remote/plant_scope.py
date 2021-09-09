@@ -27,8 +27,12 @@ class PlantScope:
             channel=self.params.redis_params.ch_edge_trajectory)
 
         self.actions = [0.0] * 100
-        self.state = [0.0] * 5
-        self.last_update = time.time()
+        self.states = [[0.0] * 5] * 100
+
+        fig, self.ax = plt.subplots(3, 1)
+        plt.axis([-0, 100, -1.5, 1.5])
+        plt.ion()
+        plt.show()
 
     def receive_plant_trajectory(self):
         plant_states_pack = self.states_subscriber.parse_response()[2]
@@ -52,33 +56,38 @@ class PlantScope:
 
         print("Connected, waiting for messages")
         step = 0
-        plt.figure("Action")
-        plt.axis([-0, 100, -1.5, 1.5])
-        plt.ion()
-        plt.show()
         while True:
             traj = self.receive_edge_trajectory_non_blocking()
             if traj is None:
-                self.physics.render(states=self.state)
-                self.visualize_actions()
+                self.physics.render(states=self.states[-1])
+                self.plot_actions()
+                self.plot_states()
+                plt.draw()
+                plt.pause(0.001)
                 traj = self.receive_edge_trajectory()
 
             self.actions.append(traj.last_action)
             self.actions = self.actions[1:]
-            self.state = traj.state
-
+            self.states.append(traj.state)
+            self.states = self.states[1:]
 
             # edge_seg = self.receive_edge_trajectory()
             # with self.tf_monitor.as_default():
             #     tf.summary.scalar('action_live', edge_seg.last_action, step)
             # step += 1
 
-    def visualize_actions(self):
+    def plot_actions(self):
+        plt.sca(self.ax[0])
+        plt.cla()
+        plt.plot(range(100), self.actions)
 
-        t = time.time()
-        if t - self.last_update > 1 / 30.:
-            plt.cla()
-            plt.plot(range(100), self.actions)
-            plt.draw()
-            plt.pause(0.001)
-            self.last_update = t
+    def plot_states(self):
+        plt.sca(self.ax[1])
+        plt.cla()
+        states = list(zip(*self.states))
+        plt.plot(range(100), states[0])
+        plt.plot(range(100), states[1])
+        plt.sca(self.ax[2])
+        plt.cla()
+        plt.plot(range(100), states[2])
+        plt.plot(range(100), states[3])

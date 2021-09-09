@@ -58,13 +58,6 @@ class QuanserEdgeControl(EdgeControl):
             time_out_counter = 0
             while self.quanser_plant.normal_mode:
 
-
-                action_real = self.last_action * self.params.control_params.action_factor
-
-                # print("normal_mode: ", self.quanser_plant.normal_mode)
-
-                self.quanser_plant.write_analog_output(action_real)
-
                 self.step += 1
 
                 states = self.quanser_plant.get_encoder_readings()
@@ -85,6 +78,12 @@ class QuanserEdgeControl(EdgeControl):
                     action = agent.get_exploitation_action(observations, self.control_targets)
 
                 # delta_t = time.time() - t0
+
+                action_real = action * self.params.control_params.action_factor
+
+                # print("normal_mode: ", self.quanser_plant.normal_mode)
+
+                self.quanser_plant.write_analog_output(action_real)
 
                 edge_trajectory = [observations, self.last_action, failed, normal_mode, self.step]
 
@@ -143,16 +142,18 @@ class QuanserEdgeControl(EdgeControl):
     def calibration(self):
 
         still_step = 0
-
+        x_old = theta_old = 0
         while True:
 
             t0 = time.time()
 
             print("calibrating...")
 
-            _, x_dot, _, theta_dot, _ = self.quanser_plant.get_encoder_readings()
+            x, _, theta, _, _ = self.quanser_plant.get_encoder_readings()
 
-            still_step = still_step + 1 if x_dot == 0. and theta_dot == 0. else 0
+            still_step = still_step + 1 if x == x_old and theta == theta_old else 0
+
+            x_old, theta_old = x, theta
 
             if still_step > 50:
                 break
