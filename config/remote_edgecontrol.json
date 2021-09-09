@@ -55,7 +55,7 @@
         "soft_alpha": 0.005,
         "action_noise_factor": 0.2,
         "action_noise_half_decay_time": 1000000.0,
-        "add_actions_observations": false,
+        "add_actions_observations": true,
         "action_observations_dim": 5
     },
     "control_params": {
@@ -73,6 +73,7 @@
         "train_real": true,
         "action_factor": 5,
         "calibrating_period" : 11,
+        "calibrating_period_steps": 10000,
         "random_reset_ini": true
     },
     "quanser_params": {
