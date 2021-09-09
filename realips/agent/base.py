@@ -120,10 +120,8 @@ class BaseAgent:
         observations = tf.expand_dims(observations, 0)  # add batch dim
         targets = tf.expand_dims(targets, 0)
         action = self.actor([observations, targets]).numpy().squeeze()
-        print("action", action)
         new_action = action + self.action_noise.sample() * var
         action_saturated = np.clip(new_action, -1, 1).squeeze()
-        print("action_with_noise", action_saturated)
         return action_saturated
 
     def get_exploitation_action(self, observations, targets):

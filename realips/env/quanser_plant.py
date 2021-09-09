@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 from quanser.hardware import HIL, Clock, HILError
 import math
@@ -10,6 +12,7 @@ class QuanserParams:
         self.x_length = 0.814
         self.x_center = 0
         self.theta_dot_filter_alpha = None
+        self.x_dot_filter_alpha = None
 
 
 class QuanserPlant:
@@ -34,6 +37,8 @@ class QuanserPlant:
         self.x_center = 0
         self.theta_ini = 0
         self.theta_dot = 0
+        self.x_dot = 0
+        self.last_update = 0
         # ditch default initialized reading if not start with [0, 0]
         self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
         print("Quanser Plant Initialized!")
@@ -44,21 +49,28 @@ class QuanserPlant:
         x_old_rescaled = self.rescale_x(x_old, self.x_center)
 
         self.card.read_encoder(self.encoder_channels, self.num_encoder_channels, self.encoder_buffer)
+        t = time.time()
+        dt = t - self.last_update
+        self.last_update = t
         # print("step_status", self.encoder_buffer)
         x_new, theta_new = self.encoder_buffer
         x_new_rescaled = self.rescale_x(x_new, self.x_center)
         theta_new_rescaled = self.rescale_theta(theta_new, self.theta_ini)
 
-        x_dot = (x_new_rescaled - x_old_rescaled) / self.sample_period
+        x_dot = (x_new_rescaled - x_old_rescaled) / dt
         # theta_dot = -1 * (theta_new - theta_old) * self.theta_resolution / self.sample_period
-        theta_dot = self.get_theta_dot(theta_old, theta_new)
+        theta_dot = self.get_theta_dot(theta_old, theta_new, dt)
+        if self.params.x_dot_filter_alpha is not None:
+            alpha = self.params.x_dot_filter_alpha
+            self.x_dot = (1 - alpha) * self.x_dot + alpha * x_dot
+            x_dot = self.x_dot
 
         failed = self.is_failed(x_new_rescaled, theta_dot)
 
         if failed:
             self.normal_mode = False
 
-        print("States:", x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
+        # print("States:", x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed)
         return [x_new_rescaled, x_dot, theta_new_rescaled, theta_dot, failed]
 
     def write_analog_output(self, action):
@@ -101,7 +113,7 @@ class QuanserPlant:
         failed = bool(abs(x) >= self.x_threshold or theta_dot > self.theta_threshold)
         return failed
 
-    def get_theta_dot(self, theta_old, theta_new):
+    def get_theta_dot(self, theta_old, theta_new, dt):
 
         theta_reading_limit = 32768
 
@@ -111,7 +123,7 @@ class QuanserPlant:
         else:
             d_theta = theta_new - theta_old
 
-        theta_dot = -1 * d_theta * self.theta_resolution / self.sample_period
+        theta_dot = -1 * d_theta * self.theta_resolution / dt
 
         if self.params.theta_dot_filter_alpha is not None:
             alpha = self.params.theta_dot_filter_alpha

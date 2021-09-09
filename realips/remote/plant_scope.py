@@ -1,4 +1,7 @@
 import time
+
+import numpy as np
+
 from realips.env.gym_physics import GymPhysics, GymPhysicsParams
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.remote.transition import TrajectorySegment
@@ -30,6 +33,10 @@ class PlantScope:
         self.states = [[0.0] * 5] * 100
 
         fig, self.ax = plt.subplots(3, 1)
+        self.pos_ax = self.ax[1]
+        self.vel_ax = self.ax[1].twinx()
+        self.the_ax = self.ax[2]
+        self.ome_ax = self.ax[2].twinx()
         plt.axis([-0, 100, -1.5, 1.5])
         plt.ion()
         plt.show()
@@ -80,14 +87,35 @@ class PlantScope:
         plt.sca(self.ax[0])
         plt.cla()
         plt.plot(range(100), self.actions)
+        plt.grid(True)
 
     def plot_states(self):
-        plt.sca(self.ax[1])
+        plt.sca(self.pos_ax)
         plt.cla()
         states = list(zip(*self.states))
         plt.plot(range(100), states[0])
-        plt.plot(range(100), states[1])
-        plt.sca(self.ax[2])
+        y_lim = plt.ylim()
+        y_lim_max = max([abs(y) for y in y_lim])
+        plt.ylim([-y_lim_max, y_lim_max])
+        plt.sca(self.vel_ax)
         plt.cla()
+        plt.plot(range(100), states[1], color="orange")
+        y_lim = plt.ylim()
+        y_lim_max = max([abs(y) for y in y_lim])
+        plt.ylim([-y_lim_max, y_lim_max])
+        plt.grid(True)
+
+        plt.sca(self.the_ax)
+        plt.cla()
+        states = list(zip(*self.states))
         plt.plot(range(100), states[2])
-        plt.plot(range(100), states[3])
+        y_lim = plt.ylim()
+        y_lim_max = max([abs(y) for y in y_lim])
+        plt.ylim([-y_lim_max, y_lim_max])
+        plt.sca(self.ome_ax)
+        plt.cla()
+        plt.plot(range(100), states[3], color="orange")
+        y_lim = plt.ylim()
+        y_lim_max = max([abs(y) for y in y_lim])
+        plt.ylim([-y_lim_max, y_lim_max])
+        plt.grid(True)
