@@ -81,7 +81,6 @@ class QuanserEdgeControl(EdgeControl):
 
                 # delta_t = time.time() - t0
 
-
                 action_real = action * self.params.control_params.action_factor
 
                 # print("normal_mode: ", self.quanser_plant.normal_mode)
