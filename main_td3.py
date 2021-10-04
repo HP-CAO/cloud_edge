@@ -30,7 +30,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.generate_config:
-        generate_config(IpsTD3Params(), "config/default_td3ips.json")
+        generate_config(IpsTD3Params(), "config/default_td3_ips.json")
         exit("ddpgips_config file generated")
 
     if not args.gpu:

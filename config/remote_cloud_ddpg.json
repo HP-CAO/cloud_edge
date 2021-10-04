@@ -54,15 +54,9 @@
         "servers": [
             {
                 "port": "6379",
-                "password": "hongi123",
-                "host_ip": "10.162.12.193",
-                "name": "cloud"
-            },
-            {
-                "port": "6379",
                 "password": "",
-                "host_ip": "127.0.0.1",
-                "name": "server_1"
+                "host_ip": "10.162.12.247",
+                "name": "cloud"
             }
         ],
         "ch_edge_control": {

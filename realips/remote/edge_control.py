@@ -12,14 +12,14 @@ class ControlParams:
     def __init__(self):
         self.frequency = 30.00  # hz
         self.x_threshold = 0.3
-        self.theta_dot_threshold = 15
+        self.theta_dot_threshold = 20
         self.random_reset_target = False
         self.control_targets = [0., 0.]
         self.is_quick_recover = True
         self.agent_type = None
         self.initialize_from_cloud = True
         self.train_real = True
-        self.action_factor = 7
+        self.action_factor = 5
         self.calibrating_period_steps = 10000
         self.random_reset_ini = True
 

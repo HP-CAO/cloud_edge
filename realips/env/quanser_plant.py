@@ -7,8 +7,8 @@ import math
 
 class QuanserParams:
     def __init__(self):
-        self.x_left = - 18825
-        self.x_right = 16528
+        self.x_left = -23749
+        self.x_right = 11946
         self.x_length = 0.814
         self.x_center = 0
         self.theta_dot_filter_alpha = None

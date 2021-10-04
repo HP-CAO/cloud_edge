@@ -8,7 +8,7 @@ from realips.trainer.trainer_params import OffPolicyTrainerParams
 class TD3TrainerParams(OffPolicyTrainerParams):
     def __init__(self):
         super().__init__()
-        self.actor_update_period = 5
+        self.actor_update_period = 2
 
 
 class TD3Trainer:
