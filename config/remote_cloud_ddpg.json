@@ -21,6 +21,7 @@
         "friction_pole": 0.0011,
         "with_friction": true,
         "force_input": false,
+        "sim_with_delay": false,
         "simulation_frequency": 30,
         "actuation_delay": 1
     },
@@ -33,7 +34,6 @@
     "stats_params": {
         "max_episode_steps": 700,
         "total_steps": 5000000.0,
-        "evaluation_steps": 700,
         "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
