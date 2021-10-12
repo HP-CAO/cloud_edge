@@ -9,7 +9,7 @@ class GymPhysicsParams:
     def __init__(self):
         self.x_threshold = 0.3
         self.theta_dot_threshold = 15
-        self.kinematics_intergrator = 'euler'
+        self.kinematics_integrator = 'euler'
 
         self.ini_states = [0., 0., -math.pi, 0., False]
         self.gravity = 9.8
@@ -24,16 +24,14 @@ class GymPhysicsParams:
         self.friction_pole = 0.0011
         self.with_friction = True
         self.force_input = False
-        self.sim_with_delay = False
         self.simulation_frequency = 30
-
         self.actuation_delay = 1
 
 
 class GymPhysics(gym.Env):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second': 30 # this is not working
+        'video.frames_per_second': 30  # this is not working
     }
 
     def __init__(self, params: GymPhysicsParams):
@@ -91,11 +89,11 @@ class GymPhysics(gym.Env):
         else:
             """without friction"""
             temp = (force + self.pole_mass_length * theta_dot ** 2 * sintheta) / self.total_mass
-            thetaacc = (self.params.gravity * sintheta - costheta * temp) /\
+            thetaacc = (self.params.gravity * sintheta - costheta * temp) / \
                        (self.params.length / 2 * (4.0 / 3.0 - self.params.mass_pole * costheta ** 2 / self.total_mass))
             xacc = temp - self.pole_mass_length * thetaacc * costheta / self.total_mass
 
-        if self.params.kinematics_intergrator == 'euler':
+        if self.params.kinematics_integrator == 'euler':
             x = x + self.tau * x_dot
             x_dot = x_dot + self.tau * xacc
             theta = theta + self.tau * theta_dot

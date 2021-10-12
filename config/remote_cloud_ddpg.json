@@ -2,7 +2,7 @@
     "physics_params": {
         "x_threshold": 0.3,
         "theta_dot_threshold": 15,
-        "kinematics_intergrator": "euler",
+        "kinematics_integrator": "euler",
         "ini_states": [
             0.0,
             0.0,
@@ -21,7 +21,6 @@
         "friction_pole": 0.0011,
         "with_friction": true,
         "force_input": false,
-        "sim_with_delay": false,
         "simulation_frequency": 30,
         "actuation_delay": 1
     },
@@ -46,9 +45,10 @@
         "weights_path": null,
         "running_mode": "train",
         "random_initial_ips": true,
-        "visualize_eval": true,
+        "visualize_eval": false,
         "reset_delay": 1.0,
-        "can_swing_up_steps": 100
+        "can_swing_up_steps": 100,
+        "on_target_reset_steps": 100
     },
     "redis_params": {
         "servers": [

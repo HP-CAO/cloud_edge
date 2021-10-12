@@ -9,6 +9,7 @@ class TD3TrainerParams(OffPolicyTrainerParams):
     def __init__(self):
         super().__init__()
         self.actor_update_period = 2
+        self.step_soft_update = False
 
 
 class TD3Trainer:
@@ -77,13 +78,14 @@ class TD3Trainer:
             # ---------------------- optimize actor ----------------------
 
             self.critic_update += 1
-            if self.critic_update % self.params.actor_update_period == 0:  # update actor less frequently
 
+            if self.critic_update % self.params.actor_update_period == 0:  # update actor less frequently
                 if self.replay_mem.get_size() >= self.params.actor_freeze_step_count:
                     with tf.GradientTape() as tape:
                         a1_predict = self.agent.actor([ob1, tgs])
                         actor_value = -1 * tf.math.reduce_mean(self.agent.critic([ob1, tgs, a1_predict]))
                     actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
                     self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
-
+                    self.agent.soft_update()
+            elif self.params.step_soft_update:
                 self.agent.soft_update()

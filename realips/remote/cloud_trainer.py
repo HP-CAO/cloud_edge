@@ -18,7 +18,7 @@ from realips.trainer.trainer_ddpg import DDPGTrainer, DDPGTrainerParams
 
 class CloudParams:
     def __init__(self):
-        self.on_target_reset_steps = 100  # num steps on target after which the episode is terminated
+        # self.on_target_reset_steps = 100  # num steps on target after which the episode is terminated
         self.sleep_after_reset = 2  # seconds of sleep because it makes sense
         self.agent_type = 0  # 0: DDPG, 1: TD3
         self.pre_fill_steps = 0
@@ -161,7 +161,7 @@ class CloudSystem(IpsSystem):
 
             self.model_stats.reward.append(r)
 
-            if training and self.model_stats.consecutive_on_target_steps > self.params.cloud_params.on_target_reset_steps:
+            if training and self.model_stats.consecutive_on_target_steps > self.params.stats_params.on_target_reset_steps:
                 break
 
             if not traj_segment.normal_operation:

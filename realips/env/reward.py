@@ -14,7 +14,6 @@ class RewardFcn:
 
     def __init__(self, params: RewardParams):
         self.params = params
-        # self.reward = self.distance_reward
         self.reward = self.distance_reward
 
     def distance_reward(self, observations, targets, action, terminal, pole_length):

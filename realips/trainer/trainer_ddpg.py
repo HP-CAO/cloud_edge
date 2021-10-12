@@ -8,6 +8,7 @@ from realips.trainer.trainer_params import OffPolicyTrainerParams
 class DDPGTrainerParams(OffPolicyTrainerParams):
     def __init__(self):
         super().__init__()
+        self.actor_update_period = 1
 
 
 class DDPGTrainer:
@@ -18,6 +19,7 @@ class DDPGTrainer:
         self.optimizer_actor = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate_actor)
         self.replay_mem = ReplayMemory(size=self.params.rm_size)
         self.replay_memory_mutex = threading.Lock()
+        self.critic_update = 0
 
     def store_experience(self, observations, targets, action, reward, next_observations, failed):
         if self.params.is_remote_train:
@@ -55,10 +57,11 @@ class DDPGTrainer:
             with tf.GradientTape() as tape:
 
                 a2 = self.agent.actor_target([ob2, tgs])
-                
+
                 if self.params.target_action_noise:
-                    action_noise = tf.clip_by_value(tf.random.normal(shape=(self.params.batch_size, 1), mean=0, stddev=0.3),
-                                                    clip_value_min=-0.5, clip_value_max=0.5)
+                    action_noise = tf.clip_by_value(
+                        tf.random.normal(shape=(self.params.batch_size, 1), mean=0, stddev=0.3),
+                        clip_value_min=-0.5, clip_value_max=0.5)
 
                     a2 = tf.clip_by_value((a2 + action_noise), clip_value_min=-1, clip_value_max=1)
 
@@ -72,15 +75,16 @@ class DDPGTrainer:
             self.optimizer_critic.apply_gradients(zip(q_grads, self.agent.critic.trainable_variables))
 
             # ---------------------- optimize actor ----------------------
-            if self.replay_mem.get_size() >= self.params.actor_freeze_step_count:
-                with tf.GradientTape() as tape:
 
-                    a1_predict = self.agent.actor([ob1, tgs])
-                    actor_value = -1 * tf.math.reduce_mean(self.agent.critic([ob1, tgs, a1_predict]))
+            self.critic_update += 1
 
-                actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
-                self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
-
+            if self.critic_update % self.params.actor_update_period == 0:
+                if self.replay_mem.get_size() >= self.params.actor_freeze_step_count:
+                    with tf.GradientTape() as tape:
+                        a1_predict = self.agent.actor([ob1, tgs])
+                        actor_value = -1 * tf.math.reduce_mean(self.agent.critic([ob1, tgs, a1_predict]))
+                    actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
+                    self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
             self.agent.soft_update()
 
     def optimize_prioritized(self):
@@ -115,13 +119,12 @@ class DDPGTrainer:
             self.replay_mem.update_priority(idx, abs(td_error.numpy()))
 
         # ---------------------- optimize actor ----------------------
-        if self.replay_mem.get_size() >= self.params.actor_freeze_step_count:
+        if self.replay_mem.get_size() >= self.params.actor_freeze_step_count: # update actor less frequently
             with tf.GradientTape() as tape:
                 a1_predict = self.agent.actor([ob1, tgs])
                 actor_value = -1 * tf.math.reduce_mean(self.agent.critic([ob1, tgs, a1_predict]))
                 actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
                 self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
-
         self.agent.soft_update()
 
     def load_weights(self, path):

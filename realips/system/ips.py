@@ -124,6 +124,9 @@ class IpsSystem:
 
                 self.trainer.optimize()
 
+                if self.model_stats.consecutive_on_target_steps > self.params.stats_params.on_target_reset_steps:
+                    break
+
                 if failed:
                     break
 

@@ -15,7 +15,7 @@ class ModelStatsParams:
     def __init__(self):
         self.max_episode_steps = 1000
         self.total_steps = int(5e6)
-        self.target_distance_score = 0.5
+        self.target_distance_score = 0.77880078307  # 5 cm distance from the target tape
         self.targets = [0., 0.]  # [x, theta]
         self.model_name = "model_name"
         self.eval_period = 20
@@ -24,9 +24,10 @@ class ModelStatsParams:
         self.weights_path = None
         self.running_mode = 'train'
         self.random_initial_ips = True
-        self.visualize_eval = True
+        self.visualize_eval = False
         self.reset_delay = 1.0
         self.can_swing_up_steps = 100
+        self.on_target_reset_steps = 100
 
 
 class ModelStats:

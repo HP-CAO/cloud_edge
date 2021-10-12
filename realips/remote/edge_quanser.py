@@ -29,7 +29,7 @@ class QuanserEdgeControlParams(EdgeControlParams):
 class QuanserEdgeControl(EdgeControl):
     def __init__(self, params: QuanserEdgeControlParams, run_eval):
         super().__init__(params, run_eval)
-        self.steps_since_calibration = self.params.control_params.calibrating_period_steps + 1
+        self.steps_since_calibration = 0
         self.params = params
         self.quanser_plant = QuanserPlant(self.params.quanser_params,
                                           self.params.control_params.frequency,
@@ -37,8 +37,8 @@ class QuanserEdgeControl(EdgeControl):
                                           self.params.control_params.theta_dot_threshold)
         self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
 
+        self.calibration()
         self.initialize_plant()
-        # self.calibration()
 
     def generate_action(self):
 
@@ -114,7 +114,7 @@ class QuanserEdgeControl(EdgeControl):
 
     def reset_control(self):
 
-        if self.steps_since_calibration % self.params.control_params.calibrating_period_steps == 0:
+        if self.steps_since_calibration >= self.params.control_params.calibrating_period_steps:
             self.calibration()
 
         t0 = time.time()
