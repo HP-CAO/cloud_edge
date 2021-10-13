@@ -48,14 +48,16 @@
         "visualize_eval": false,
         "reset_delay": 1.0,
         "can_swing_up_steps": 100,
-        "on_target_reset_steps": 100
+        "on_target_reset_steps": 100,
+        "converge_swing_up_time": 250,
+        "converge_episodes": 3
     },
     "redis_params": {
         "servers": [
             {
                 "port": "6379",
-                "password": "",
-                "host_ip": "10.162.12.247",
+                "password": "cps123456",
+                "host_ip": "10.162.12.241",
                 "name": "cloud"
             }
         ],

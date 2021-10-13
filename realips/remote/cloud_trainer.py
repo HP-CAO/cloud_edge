@@ -1,10 +1,10 @@
 import pickle
 import copy
+import sys
 import struct
 import math
 import threading
 import time
-
 import numpy as np
 from realips.agent.td3 import TD3Agent, TD3AgentParams
 from realips.remote.transition import TrajectorySegment
@@ -81,6 +81,8 @@ class CloudSystem(IpsSystem):
     def run(self):
         """It's triple threads"""
         # self.t1.start()
+        self.t2.daemon = True
+        self.t3.daemon = True
         self.t2.start()
         self.t3.start()
         self.store_trajectory()
@@ -180,9 +182,12 @@ class CloudSystem(IpsSystem):
             self.model_stats.add_steps(step)
             self.model_stats.training_monitor(self.ep)
         else:
-            # self.model_stats.add_steps(1)  # Add one step so that it doesn't overlap with possible previous evals
             self.model_stats.evaluation_monitor_scalar(self.ep)
             self.model_stats.evaluation_monitor_image(self.ep)
+            if self.model_stats.converge_eval_episode >= self.params.stats_params.converge_episodes:
+                self.agent.save_weights(self.params.stats_params.model_name + '_converge')
+                print("Converging, training stopped")
+                sys.exit()
 
         dsas = float(self.model_stats.survived) * self.model_stats.get_average_distance_score()
         # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))

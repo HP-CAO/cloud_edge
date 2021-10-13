@@ -67,7 +67,7 @@ class DDPGTrainer:
 
                 q_e = self.agent.critic_target([ob2, tgs, a2])
 
-                y_exp = r1 + self.params.gamma_discount * q_e * (1 - cra)  # n-step returns?
+                y_exp = r1 + self.params.gamma_discount * q_e * (1 - cra)
                 y_pre = self.agent.critic([ob1, tgs, a1])
                 loss_critic = tf.keras.losses.mean_squared_error(y_exp, y_pre)
 

@@ -106,7 +106,6 @@ class BaseAgent:
 
         # generate actor network
         model_actor = Model(inputs=[input_observations, input_targets], outputs=output_action, name=name + 'actor')
-
         return model_actor
 
     def get_exploration_action(self, observations, targets):

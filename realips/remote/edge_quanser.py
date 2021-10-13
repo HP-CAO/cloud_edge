@@ -73,17 +73,15 @@ class QuanserEdgeControl(EdgeControl):
                 observations = np.hstack((stats_observation, action_observations)).tolist()
 
                 agent = self.agent_a if self.agent_a_active else self.agent_b
-
+                t_start = time.time()
                 if self.training:
                     action = agent.get_exploration_action(observations, self.control_targets)
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
-
+                print("Inference time:", time.time() - t_start)
                 # delta_t = time.time() - t0
 
                 action_real = action * self.params.control_params.action_factor
-
-                # print("normal_mode: ", self.quanser_plant.normal_mode)
 
                 self.quanser_plant.write_analog_output(action_real)
 
@@ -114,9 +112,6 @@ class QuanserEdgeControl(EdgeControl):
 
     def reset_control(self):
 
-        if self.steps_since_calibration >= self.params.control_params.calibrating_period_steps:
-            self.calibration()
-
         t0 = time.time()
 
         if self.params.control_params.random_reset_ini:
@@ -133,13 +128,15 @@ class QuanserEdgeControl(EdgeControl):
             control_action = self.pid_controller(x)
             control_action = np.clip(control_action, -2.5, 2.5)  # set an action range
             self.quanser_plant.write_analog_output(control_action)
-
             self.quanser_plant.get_encoder_readings()
 
         self.quanser_plant.write_analog_output(0)
         self.quanser_plant.normal_mode = True
         self.last_action = 0
         print("<========== resetting finished ==========>")
+
+        if self.steps_since_calibration >= self.params.control_params.calibrating_period_steps:
+            self.calibration()
 
     def calibration(self):
 
