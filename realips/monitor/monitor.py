@@ -28,6 +28,8 @@ class ModelStatsParams:
         self.reset_delay = 1.0
         self.can_swing_up_steps = 100
         self.on_target_reset_steps = 100
+        self.converge_episodes = 3
+        self.converge_swing_up_time = 250
 
 
 class ModelStats:
@@ -47,6 +49,7 @@ class ModelStats:
         self.actions = []
         self.pendulum_angele = []
         self.total_steps = 0
+        self.converge_eval_episode = 0
 
         self.log_dir = 'logs/' + self.params.log_file_name
         self.clear_cache()
@@ -139,6 +142,11 @@ class ModelStats:
 
             print("Evaluation:=====>  Episode: ", episode, " Total steps:",
                   self.get_steps(), " Average_reward: ", average_reward, "ds_mean", average_distance_score)
+
+        if swing_up_time <= self.params.converge_swing_up_time:
+            self.converge_eval_episode += 1
+        else:
+            self.converge_eval_episode = 0
 
     def evaluation_monitor_image(self, ep):
 

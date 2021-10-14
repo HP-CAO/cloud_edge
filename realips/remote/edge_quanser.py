@@ -20,13 +20,24 @@ from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
 from realips.utils import states2observations
 
 
+def signal_handler(signal, frame):
+    global run
+    print("Safe exiting")
+    run = False
+
+
 class QuanserEdgeControlParams(EdgeControlParams):
     def __init__(self):
         super().__init__()
         self.quanser_params = QuanserParams()
 
 
+run = True
+signal.signal(signal.SIGINT, signal_handler)
+
+
 class QuanserEdgeControl(EdgeControl):
+
     def __init__(self, params: QuanserEdgeControlParams, run_eval):
         super().__init__(params, run_eval)
         self.steps_since_calibration = 0
@@ -73,12 +84,12 @@ class QuanserEdgeControl(EdgeControl):
                 observations = np.hstack((stats_observation, action_observations)).tolist()
 
                 agent = self.agent_a if self.agent_a_active else self.agent_b
-                t_start = time.time()
+                # t_start = time.time()
                 if self.training:
                     action = agent.get_exploration_action(observations, self.control_targets)
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
-                print("Inference time:", time.time() - t_start)
+                # print("Inference time:", time.time() - t_start)
                 # delta_t = time.time() - t0
 
                 action_real = action * self.params.control_params.action_factor
@@ -109,6 +120,10 @@ class QuanserEdgeControl(EdgeControl):
                     time_out_counter = 0
                 else:
                     t0 = t0 + self.sample_period
+
+                if run is False:
+                    self.quanser_plant.write_analog_output(0)
+                    sys.exit("Safe exiting...")
 
     def reset_control(self):
 

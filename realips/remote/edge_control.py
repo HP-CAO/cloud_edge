@@ -128,6 +128,10 @@ class EdgeControl:
             self.agent_a_active = not self.agent_a_active
 
     def run(self):
+        self.t2.daemon = True
+        self.t3.daemon = True
+        self.t4.daemon = True
+
         self.t2.start()
         self.t3.start()
         self.t4.start()
