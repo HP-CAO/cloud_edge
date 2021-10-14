@@ -1,6 +1,7 @@
 import math
 import tensorflow as tf
 import os
+from keras_flops import get_flops
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras import Model
 from realips.utils import OrnsteinUhlenbeckActionNoise
@@ -66,23 +67,16 @@ class BaseAgent:
         """
         # observations input branch
         input_observations = Input(shape=(self.shape_observations,), name=name + 'observations_input',
-                                   dtype=tf.float32)
-        input_targets = Input(shape=(self.shape_targets,), name=name + 'targets_input', dtype=tf.float32)
-        input_concat = tf.concat([input_observations, input_targets], 1, name=name + 'input_concat')
+                                   dtype=tf.float16)
+        input_targets = Input(shape=(self.shape_targets,), name=name + 'targets_input', dtype=tf.float16)
+        input_action = Input(shape=(self.shape_action,), name=name + 'action_input', dtype=tf.float16)
 
-        dense1_obs = Dense(self.params.critic_dense1_obs, activation='relu', name=name + 'dense1_obs')(input_concat)
-        dense2_obs = Dense(self.params.critic_dense2_obs, activation='relu', name=name + 'dense2_obs')(dense1_obs)
+        input_concat = tf.concat([input_observations, input_targets, input_action], 1, name=name + 'input_concat')
 
-        # action input branch
-        input_action = Input(shape=(self.shape_action,), name=name + 'action_input', dtype=tf.float32)
-        dense1_act = Dense(self.params.critic_dense1_act, activation='relu', name=name + 'dense1_act')(input_action)
-
-        # merge two branches
-        mid_concat = tf.concat([dense2_obs, dense1_act], 1, name=name + 'mid_concat')
-        dense1_critic = Dense(self.params.critic_dense1, activation='relu', name=name + 'dense1_critic')(mid_concat)
-        dense2_critic = Dense(self.params.critic_dense2, activation='relu', name=name + 'dense2_critic')(
-            dense1_critic)
-        output_value = Dense(1, activation=None, name=name + 'output_critic')(dense2_critic)
+        dense1_critic = Dense(256, activation='relu', name=name + 'dense1_critic')(input_concat)
+        dense2_critic = Dense(128, activation='relu', name=name + 'dense2_critic')(dense1_critic)
+        dense3_critic = Dense(64, activation='relu', name=name + 'dense3_critic')(dense2_critic)
+        output_value = Dense(1, activation=None, name=name + 'output_critic')(dense3_critic)
 
         # generate critic network
         model_critic = Model(inputs=[input_observations, input_targets, input_action], outputs=output_value,
@@ -95,8 +89,8 @@ class BaseAgent:
         return: model of actor neural network
         """
         input_observations = Input(shape=(self.shape_observations,), name=name + 'observations_input',
-                                   dtype=tf.float32)
-        input_targets = Input(shape=(self.shape_targets,), name=name + 'targets_input', dtype=tf.float32)
+                                   dtype=tf.float16)
+        input_targets = Input(shape=(self.shape_targets,), name=name + 'targets_input', dtype=tf.float16)
         input_concat = tf.concat([input_observations, input_targets], 1, name=name + 'input_concat')
 
         dense1_actor = Dense(self.params.actor_dense1, activation='relu', name=name + 'dense1_actor')(input_concat)
@@ -106,6 +100,9 @@ class BaseAgent:
 
         # generate actor network
         model_actor = Model(inputs=[input_observations, input_targets], outputs=output_action, name=name + 'actor')
+        # flops = get_flops(model_actor, batch_size=1)
+        # print(f"FLOPS: {flops / 10 ** 9:.03} G")
+        # print("analysis")
         return model_actor
 
     def get_exploration_action(self, observations, targets):
