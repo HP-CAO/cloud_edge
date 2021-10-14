@@ -8,6 +8,8 @@ import signal
 import sys
 import numpy
 import numpy as np
+import pandas
+import csv
 from simple_pid import PID
 from quanser.hardware import HILError
 
@@ -41,9 +43,11 @@ class QuanserEdgeControl(EdgeControl):
         self.initialize_plant()
 
     def generate_action(self):
+        inf_time_list = []
+        loop_time_list = []
 
         while True:
-
+            
             self.ep += 1
 
             if self.params.ddpg_params.add_actions_observations:
@@ -53,10 +57,23 @@ class QuanserEdgeControl(EdgeControl):
                 action_observations = []
 
             while not self.quanser_plant.normal_mode:
+                if inf_time_list:
+                    data = [inf_time_list,
+                            loop_time_list]
+                    with open("output.csv", "a") as fp:
+                        wr = csv.writer(fp, dialect='excel')
+                        wr.writerow(data)
+                    inf_time_list = []
+                    loop_time_list = []
+
+                else:
+                    pass
+
                 self.reset_control()
 
-            t0 = time.time()
+            t0 = time.perf_counter()
             time_out_counter = 0
+
             while self.quanser_plant.normal_mode:
 
                 self.step += 1
@@ -73,12 +90,13 @@ class QuanserEdgeControl(EdgeControl):
                 observations = np.hstack((stats_observation, action_observations)).tolist()
 
                 agent = self.agent_a if self.agent_a_active else self.agent_b
-                t_start = time.time()
+                t_start = time.perf_counter()
                 if self.training:
                     action = agent.get_exploration_action(observations, self.control_targets)
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
-                print("Inference time:", time.time() - t_start)
+                # print("Inference time:", time.time() - t_start)
+                inf_time_list.append(time.perf_counter()-t_start)
                 # delta_t = time.time() - t0
 
                 action_real = action * self.params.control_params.action_factor
@@ -95,7 +113,8 @@ class QuanserEdgeControl(EdgeControl):
                 if self.params.ddpg_params.add_actions_observations:
                     action_observations = np.append(action_observations, action)[1:]
 
-                one_loop_time = time.time() - t0
+                one_loop_time = time.perf_counter() - t0
+                loop_time_list.append(one_loop_time)
 
                 if one_loop_time < self.sample_period:
                     time.sleep(self.sample_period - one_loop_time)
@@ -104,7 +123,7 @@ class QuanserEdgeControl(EdgeControl):
                     time_out_counter += 1
 
                 if time_out_counter >= 10:
-                    t0 = time.time()
+                    t0 = time.perf_counter()
                     print("TIMEOUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                     time_out_counter = 0
                 else:
