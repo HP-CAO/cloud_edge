@@ -1,0 +1,84 @@
+{
+    "physics_params": {
+        "x_threshold": 0.45,
+        "theta_dot_threshold": 15,
+        "kinematics_integrator": "euler",
+        "ini_states": [
+            0.0,
+            0.0,
+            -3.141592653589793,
+            0.0,
+            false
+        ],
+        "gravity": 9.8,
+        "mass_cart": 1.116,
+        "mass_pole": 0.155,
+        "force_mag": 10.0,
+        "voltage_mag": 5.0,
+        "length": 0.5,
+        "theta_random_std": 0.8,
+        "friction_cart": 0,
+        "friction_pole": 0,
+        "with_friction": false,
+        "force_input": true,
+        "simulation_frequency": 50,
+        "actuation_delay": 1
+    },
+    "reward_params": {
+        "distance_score_reward": 0.5,
+        "action_penalty": 0.05,
+        "crash_penalty": 10,
+        "distance_score_factor": 5
+    },
+    "stats_params": {
+        "max_episode_steps": 1000,
+        "total_steps": 1000000,
+        "target_distance_score": 0.77880078307,
+        "targets": [
+            0.0,
+            0.0
+        ],
+        "model_name": "model_name",
+        "eval_period": 20,
+        "log_file_name": "20211004-112941",
+        "force_override": false,
+        "weights_path": null,
+        "running_mode": "train",
+        "random_initial_ips": true,
+        "visualize_eval": false,
+        "reset_delay": 1.0,
+        "can_swing_up_steps": 100,
+        "on_target_reset_steps": 100,
+        "converge_swing_up_time": 250,
+        "converge_episodes": 3
+    },
+    "agent_params": {
+        "critic_dense1_obs": 256,
+        "critic_dense2_obs": 128,
+        "critic_dense1_act": 128,
+        "critic_dense1": 256,
+        "critic_dense2": 128,
+        "actor_dense1": 256,
+        "actor_dense2": 128,
+        "actor_dense3": 64,
+        "soft_alpha": 0.005,
+        "action_noise_factor": 1,
+        "action_noise_half_decay_time": 1000000.0,
+        "add_actions_observations": true,
+        "action_observations_dim": 5
+    },
+    "trainer_params": {
+        "gamma_discount": 0.99,
+        "rm_size": 1000000,
+        "batch_size": 128,
+        "learning_rate_actor": 0.0003,
+        "learning_rate_critic": 0.0003,
+        "is_remote_train": false,
+        "actor_freeze_step_count": 5000,
+        "use_prioritized_replay": false,
+        "pre_fill_exp": 3500,
+        "target_action_noise": true,
+        "training_epoch": 1,
+        "actor_update_period": 1
+    }
+}

@@ -22,6 +22,7 @@ class CloudParams:
         self.sleep_after_reset = 2  # seconds of sleep because it makes sense
         self.agent_type = 0  # 0: DDPG, 1: TD3
         self.pre_fill_steps = 0
+        self.weights_update_period = 1
 
 
 class CloudSystemParams(IpsSystemParams):
@@ -123,7 +124,6 @@ class CloudSystem(IpsSystem):
 
         step_count = self.params.stats_params.max_episode_steps
         step = 0
-        on_target_steps = 0
         for step in range(step_count):
             last_seg = traj_segment
             traj_segment = self.receive_edge_trajectory()
@@ -195,6 +195,8 @@ class CloudSystem(IpsSystem):
 
     def optimize(self):
 
+        optimize_times = 0
+
         while True:
 
             if self.trainable == 0:
@@ -202,19 +204,21 @@ class CloudSystem(IpsSystem):
                 self.optimize_condition.wait()
 
             self.trainer.optimize()
-
+            optimize_times += 1
             self.trainable -= 1
 
             if self.edge_ready and self.training:
-                weights = self.agent.get_actor_weights()
-                self.edge_ready = False
-                self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
-                # self.agent.save_weights(self.params.stats_params.model_name)
-                print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}, backlog: {}"
-                      .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
-            else:
-                print("[{}] ===>  Training: current training finished, not sending weights, mem_size: {}, backlog: {}"
-                      .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
+                if optimize_times % self.params.cloud_params.weights_update_period == 0:
+                    weights = self.agent.get_actor_weights()
+                    self.edge_ready = False
+                    self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
+                    # self.agent.save_weights(self.params.stats_params.model_name)
+                    print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}, backlog: {}"
+                          .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
+                else:
+                    print(
+                        "[{}] ===>  Training: current training finished, not sending weights, mem_size: {}, backlog: {}"
+                        .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
 
     def waiting_edge_ready(self):
 

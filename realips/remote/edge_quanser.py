@@ -8,7 +8,7 @@ import signal
 import sys
 import numpy
 import numpy as np
-import pandas
+# import pandas
 import csv
 from simple_pid import PID
 from quanser.hardware import HILError
@@ -54,12 +54,16 @@ class QuanserEdgeControl(EdgeControl):
         self.initialize_plant()
 
     def generate_action(self):
+
         inf_time_list = []
         loop_time_list = []
+        loop_time_till_sleep = []
 
         while True:
-            
+
             self.ep += 1
+            if self.ep > 7:
+                sys.exit("run_time logged")
 
             if self.params.ddpg_params.add_actions_observations:
 
@@ -68,28 +72,30 @@ class QuanserEdgeControl(EdgeControl):
                 action_observations = []
 
             while not self.quanser_plant.normal_mode:
-                if inf_time_list:
-                    data = [inf_time_list,
-                            loop_time_list]
-                    with open("output.csv", "a") as fp:
-                        wr = csv.writer(fp, dialect='excel')
-                        wr.writerow(data)
-                    inf_time_list = []
-                    loop_time_list = []
+                time_log_data = np.array(
+                    [self.ep - 1, self.training, inf_time_list, loop_time_list, loop_time_till_sleep, self.t2_time,
+                     self.t3_time, self.t4_time])
+                np.save('./run_time/{}'.format(self.ep - 1), time_log_data)
 
-                else:
-                    pass
-
+                inf_time_list = []
+                loop_time_list = []
+                loop_time_till_sleep = []
+                self.t3_time = []
+                self.t4_time = []
+                self.t2_time = []
                 self.reset_control()
 
             t0 = time.perf_counter()
             time_out_counter = 0
+            t1_1 = time.perf_counter()
+            t1 = t1_1
 
             while self.quanser_plant.normal_mode:
-
+                t1_1 = time.perf_counter()
+                delta_t = t1_1 - t1
+                t1 = t1_1
                 self.step += 1
                 self.steps_since_calibration += 1
-
                 states = self.quanser_plant.get_encoder_readings()
 
                 self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
@@ -110,8 +116,7 @@ class QuanserEdgeControl(EdgeControl):
                     action = agent.get_exploitation_action(observations, self.control_targets)
                 # print("Inference time:", time.time() - t_start)
 
-                inf_time_list.append(time.perf_counter()-t_start)
-
+                inf_time_list.append(time.perf_counter() - t_start)
 
                 action_real = action * self.params.control_params.action_factor
 
@@ -128,7 +133,11 @@ class QuanserEdgeControl(EdgeControl):
                     action_observations = np.append(action_observations, action)[1:]
 
                 one_loop_time = time.perf_counter() - t0
-                loop_time_list.append(one_loop_time)
+                loop_time_list.append(delta_t)
+
+                t_loop = time.perf_counter()
+                delta_t_2 = t_loop - t1_1
+                loop_time_till_sleep.append(delta_t_2)
 
                 if one_loop_time < self.sample_period:
                     time.sleep(self.sample_period - one_loop_time)

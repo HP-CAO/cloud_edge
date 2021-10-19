@@ -1,8 +1,10 @@
 import pickle
 import threading
 import struct
-import numpy as np
+import time
 
+import numpy as np
+import multiprocessing
 from realips.agent.base import BaseAgent
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.agent.ddpg import DDPGAgentParams
@@ -57,10 +59,17 @@ class EdgeControl:
         self.t2 = threading.Thread(target=self.update_weights)
         self.t3 = threading.Thread(target=self.receive_mode)
         self.t4 = threading.Thread(target=self.receive_reset_command)
+        # self.t2 = multiprocessing.Process(target=self.update_weights)
+        # self.t3 = multiprocessing.Process(target=self.receive_mode)
+        # self.t4 = multiprocessing.Process(target=self.receive_reset_command)
         self.step = 0
         self.ep = 0
         self.training = True if eval_weights is None else False
         self.last_action = 0
+
+        self.t2_time = []
+        self.t3_time = []
+        self.t4_time = []
 
         if eval_weights is not None:
             self.agent_a.load_weights(eval_weights)
@@ -113,19 +122,27 @@ class EdgeControl:
     def update_weights(self):
 
         while True:
+            t0 = time.perf_counter()
 
             self.send_ready_update(True)
 
             weights, action_noise_factor = self.receives_weights_and_noise_factor()
 
             if self.agent_a_active:
-                self.agent_b.set_actor_weights(weights)
+                for i, w in enumerate(weights):
+                    self.agent_b.actor.weights[i].assign(w)
+                    time.sleep(0.0001)
+                # self.agent_b.set_actor_weights(weights)
                 self.agent_b.set_action_noise_factor(action_noise_factor)
             else:
-                self.agent_a.set_actor_weights(weights)
+                for i, w in enumerate(weights):
+                    self.agent_a.actor.weights[i].assign(w)
+                    time.sleep(0.0001)
+                # self.agent_a.set_actor_weights(weights)  # todo check time consumption
                 self.agent_a.set_action_noise_factor(action_noise_factor)
-
             self.agent_a_active = not self.agent_a_active
+
+            self.t2_time.append(time.perf_counter() - t0)
 
     def run(self):
         self.t2.daemon = True
@@ -142,10 +159,12 @@ class EdgeControl:
         receive_mode to switch between training and testing
         """
         while True:
+            t0 = time.perf_counter()
             mode_pack = self.training_mode_subscriber.parse_response()[2]
             mode = pickle.loads(mode_pack)
             self.training = mode[0]
             print("training:", self.training)
+            self.t3_time.append(time.perf_counter() - t0)
 
     def reset_control(self):
         pass
@@ -160,8 +179,10 @@ class EdgeControl:
         """
 
         while True:
+            t0 = time.perf_counter()
             _ = self.plant_reset_subscriber.parse_response()[2]
             self.set_normal_mode(False)
+            self.t4_time.append(time.perf_counter() - t0)
 
     def set_normal_mode(self, normal_mode):
         pass
