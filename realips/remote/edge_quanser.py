@@ -1,24 +1,12 @@
-import copy
-import pickle
-import random
-import threading
-import struct
 import time
 import signal
 import sys
-import numpy
 import numpy as np
-# import pandas
-import csv
 from simple_pid import PID
 from quanser.hardware import HILError
 
-from realips.agent.base import BaseAgent
 from realips.env.quanser_plant import QuanserParams, QuanserPlant
 from realips.remote.edge_control import EdgeControlParams, EdgeControl
-from realips.utils import get_current_time
-from realips.remote.redis import RedisParams, RedisConnection
-from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
 from realips.utils import states2observations
 
 
@@ -62,7 +50,9 @@ class QuanserEdgeControl(EdgeControl):
         while True:
 
             self.ep += 1
-            if self.ep > 7:
+            self.loop_step = 0
+
+            if self.ep > 3:
                 sys.exit("run_time logged")
 
             if self.params.ddpg_params.add_actions_observations:
@@ -73,16 +63,14 @@ class QuanserEdgeControl(EdgeControl):
 
             while not self.quanser_plant.normal_mode:
                 time_log_data = np.array(
-                    [self.ep - 1, self.training, inf_time_list, loop_time_list, loop_time_till_sleep, self.t2_time,
-                     self.t3_time, self.t4_time])
+                    [self.ep - 1, self.training, inf_time_list, loop_time_list, loop_time_till_sleep, self.t2_time])
+
                 np.save('./run_time/{}'.format(self.ep - 1), time_log_data)
 
                 inf_time_list = []
                 loop_time_list = []
                 loop_time_till_sleep = []
-                self.t3_time = []
-                self.t4_time = []
-                self.t2_time = []
+                self.t2_time = np.zeros(shape=1020)
                 self.reset_control()
 
             t0 = time.perf_counter()
@@ -95,6 +83,7 @@ class QuanserEdgeControl(EdgeControl):
                 delta_t = t1_1 - t1
                 t1 = t1_1
                 self.step += 1
+                self.loop_step += 1
                 self.steps_since_calibration += 1
                 states = self.quanser_plant.get_encoder_readings()
 
