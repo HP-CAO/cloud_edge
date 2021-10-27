@@ -93,7 +93,7 @@ class QuanserEdgeControl(EdgeControl):
 
                 stats_observation, failed = states2observations(states)
 
-                observations = np.hstack((stats_observation, action_observations)).tolist()
+                observations = np.hstack((stats_observation, action_observations))
 
                 agent = self.agent_a if self.agent_a_active else self.agent_b
 

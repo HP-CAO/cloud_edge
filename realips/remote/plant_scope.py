@@ -1,16 +1,8 @@
-import time
-
-import numpy as np
-
+import pickle
+import matplotlib.pyplot as plt
 from realips.env.gym_physics import GymPhysics, GymPhysicsParams
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.remote.transition import TrajectorySegment
-import pickle
-import tensorflow as tf
-
-from realips.utils import observations2states
-
-import matplotlib.pyplot as plt
 
 
 class PlantScopeParams:

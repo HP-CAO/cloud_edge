@@ -40,10 +40,8 @@ class IpsSystem:
             else:
                 action_observations = []
 
-            observations = np.hstack((self.model_stats.observations, action_observations)).tolist()
-
+            observations = np.hstack((self.model_stats.observations, action_observations))
             action = agent.get_exploitation_action(observations, self.model_stats.targets)
-
             states_next = self.physics.step(action)
             stats_observations_next, failed = states2observations(states_next)
 

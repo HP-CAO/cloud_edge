@@ -48,7 +48,9 @@
         "visualize_eval": false,
         "reset_delay": 1.0,
         "can_swing_up_steps": 100,
-        "on_target_reset_steps": 100
+        "on_target_reset_steps": 100,
+        "converge_swing_up_time": 250,
+        "converge_episodes": 3
     },
     "agent_params": {
         "critic_dense1_obs": 256,

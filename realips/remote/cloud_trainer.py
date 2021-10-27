@@ -39,8 +39,8 @@ class CloudSystem(IpsSystem):
         super().__init__(params)
         self.params = params
         self.redis_connection = RedisConnection(self.params.redis_params)
-        self.trajectory_subscriber = self.redis_connection.subscribe(
-            channel=self.params.redis_params.ch_plant_trajectory_segment)
+        # self.trajectory_subscriber = self.redis_connection.subscribe(
+        #     channel=self.params.redis_params.ch_plant_trajectory_segment)
         self.edge_trajectory_subscriber = self.redis_connection.subscribe(
             channel=self.params.redis_params.ch_edge_trajectory)
         self.ep = 0
@@ -190,7 +190,6 @@ class CloudSystem(IpsSystem):
                 sys.exit()
 
         dsas = float(self.model_stats.survived) * self.model_stats.get_average_distance_score()
-        # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))
         return dsas
 
     def optimize(self):

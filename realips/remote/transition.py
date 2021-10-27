@@ -35,7 +35,7 @@ class TrajectorySegment:
         s.failed = seg[2]
         s.normal_operation = seg[3]
         s.sequence_number = seg[-1]
-        s.state = observations2states(s.observations, s.failed)
+        # s.state = observations2states(s.observations, s.failed)
         return s
 
     def get_observation(self):
