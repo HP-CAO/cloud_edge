@@ -135,9 +135,9 @@ class QuanserEdgeControl(EdgeControl):
                 if self.params.ddpg_params.add_actions_observations:
                     action_observations = np.append(action_observations, action)[1:]
 
-                if self.control_condition.acquire(False):
-                    self.control_condition.notify_all()
-                    self.control_condition.release()
+                if self.trajectory_sending_condition.acquire(False):
+                    self.trajectory_sending_condition.notify_all()
+                    self.trajectory_sending_condition.release()
 
                 one_loop_time = time.perf_counter() - t0
                 loop_time_list.append(delta_t)

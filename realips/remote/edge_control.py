@@ -60,7 +60,7 @@ class EdgeControl:
         self.t3 = threading.Thread(target=self.receive_mode)
         self.t4 = threading.Thread(target=self.receive_reset_command)
         self.t5 = threading.Thread(target=self.loop_sending_edge_trajectory)
-        self.control_condition = threading.Condition()
+        self.trajectory_sending_condition = threading.Condition()
         self.step = 0
         self.ep = 0
         self.training = True if eval_weights is None else False
@@ -167,13 +167,12 @@ class EdgeControl:
         #         self.new_trajectory = False
 
         # self.control_condition.release()
-        self.control_condition.acquire()
+        self.trajectory_sending_condition.acquire()
         while True:
-            self.control_condition.wait()
-            if self.edge_trajectory[-1] != 0:
-                t1 = time.perf_counter()
-                self.send_edge_trajectory(self.edge_trajectory)
-                self.pub_time.append(time.perf_counter() - t1)
+            self.trajectory_sending_condition.wait()
+            t1 = time.perf_counter()
+            self.send_edge_trajectory(self.edge_trajectory)
+            self.pub_time.append(time.perf_counter() - t1)
 
     def reset_control(self):
         pass
