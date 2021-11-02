@@ -1,3 +1,4 @@
+import asyncio
 import pickle
 import threading
 import time
@@ -54,15 +55,20 @@ class EdgeControl:
         self.agent_a.initial_model()
         self.agent_b.initial_model()
         self.agent_b.action_noise = self.agent_a.action_noise  # Correlate noise
+        self.edge_trajectory = [0, 0, 0, 0, 0]
         self.t2 = threading.Thread(target=self.update_weights)
         self.t3 = threading.Thread(target=self.receive_mode)
         self.t4 = threading.Thread(target=self.receive_reset_command)
+        self.t5 = threading.Thread(target=self.loop_sending_edge_trajectory)
+        self.control_condition = threading.Condition()
         self.step = 0
         self.ep = 0
         self.training = True if eval_weights is None else False
         self.last_action = 0
+        # self.new_trajectory = False
 
-        self.t2_time = np.zeros(shape=1020)
+        self.t2_time = np.zeros(shape=1200)
+        self.pub_time = []
 
         if eval_weights is not None:
             self.agent_a.load_weights(eval_weights)
@@ -97,12 +103,6 @@ class EdgeControl:
         edge_trajectory_pack = pickle.dumps(edge_trajectory)
         self.redis_connection.publish(channel=self.params.redis_params.ch_edge_trajectory, message=edge_trajectory_pack)
 
-    def send_plant_trajectory(self, plant_trajectory):
-        """send plant states list"""
-        plant_trajectory_pack = pickle.dumps(plant_trajectory)
-        self.redis_connection.publish(channel=self.params.redis_params.ch_plant_trajectory_segment,
-                                      message=plant_trajectory_pack)
-
     def ini_weights_and_noise_factor_from_cloud(self, *args):
         self.send_ready_update(True)
         weights, action_noise_factor = self.receives_weights_and_noise_factor()
@@ -116,7 +116,6 @@ class EdgeControl:
     def update_weights(self):
 
         while True:
-
             self.send_ready_update(True)
 
             weights, action_noise_factor = self.receives_weights_and_noise_factor()
@@ -141,10 +140,13 @@ class EdgeControl:
         self.t2.daemon = True
         self.t3.daemon = True
         self.t4.daemon = True
+        self.t5.daemon = True
 
         self.t2.start()
         self.t3.start()
         self.t4.start()
+        self.t5.start()
+
         self.generate_action()
 
     def receive_mode(self):
@@ -157,6 +159,22 @@ class EdgeControl:
             self.training = mode[0]
             print("training:", self.training)
 
+    def loop_sending_edge_trajectory(self):
+
+        # while True:
+        #     if self.new_trajectory:
+        #         self.send_edge_trajectory(self.edge_trajectory)  # this is sent to the cloud trainer
+        #         self.new_trajectory = False
+
+        # self.control_condition.release()
+        self.control_condition.acquire()
+        while True:
+            self.control_condition.wait()
+            if self.edge_trajectory[-1] != 0:
+                t1 = time.perf_counter()
+                self.send_edge_trajectory(self.edge_trajectory)
+                self.pub_time.append(time.perf_counter() - t1)
+
     def reset_control(self):
         pass
 
@@ -168,10 +186,10 @@ class EdgeControl:
         receive reset command from the cloud trainer to reset the plant;
         resetting command comes when the current steps reach the max_steps of a single episode
         """
-
         while True:
             _ = self.plant_reset_subscriber.parse_response()[2]
             self.set_normal_mode(False)
 
     def set_normal_mode(self, normal_mode):
         pass
+

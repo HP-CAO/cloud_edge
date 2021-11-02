@@ -42,7 +42,6 @@ class SimEdgeControl(EdgeControl):
                 self.step += 1
 
                 states = self.physics.states
-                self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
 
                 normal_mode = self.normal_mode
 
