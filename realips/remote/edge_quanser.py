@@ -1,6 +1,7 @@
 import time
 import signal
 import sys
+import asyncio
 import numpy as np
 from simple_pid import PID
 from quanser.hardware import HILError
@@ -41,11 +42,14 @@ class QuanserEdgeControl(EdgeControl):
         self.calibration()
         self.initialize_plant()
 
+    # async def generate_action(self):
     def generate_action(self):
 
         inf_time_list = []
         loop_time_list = []
         loop_time_till_sleep = []
+        quanser_read_time = []
+        quanser_write_time = []
 
         while True:
 
@@ -63,14 +67,19 @@ class QuanserEdgeControl(EdgeControl):
 
             while not self.quanser_plant.normal_mode:
                 time_log_data = np.array(
-                    [self.ep - 1, self.training, inf_time_list, loop_time_list, loop_time_till_sleep, self.t2_time])
+                    [self.ep - 1, self.training, inf_time_list, loop_time_list, loop_time_till_sleep, self.t2_time,
+                     quanser_read_time, quanser_write_time, self.pub_time])
 
                 np.save('./run_time/{}'.format(self.ep - 1), time_log_data)
 
                 inf_time_list = []
+                self.loop_step = 0
                 loop_time_list = []
                 loop_time_till_sleep = []
-                self.t2_time = np.zeros(shape=1020)
+                quanser_read_time = []
+                quanser_write_time = []
+                self.t2_time = np.zeros(shape=2000)
+                self.pub_time = []
                 self.reset_control()
 
             t0 = time.perf_counter()
@@ -79,15 +88,18 @@ class QuanserEdgeControl(EdgeControl):
             t1 = t1_1
 
             while self.quanser_plant.normal_mode:
+
                 t1_1 = time.perf_counter()
                 delta_t = t1_1 - t1
                 t1 = t1_1
                 self.step += 1
                 self.loop_step += 1
                 self.steps_since_calibration += 1
+
+                t_r_start = time.perf_counter()
                 states = self.quanser_plant.get_encoder_readings()
 
-                self.send_plant_trajectory(states)  # this is sent to the plant scope for monitoring
+                quanser_read_time.append(time.perf_counter() - t_r_start)
 
                 normal_mode = self.quanser_plant.normal_mode
 
@@ -109,17 +121,23 @@ class QuanserEdgeControl(EdgeControl):
 
                 action_real = action * self.params.control_params.action_factor
 
+                t_w_start = time.perf_counter()
                 self.quanser_plant.write_analog_output(action_real)
+                quanser_write_time.append(time.perf_counter() - t_w_start)
 
-                edge_trajectory = [observations, self.last_action, failed, normal_mode, self.step]
+                self.edge_trajectory = [observations, self.last_action, failed, normal_mode, self.step]
+                # self.new_trajectory = True
 
                 self.last_action = action
 
-                self.send_edge_trajectory(edge_trajectory)  # this is sent to the cloud trainer
                 # print("Inference took {}s".format(delta_t))
 
                 if self.params.ddpg_params.add_actions_observations:
                     action_observations = np.append(action_observations, action)[1:]
+
+                if self.trajectory_sending_condition.acquire(False):
+                    self.trajectory_sending_condition.notify_all()
+                    self.trajectory_sending_condition.release()
 
                 one_loop_time = time.perf_counter() - t0
                 loop_time_list.append(delta_t)
@@ -130,6 +148,7 @@ class QuanserEdgeControl(EdgeControl):
 
                 if one_loop_time < self.sample_period:
                     time.sleep(self.sample_period - one_loop_time)
+                    # await asyncio.sleep(self.sample_period - one_loop_time)
                     time_out_counter = 0
                 else:
                     time_out_counter += 1
@@ -146,7 +165,7 @@ class QuanserEdgeControl(EdgeControl):
                     sys.exit("Safe exiting...")
 
     def reset_control(self):
-
+        self.edge_trajectory = [0, 0, 0, 0, 0]
         t0 = time.time()
 
         if self.params.control_params.random_reset_ini:

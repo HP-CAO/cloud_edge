@@ -1,7 +1,6 @@
 import pickle
 import copy
 import sys
-import struct
 import math
 import threading
 import time
@@ -39,8 +38,8 @@ class CloudSystem(IpsSystem):
         super().__init__(params)
         self.params = params
         self.redis_connection = RedisConnection(self.params.redis_params)
-        # self.trajectory_subscriber = self.redis_connection.subscribe(
-        #     channel=self.params.redis_params.ch_plant_trajectory_segment)
+        self.trajectory_subscriber = self.redis_connection.subscribe(
+            channel=self.params.redis_params.ch_plant_trajectory_segment)
         self.edge_trajectory_subscriber = self.redis_connection.subscribe(
             channel=self.params.redis_params.ch_edge_trajectory)
         self.ep = 0
@@ -124,18 +123,22 @@ class CloudSystem(IpsSystem):
 
         step_count = self.params.stats_params.max_episode_steps
         step = 0
-        for step in range(step_count):
+
+        while step < step_count:
             last_seg = traj_segment
             traj_segment = self.receive_edge_trajectory()
-            stat_observations = last_seg.observations[0:5]
 
-            r = self.reward_fcn.reward(stat_observations,
-                                       self.target,
-                                       traj_segment.last_action,
-                                       traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
+            if traj_segment.sequence_number == (last_seg.sequence_number + 1):
+                step += 1
+                self.send_plant_trajectory(traj_segment.state)  # this is sent to the plant scope for monitoring
 
-            if training:
-                if traj_segment.sequence_number == (last_seg.sequence_number + 1):
+                stat_observations = last_seg.observations[0:5]
+                r = self.reward_fcn.reward(stat_observations,
+                                           self.target,
+                                           traj_segment.last_action,
+                                           traj_segment.failed, pole_length=self.params.physics_params.length).squeeze()
+
+                if training:
                     # only save the experience if the two trajectory are consecutive
                     self.trainer.store_experience(last_seg.observations, self.target, traj_segment.last_action, r,
                                                   traj_segment.observations, traj_segment.failed)
@@ -145,23 +148,25 @@ class CloudSystem(IpsSystem):
                     if self.optimize_condition.acquire(False):
                         self.optimize_condition.notify_all()
                         self.optimize_condition.release()
+
                 else:
-                    print("Package loss... terrible loss :/")
-            else:
 
-                self.model_stats.cart_positions.append(last_seg.observations[0])
-                self.model_stats.pendulum_angele.append(
-                    math.atan2(last_seg.observations[2], last_seg.observations[3]))
-                self.model_stats.actions.append(traj_segment.last_action)
+                    self.model_stats.cart_positions.append(last_seg.observations[0])
+                    self.model_stats.pendulum_angele.append(
+                        math.atan2(last_seg.observations[2], last_seg.observations[3]))
+                    self.model_stats.actions.append(traj_segment.last_action)
 
-            self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
-            self.model_stats.targets = copy.deepcopy(self.target)
-            self.model_stats.measure(self.model_stats.observations, self.model_stats.targets,
-                                     traj_segment.failed,
-                                     pole_length=self.params.physics_params.length,
-                                     distance_score_factor=self.params.reward_params.distance_score_factor)
+                self.model_stats.observations = copy.deepcopy(traj_segment.observations[0:5])
+                self.model_stats.targets = copy.deepcopy(self.target)
+                self.model_stats.measure(self.model_stats.observations, self.model_stats.targets,
+                                         traj_segment.failed,
+                                         pole_length=self.params.physics_params.length,
+                                         distance_score_factor=self.params.reward_params.distance_score_factor)
 
-            self.model_stats.reward.append(r)
+                self.model_stats.reward.append(r)
+
+            elif traj_segment.sequence_number - last_seg.sequence_number > 1:
+                print("Package loss... terrible loss :/")
 
             if training and self.model_stats.consecutive_on_target_steps > self.params.stats_params.on_target_reset_steps:
                 break
@@ -172,6 +177,7 @@ class CloudSystem(IpsSystem):
         self.agent.noise_factor_decay(self.model_stats.total_steps)
 
         self.initiate_reset()
+
         time.sleep(self.params.cloud_params.sleep_after_reset)
         # Clean the received trajectory
         stale_segments = self.edge_trajectory_subscriber.parse_response(block=False)
@@ -191,6 +197,7 @@ class CloudSystem(IpsSystem):
 
         dsas = float(self.model_stats.survived) * self.model_stats.get_average_distance_score()
         return dsas
+        # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))
 
     def optimize(self):
 
@@ -217,7 +224,7 @@ class CloudSystem(IpsSystem):
                 else:
                     print(
                         "[{}] ===>  Training: current training finished, not sending weights, mem_size: {}, backlog: {}"
-                        .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
+                            .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
 
     def waiting_edge_ready(self):
 
@@ -282,3 +289,9 @@ class CloudSystem(IpsSystem):
                 if failed:
                     break
             steps += step
+
+    def send_plant_trajectory(self, plant_trajectory):
+        """send plant states list"""
+        plant_trajectory_pack = pickle.dumps(plant_trajectory)
+        self.redis_connection.publish(channel=self.params.redis_params.ch_plant_trajectory_segment,
+                                      message=plant_trajectory_pack)
