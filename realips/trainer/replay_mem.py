@@ -21,14 +21,11 @@ class ReplayMemory(object):
     Replay memory class to store trajectories
     """
 
-    def __init__(self, size, beta=1, alpha=1):
+    def __init__(self, size):
         """
         initializing the replay memory
-        :param: beta, alpha are for prioritized replay_mem
         """
         self.new_head = False
-        self.beta = beta
-        self.alpha = alpha
         self.k = 0
         self.head = -1
         self.full = False
@@ -42,16 +39,13 @@ class ReplayMemory(object):
     def add(self, experience):
         if self.memory is None:
             self.initialize(experience)
-            priority = 1.0
-        else:
-            priority = np.max(self.memory[-1])
+            print("initialized done")
 
         if len(experience) + 1 != len(self.memory):
             raise Exception('Experiment not the same size as memory', len(experience), '!=', len(self.memory))
 
         for e, mem in zip(experience, self.memory):
             mem[self.k] = e
-        self.memory[-1][self.k] = priority
 
         self.head = self.k
         self.new_head = True
@@ -87,8 +81,6 @@ class ReplayMemory(object):
         self.head = -1
         self.full = False
         self.memory = None
-        self.alpha = 1  # put a parameter to reset alpha beta
-        self.beta = 1
         self.new_head = False
 
     def shuffle(self):
@@ -111,17 +103,3 @@ class ReplayMemory(object):
                 self.memory = np.hstack((self.memory, memory))
 
         print("Load memory caches, pre-filled replay memory!")
-
-    def sample_prioritized(self, batch_size):
-        r = self.size
-        if not self.full:
-            r = self.k
-        P = (self.memory[-1][:r] / np.sum(self.memory[-1][:r]))
-        random_idx = np.random.choice(r, size=batch_size, replace=False, p=P)
-
-        importance_sampling_weight = (P[random_idx] / max(P)) ** (-self.beta)
-
-        return random_idx, [mem[random_idx] for mem in self.memory], importance_sampling_weight
-
-    def update_priority(self, idx, priorities):
-        self.memory[-1][idx] = np.squeeze(priorities) ** self.alpha + 1e-3

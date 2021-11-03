@@ -1,4 +1,3 @@
-import asyncio
 import pickle
 import threading
 import time
@@ -55,20 +54,17 @@ class EdgeControl:
         self.agent_a.initial_model()
         self.agent_b.initial_model()
         self.agent_b.action_noise = self.agent_a.action_noise  # Correlate noise
-        self.edge_trajectory = [0, 0, 0, 0, 0]
+
         self.t2 = threading.Thread(target=self.update_weights)
         self.t3 = threading.Thread(target=self.receive_mode)
         self.t4 = threading.Thread(target=self.receive_reset_command)
         self.t5 = threading.Thread(target=self.loop_sending_edge_trajectory)
-        self.trajectory_sending_condition = threading.Condition()
-        self.step = 0
-        self.ep = 0
-        self.training = True if eval_weights is None else False
-        self.last_action = 0
-        # self.new_trajectory = False
 
-        self.t2_time = np.zeros(shape=1200)
-        self.pub_time = []
+        self.trajectory_sending_condition = threading.Condition()
+        self.training = True if eval_weights is None else False
+        self.step = 0
+        self.last_action = 0
+        self.edge_trajectory = [0, 0, 0, 0, 0]
 
         if eval_weights is not None:
             self.agent_a.load_weights(eval_weights)
@@ -76,10 +72,6 @@ class EdgeControl:
         elif params.control_params.initialize_from_cloud:
             print("waiting for weights from cloud")
             self.ini_weights_and_noise_factor_from_cloud(self.agent_a, self.agent_b)
-
-        self.loop_step = 0
-        # self.calibration()
-        # self.initialize_plant()
 
     def reset_targets(self):
         if self.params.control_params.random_reset_target:
@@ -122,17 +114,13 @@ class EdgeControl:
 
             if self.agent_a_active:
                 for i, w in enumerate(weights):
-                    t0 = time.perf_counter()
                     self.agent_b.actor.weights[i].assign(w)
                     time.sleep(0.001)
-                    self.t2_time[self.loop_step] = time.perf_counter() - t0
                 self.agent_b.set_action_noise_factor(action_noise_factor)
             else:
                 for i, w in enumerate(weights):
-                    t0 = time.perf_counter()
                     self.agent_a.actor.weights[i].assign(w)
                     time.sleep(0.001)
-                    self.t2_time[self.loop_step] = time.perf_counter() - t0
                 self.agent_a.set_action_noise_factor(action_noise_factor)
             self.agent_a_active = not self.agent_a_active
 
@@ -161,18 +149,10 @@ class EdgeControl:
 
     def loop_sending_edge_trajectory(self):
 
-        # while True:
-        #     if self.new_trajectory:
-        #         self.send_edge_trajectory(self.edge_trajectory)  # this is sent to the cloud trainer
-        #         self.new_trajectory = False
-
-        # self.control_condition.release()
         self.trajectory_sending_condition.acquire()
         while True:
             self.trajectory_sending_condition.wait()
-            t1 = time.perf_counter()
             self.send_edge_trajectory(self.edge_trajectory)
-            self.pub_time.append(time.perf_counter() - t1)
 
     def reset_control(self):
         pass

@@ -1,7 +1,6 @@
 import pickle
 import copy
 import sys
-import struct
 import math
 import threading
 import time
@@ -39,8 +38,6 @@ class CloudSystem(IpsSystem):
         super().__init__(params)
         self.params = params
         self.redis_connection = RedisConnection(self.params.redis_params)
-        # self.trajectory_subscriber = self.redis_connection.subscribe(
-        #     channel=self.params.redis_params.ch_plant_trajectory_segment)
         self.edge_trajectory_subscriber = self.redis_connection.subscribe(
             channel=self.params.redis_params.ch_edge_trajectory)
         self.ep = 0
@@ -62,7 +59,6 @@ class CloudSystem(IpsSystem):
             channel=self.params.redis_params.ch_edge_ready_update)
         self.edge_ready = None
 
-        # self.t1 = threading.Thread(target=self.store_trajectory)
         self.t2 = threading.Thread(target=self.optimize)
         self.t3 = threading.Thread(target=self.waiting_edge_ready)
 
@@ -281,4 +277,5 @@ class CloudSystem(IpsSystem):
 
                 if failed:
                     break
+
             steps += step

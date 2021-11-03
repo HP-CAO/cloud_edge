@@ -1,7 +1,6 @@
 import time
 import signal
 import sys
-import asyncio
 import numpy as np
 from simple_pid import PID
 from quanser.hardware import HILError
@@ -37,27 +36,15 @@ class QuanserEdgeControl(EdgeControl):
                                           self.params.control_params.frequency,
                                           self.params.control_params.x_threshold,
                                           self.params.control_params.theta_dot_threshold)
+
         self.pid_controller = PID(Kp=0.0005, setpoint=0, sample_time=self.sample_period)
 
         self.calibration()
         self.initialize_plant()
 
-    # async def generate_action(self):
     def generate_action(self):
 
-        inf_time_list = []
-        loop_time_list = []
-        loop_time_till_sleep = []
-        quanser_read_time = []
-        quanser_write_time = []
-
         while True:
-
-            self.ep += 1
-            self.loop_step = 0
-
-            if self.ep > 3:
-                sys.exit("run_time logged")
 
             if self.params.ddpg_params.add_actions_observations:
 
@@ -66,71 +53,38 @@ class QuanserEdgeControl(EdgeControl):
                 action_observations = []
 
             while not self.quanser_plant.normal_mode:
-                time_log_data = np.array(
-                    [self.ep - 1, self.training, inf_time_list, loop_time_list, loop_time_till_sleep, self.t2_time,
-                     quanser_read_time, quanser_write_time, self.pub_time])
-
-                np.save('./run_time/{}'.format(self.ep - 1), time_log_data)
-
-                inf_time_list = []
-                self.loop_step = 0
-                loop_time_list = []
-                loop_time_till_sleep = []
-                quanser_read_time = []
-                quanser_write_time = []
-                self.t2_time = np.zeros(shape=2000)
-                self.pub_time = []
                 self.reset_control()
 
             t0 = time.perf_counter()
             time_out_counter = 0
-            t1_1 = time.perf_counter()
-            t1 = t1_1
 
             while self.quanser_plant.normal_mode:
 
-                t1_1 = time.perf_counter()
-                delta_t = t1_1 - t1
-                t1 = t1_1
                 self.step += 1
-                self.loop_step += 1
                 self.steps_since_calibration += 1
 
-                t_r_start = time.perf_counter()
                 states = self.quanser_plant.get_encoder_readings()
-
-                quanser_read_time.append(time.perf_counter() - t_r_start)
 
                 normal_mode = self.quanser_plant.normal_mode
 
                 stats_observation, failed = states2observations(states)
 
-                observations = np.hstack((stats_observation, action_observations))
+                observations = np.hstack((stats_observation, action_observations)).tolist()
 
                 agent = self.agent_a if self.agent_a_active else self.agent_b
-
-                t_start = time.perf_counter()
 
                 if self.training:
                     action = agent.get_exploration_action(observations, self.control_targets)
                 else:
                     action = agent.get_exploitation_action(observations, self.control_targets)
-                # print("Inference time:", time.time() - t_start)
-
-                inf_time_list.append(time.perf_counter() - t_start)
 
                 action_real = action * self.params.control_params.action_factor
 
-                t_w_start = time.perf_counter()
                 self.quanser_plant.write_analog_output(action_real)
-                quanser_write_time.append(time.perf_counter() - t_w_start)
 
                 self.edge_trajectory = [observations, self.last_action, failed, normal_mode, self.step]
-                # self.new_trajectory = True
 
                 self.last_action = action
-
-                # print("Inference took {}s".format(delta_t))
 
                 if self.params.ddpg_params.add_actions_observations:
                     action_observations = np.append(action_observations, action)[1:]
@@ -140,15 +94,9 @@ class QuanserEdgeControl(EdgeControl):
                     self.trajectory_sending_condition.release()
 
                 one_loop_time = time.perf_counter() - t0
-                loop_time_list.append(delta_t)
-
-                t_loop = time.perf_counter()
-                delta_t_2 = t_loop - t1_1
-                loop_time_till_sleep.append(delta_t_2)
 
                 if one_loop_time < self.sample_period:
                     time.sleep(self.sample_period - one_loop_time)
-                    # await asyncio.sleep(self.sample_period - one_loop_time)
                     time_out_counter = 0
                 else:
                     time_out_counter += 1
@@ -165,8 +113,8 @@ class QuanserEdgeControl(EdgeControl):
                     sys.exit("Safe exiting...")
 
     def reset_control(self):
-        self.edge_trajectory = [0, 0, 0, 0, 0]
-        t0 = time.time()
+
+        t0 = time.perf_counter()
 
         if self.params.control_params.random_reset_ini:
             reset_point \
@@ -177,7 +125,7 @@ class QuanserEdgeControl(EdgeControl):
 
         print("resetting.....")
 
-        while time.time() - t0 < 5:
+        while time.perf_counter() - t0 < 5:
             x = self.quanser_plant.encoder_buffer[0].copy()
             control_action = self.pid_controller(x)
             control_action = np.clip(control_action, -2.5, 2.5)  # set an action range
@@ -198,7 +146,7 @@ class QuanserEdgeControl(EdgeControl):
         x_old = theta_old = 0
         while True:
 
-            t0 = time.time()
+            t0 = time.perf_counter()
 
             print("calibrating...")
 
@@ -211,7 +159,7 @@ class QuanserEdgeControl(EdgeControl):
             if still_step > 50:
                 break
 
-            dt = time.time() - t0
+            dt = time.perf_counter() - t0
 
             time.sleep(self.sample_period - dt) if dt < self.sample_period else print("time_out")
 

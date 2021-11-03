@@ -33,10 +33,6 @@ class DDPGTrainer:
 
         for i in range(self.params.training_epoch):
 
-            if self.params.use_prioritized_replay:
-                self.optimize_prioritized()
-                return
-
             if self.params.pre_fill_exp > self.replay_mem.get_size():
                 return
 
@@ -86,46 +82,6 @@ class DDPGTrainer:
                     actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
                     self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
             self.agent.soft_update()
-
-    def optimize_prioritized(self):
-
-        if self.params.batch_size > self.replay_mem.get_size():
-            return
-
-        self.replay_memory_mutex.acquire()
-        idx, mini_batch, importance_sampling_weight = self.replay_mem.sample_prioritized(self.params.batch_size)
-        self.replay_memory_mutex.release()
-
-        ob1 = mini_batch[0]
-        tgs = mini_batch[1]
-        a1 = mini_batch[2]
-        r1 = mini_batch[3]
-        ob2 = mini_batch[4]
-        cra = mini_batch[5]
-
-        # ---------------------- optimize critic ----------------------
-        # Use target actor exploitation policy here for loss evaluation
-
-        with tf.GradientTape() as tape:
-            a2 = self.agent.actor_target([ob2, tgs])
-            q_e = self.agent.critic_target([ob2, tgs, a2])
-            y_exp = r1 + self.params.gamma_discount * q_e * (1 - cra)
-            y_pre = self.agent.critic([ob1, tgs, a1])
-            td_error = y_exp - y_pre
-            loss_critic = tf.reduce_mean(importance_sampling_weight * td_error ** 2)
-            q_grads = tape.gradient(loss_critic, self.agent.critic.trainable_variables)
-            # q_grads = importance_sampling_weight * td_error * bare_grads
-            self.optimizer_critic.apply_gradients(zip(q_grads, self.agent.critic.trainable_variables))
-            self.replay_mem.update_priority(idx, abs(td_error.numpy()))
-
-        # ---------------------- optimize actor ----------------------
-        if self.replay_mem.get_size() >= self.params.actor_freeze_step_count: # update actor less frequently
-            with tf.GradientTape() as tape:
-                a1_predict = self.agent.actor([ob1, tgs])
-                actor_value = -1 * tf.math.reduce_mean(self.agent.critic([ob1, tgs, a1_predict]))
-                actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
-                self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
-        self.agent.soft_update()
 
     def load_weights(self, path):
         self.agent.load_weights(path)

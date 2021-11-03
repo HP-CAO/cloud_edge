@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from realips.remote.cloud_trainer_seq import CloudSystem, CloudSystemParams
+from realips.remote.cloud_trainer import CloudSystem, CloudSystemParams
 from utils import *
 
 
