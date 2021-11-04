@@ -31,8 +31,8 @@
         "distance_score_factor": 5
     },
     "stats_params": {
-        "max_episode_steps": 1500,
-        "total_steps": 1000000,
+        "max_episode_steps": 1200,
+        "total_steps": 500000,
         "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
@@ -48,7 +48,9 @@
         "visualize_eval": false,
         "reset_delay": 1.0,
         "can_swing_up_steps": 100,
-        "on_target_reset_steps": 100
+        "on_target_reset_steps": 100,
+        "converge_swing_up_time": 250,
+        "converge_episodes": 3
     },
     "agent_params": {
         "critic_dense1_obs": 256,
@@ -75,9 +77,8 @@
         "actor_freeze_step_count": 5000,
         "use_prioritized_replay": false,
         "pre_fill_exp": 3500,
-        "target_action_noise": true,
+        "target_action_noise": false,
         "training_epoch": 1,
-        "actor_update_period": 2,
-        "step_soft_update": false
+        "actor_update_period": 1
     }
 }

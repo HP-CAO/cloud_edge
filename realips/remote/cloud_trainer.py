@@ -252,6 +252,7 @@ class CloudSystem(IpsSystem):
                 action_observations = []
 
             step = 0
+
             for step in range(self.params.stats_params.max_episode_steps):
 
                 observations = np.hstack((self.model_stats.observations, action_observations)).tolist()
