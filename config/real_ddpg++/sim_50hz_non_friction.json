@@ -32,7 +32,7 @@
     },
     "stats_params": {
         "max_episode_steps": 1200,
-        "total_steps": 500000,
+        "total_steps": 1000000,
         "target_distance_score": 0.77880078307,
         "targets": [
             0.0,

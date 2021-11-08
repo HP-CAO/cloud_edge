@@ -87,5 +87,4 @@ class TD3Trainer:
                     actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
                     self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
                     self.agent.soft_update()
-            elif self.params.step_soft_update:
-                self.agent.soft_update()
+

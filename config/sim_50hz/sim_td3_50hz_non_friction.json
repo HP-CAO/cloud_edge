@@ -32,7 +32,7 @@
     },
     "stats_params": {
         "max_episode_steps": 1200,
-        "total_steps": 500000,
+        "total_steps": 1000000,
         "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
@@ -71,7 +71,7 @@
         "gamma_discount": 0.99,
         "rm_size": 1000000,
         "batch_size": 128,
-        "learning_rate_actor": 0.0003,
+        "learning_rate_actor": 0.0001,
         "learning_rate_critic": 0.0003,
         "is_remote_train": false,
         "actor_freeze_step_count": 5000,
@@ -79,7 +79,6 @@
         "pre_fill_exp": 3500,
         "target_action_noise": true,
         "training_epoch": 1,
-        "actor_update_period": 2,
-        "step_soft_update": false
+        "actor_update_period": 2
     }
 }

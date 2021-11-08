@@ -17,9 +17,9 @@
         "voltage_mag": 5.0,
         "length": 0.64,
         "theta_random_std": 0.8,
-        "friction_cart": 0,
-        "friction_pole": 0,
-        "with_friction": false,
+        "friction_cart": 5,
+        "friction_pole": 0.0005,
+        "with_friction": true,
         "force_input": false,
         "simulation_frequency": 50,
         "actuation_delay": 1
@@ -71,14 +71,14 @@
         "gamma_discount": 0.99,
         "rm_size": 1000000,
         "batch_size": 128,
-        "learning_rate_actor": 0.0001,
+        "learning_rate_actor": 0.0003,
         "learning_rate_critic": 0.0003,
         "is_remote_train": false,
-        "actor_freeze_step_count": 128,
+        "actor_freeze_step_count": 5000,
         "use_prioritized_replay": false,
-        "pre_fill_exp": 128,
+        "pre_fill_exp": 3500,
         "target_action_noise": true,
         "training_epoch": 1,
-        "actor_update_period": 1
+        "actor_update_period": 2
     }
 }

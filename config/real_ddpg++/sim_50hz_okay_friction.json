@@ -18,7 +18,7 @@
         "length": 0.64,
         "theta_random_std": 0.8,
         "friction_cart": 10,
-        "friction_pole": 0.0011,
+        "friction_pole": 0.0010,
         "with_friction": true,
         "force_input": false,
         "simulation_frequency": 50,
@@ -32,7 +32,7 @@
     },
     "stats_params": {
         "max_episode_steps": 1200,
-        "total_steps": 500000,
+        "total_steps": 1000000,
         "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
