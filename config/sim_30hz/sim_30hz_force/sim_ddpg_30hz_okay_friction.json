@@ -17,10 +17,10 @@
         "voltage_mag": 5.0,
         "length": 0.64,
         "theta_random_std": 0.8,
-        "friction_cart": 0,
-        "friction_pole": 0,
-        "with_friction": false,
-        "force_input": false,
+        "friction_cart": 10,
+        "friction_pole": 0.0010,
+        "with_friction": true,
+        "force_input": true,
         "simulation_frequency": 30,
         "actuation_delay": 1
     },
@@ -31,8 +31,8 @@
         "distance_score_factor": 5
     },
     "stats_params": {
-        "max_episode_steps": 1200,
-        "total_steps": 500000,
+        "max_episode_steps": 1000,
+        "total_steps": 1000000,
         "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
@@ -74,10 +74,10 @@
         "learning_rate_actor": 0.0003,
         "learning_rate_critic": 0.0003,
         "is_remote_train": false,
-        "actor_freeze_step_count": 128,
+        "actor_freeze_step_count": 5000,
         "use_prioritized_replay": false,
-        "pre_fill_exp": 128,
-        "target_action_noise": true,
+        "pre_fill_exp": 3500,
+        "target_action_noise": false,
         "training_epoch": 1,
         "actor_update_period": 1
     }

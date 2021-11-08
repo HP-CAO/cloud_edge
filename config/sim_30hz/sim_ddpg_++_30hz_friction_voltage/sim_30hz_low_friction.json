@@ -17,9 +17,9 @@
         "voltage_mag": 5.0,
         "length": 0.64,
         "theta_random_std": 0.8,
-        "friction_cart": 0,
-        "friction_pole": 0,
-        "with_friction": false,
+        "friction_cart": 5,
+        "friction_pole": 0.0005,
+        "with_friction": true,
         "force_input": false,
         "simulation_frequency": 30,
         "actuation_delay": 1
@@ -31,8 +31,8 @@
         "distance_score_factor": 5
     },
     "stats_params": {
-        "max_episode_steps": 1200,
-        "total_steps": 500000,
+        "max_episode_steps": 1000,
+        "total_steps": 1000000,
         "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
@@ -79,6 +79,6 @@
         "pre_fill_exp": 3500,
         "target_action_noise": true,
         "training_epoch": 1,
-        "actor_update_period": 1
+        "actor_update_period": 2
     }
 }

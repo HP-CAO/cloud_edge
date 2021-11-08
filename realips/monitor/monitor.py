@@ -140,8 +140,8 @@ class ModelStats:
             tf.summary.scalar('distance_score', average_distance_score, self.total_steps)
             tf.summary.scalar('distance_score_and_survived', average_distance_score * survived, self.total_steps)
 
-            print("Evaluation:=====>  Episode: ", episode, " Total steps:",
-                  self.get_steps(), " Average_reward: ", average_reward, "ds_mean", average_distance_score)
+        print("Evaluation:=====>  Episode: ", episode, " Total steps:",
+              self.get_steps(), " Average_reward: ", average_reward, "ds_mean", average_distance_score)
 
         if swing_up_time <= self.params.converge_swing_up_time:
             self.converge_eval_episode += 1
