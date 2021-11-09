@@ -21,7 +21,7 @@
         "friction_pole": 0.0011,
         "with_friction": true,
         "force_input": false,
-        "simulation_frequency": 50,
+        "simulation_frequency": 30,
         "actuation_delay": 1
     },
     "reward_params": {
@@ -31,7 +31,7 @@
         "distance_score_factor": 5
     },
     "stats_params": {
-        "max_episode_steps": 1200,
+        "max_episode_steps": 1000,
         "total_steps": 5000000.0,
         "target_distance_score": 0.77880078307,
         "targets": [
@@ -94,7 +94,6 @@
         "sleep_after_reset": 2,
         "agent_type": 0,
         "pre_fill_steps" : 0,
-        "on_target_reset_steps": 100,
         "weights_update_period": 1
     },
     "agent_params": {
@@ -124,6 +123,6 @@
         "pre_fill_exp": 3500,
         "target_action_noise": true,
         "training_epoch": 1,
-        "actor_update_period": 1
+        "actor_update_period": 2
     }
 }
