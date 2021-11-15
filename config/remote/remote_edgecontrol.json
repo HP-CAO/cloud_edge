@@ -65,7 +65,7 @@
         "agent_type": null,
         "initialize_from_cloud": true,
         "train_real": true,
-        "action_factor": 5,
+        "action_factor": 4,
         "calibrating_period" : 11,
         "calibrating_period_steps": 10000,
         "random_reset_ini": true
