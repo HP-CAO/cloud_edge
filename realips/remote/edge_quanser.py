@@ -97,6 +97,7 @@ class QuanserEdgeControl(EdgeControl):
 
                 if one_loop_time < self.sample_period:
                     time.sleep(self.sample_period - one_loop_time)
+                    # asyncio.sleep(self.sample_period - one_loop_time) # todo double check
                     time_out_counter = 0
                 else:
                     time_out_counter += 1
@@ -113,6 +114,9 @@ class QuanserEdgeControl(EdgeControl):
                     sys.exit("Safe exiting...")
 
     def reset_control(self):
+
+        if self.steps_since_calibration >= self.params.control_params.calibrating_period_steps:
+            self.calibration()
 
         t0 = time.perf_counter()
 
@@ -137,11 +141,9 @@ class QuanserEdgeControl(EdgeControl):
         self.last_action = 0
         print("<========== resetting finished ==========>")
 
-        if self.steps_since_calibration >= self.params.control_params.calibrating_period_steps:
-            self.calibration()
-
     def calibration(self):
-
+        
+        self.quanser_plant.write_analog_output(0)
         still_step = 0
         x_old = theta_old = 0
         while True:

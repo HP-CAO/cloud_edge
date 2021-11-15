@@ -94,7 +94,6 @@
         "sleep_after_reset": 2,
         "agent_type": 0,
         "pre_fill_steps" : 0,
-        "on_target_reset_steps": 100,
         "weights_update_period": 1
     },
     "agent_params": {
@@ -122,8 +121,8 @@
         "actor_freeze_step_count": 5000,
         "use_prioritized_replay": false,
         "pre_fill_exp": 3500,
-        "target_action_noise": false,
+        "target_action_noise": true,
         "training_epoch": 1,
-        "actor_update_period": 1
+        "actor_update_period": 2
     }
 }

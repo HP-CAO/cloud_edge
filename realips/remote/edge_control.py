@@ -1,6 +1,7 @@
 import pickle
 import threading
 import time
+# import asyncio
 
 import numpy as np
 from realips.agent.base import BaseAgent
@@ -116,12 +117,15 @@ class EdgeControl:
                 for i, w in enumerate(weights):
                     self.agent_b.actor.weights[i].assign(w)
                     time.sleep(0.001)
+                    # asyncio.sleep(0)
                 self.agent_b.set_action_noise_factor(action_noise_factor)
             else:
                 for i, w in enumerate(weights):
                     self.agent_a.actor.weights[i].assign(w)
                     time.sleep(0.001)
+                    # asyncio.sleep(0)
                 self.agent_a.set_action_noise_factor(action_noise_factor)
+
             self.agent_a_active = not self.agent_a_active
 
     def run(self):
