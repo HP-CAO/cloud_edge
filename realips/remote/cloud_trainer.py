@@ -13,6 +13,7 @@ from realips.system.ips import IpsSystemParams, IpsSystem
 from realips.remote.redis import RedisParams, RedisConnection
 from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
 from realips.trainer.trainer_ddpg import DDPGTrainer, DDPGTrainerParams
+from utils import write_config
 
 
 class CloudParams:
@@ -22,6 +23,8 @@ class CloudParams:
         self.agent_type = 0  # 0: DDPG, 1: TD3
         self.pre_fill_steps = 0
         self.weights_update_period = 1
+        self.artificial_bandwidth = -1  # set bandwidth between cloud and edge in MBit/s
+        self.artificial_ping = 0  # set ping between cloud and edge in ms
 
 
 class CloudSystemParams(IpsSystemParams):
@@ -37,6 +40,7 @@ class CloudSystem(IpsSystem):
     def __init__(self, params: CloudSystemParams):
         super().__init__(params)
         self.params = params
+        write_config(params, f"{self.model_stats.log_dir}/config.json")
         self.redis_connection = RedisConnection(self.params.redis_params)
         self.edge_trajectory_subscriber = self.redis_connection.subscribe(
             channel=self.params.redis_params.ch_edge_trajectory)
@@ -57,7 +61,6 @@ class CloudSystem(IpsSystem):
 
         self.edge_status_subscriber = self.redis_connection.subscribe(
             channel=self.params.redis_params.ch_edge_ready_update)
-        self.edge_ready = None
 
         self.t2 = threading.Thread(target=self.optimize)
         self.t3 = threading.Thread(target=self.waiting_edge_ready)
@@ -70,10 +73,17 @@ class CloudSystem(IpsSystem):
         if self.params.cloud_params.pre_fill_steps > 0:
             self.prefill_sim(self.params.cloud_params.pre_fill_steps)
 
-        self.send_weights_and_noise_factor(self.agent.get_actor_weights(), self.agent.action_noise_factor)
         self.target = [0., 0.]
         self.training = True
         self.trainable = 0
+
+        if self.params.cloud_params.artificial_bandwidth != -1:
+            packet = pickle.dumps([self.agent.get_actor_weights(), self.agent.action_noise_factor])
+            self.sending_time = (len(packet) * 8 / 2 ** 20) / self.params.cloud_params.artificial_bandwidth + \
+                                self.params.cloud_params.artificial_ping / 1000
+            print(f"Setting sending time for actor weights to {self.sending_time} seconds")
+        else:
+            self.sending_time = 0
 
     def run(self):
         """It's triple threads"""
@@ -202,25 +212,30 @@ class CloudSystem(IpsSystem):
             optimize_times += 1
             self.trainable -= 1
 
-            if self.edge_ready and self.training:
-                if optimize_times % self.params.cloud_params.weights_update_period == 0:
-                    weights = self.agent.get_actor_weights()
-                    self.edge_ready = False
-                    self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
-                    # self.agent.save_weights(self.params.stats_params.model_name)
-                    print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}, backlog: {}"
-                          .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
-                else:
-                    print(
-                        "[{}] ===>  Training: current training finished, not sending weights, mem_size: {}, backlog: {}"
-                        .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
+            # if self.edge_ready and self.training:
+            #     if optimize_times % self.params.cloud_params.weights_update_period == 0:
+            #         weights = self.agent.get_actor_weights()
+            #         self.edge_ready = False
+            #         self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
+            #         # self.agent.save_weights(self.params.stats_params.model_name)
+            #         print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}, backlog: {}"
+            #               .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
+            #     else:
+            #         print(
+            #             "[{}] ===>  Training: current training finished, not sending weights, mem_size: {}, backlog: {}"
+            #             .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
 
     def waiting_edge_ready(self):
 
         while True:
             edge_status = self.receive_edge_status()
-            self.edge_ready = edge_status
-            print("Edge is ready for update", self.edge_ready)
+            if edge_status:
+                weights = self.agent.get_actor_weights()
+                if self.sending_time > 0:
+                    time.sleep(self.sending_time)
+                self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
+                print("[{}] ===>  Training: current training finished, sending weights, mem_size: {}, backlog: {}"
+                      .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
 
     def receive_edge_status(self):
         edge_status_pack = self.edge_status_subscriber.parse_response()
@@ -229,6 +244,8 @@ class CloudSystem(IpsSystem):
 
     def send_weights_and_noise_factor(self, weights, noise_factor):
         weights_and_noise_pack = pickle.dumps([weights, noise_factor])
+        if self.params.cloud_params.artificial_bandwidth != -1:
+            time.sleep(self.sending_time)
         self.redis_connection.publish(channel=self.params.redis_params.ch_edge_weights, message=weights_and_noise_pack)
 
     def receive_edge_trajectory(self):
