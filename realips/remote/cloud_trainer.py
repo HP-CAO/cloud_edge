@@ -25,6 +25,8 @@ class CloudParams:
         self.weights_update_period = 1
         self.artificial_bandwidth = -1  # set bandwidth between cloud and edge in MBit/s
         self.artificial_ping = 0  # set ping between cloud and edge in ms
+        self.ethernet_bandwidth = 100  # bw if connected with ethernet between cloud and edge in MBit/s
+        self.ethernet_ping = 0.2  # ping if connected with ethernet between cloud and edge in ms
 
 
 class CloudSystemParams(IpsSystemParams):
@@ -79,8 +81,10 @@ class CloudSystem(IpsSystem):
 
         if self.params.cloud_params.artificial_bandwidth != -1:
             packet = pickle.dumps([self.agent.get_actor_weights(), self.agent.action_noise_factor])
+            ethernet_time = (len(packet) * 8 / 2 ** 20) / self.params.cloud_params.ethernet_bandwidth + \
+                                self.params.cloud_params.ethernet_ping / 1000
             self.sending_time = (len(packet) * 8 / 2 ** 20) / self.params.cloud_params.artificial_bandwidth + \
-                                self.params.cloud_params.artificial_ping / 1000
+                                self.params.cloud_params.artificial_ping / 1000 - ethernet_time
             print(f"Setting sending time for actor weights to {self.sending_time} seconds")
         else:
             self.sending_time = 0
