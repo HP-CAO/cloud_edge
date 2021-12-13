@@ -82,7 +82,7 @@ class CloudSystem(IpsSystem):
         if self.params.cloud_params.artificial_bandwidth != -1.0:
             packet = pickle.dumps([self.agent.get_actor_weights(), self.agent.action_noise_factor])
             ethernet_time = (len(packet) * 8 / 2 ** 20) / self.params.cloud_params.ethernet_bandwidth + \
-                                self.params.cloud_params.ethernet_ping / 1000
+                            self.params.cloud_params.ethernet_ping / 1000
             self.sending_time = (len(packet) * 8 / 2 ** 20) / self.params.cloud_params.artificial_bandwidth + \
                                 self.params.cloud_params.artificial_ping / 1000 - ethernet_time
             print(f"Setting sending time for actor weights to {self.sending_time} seconds")
@@ -108,7 +108,8 @@ class CloudSystem(IpsSystem):
             self.model_stats.reset_status()
             self.ep += 1
 
-            if self.ep % self.params.stats_params.eval_period == 0:
+            if self.ep % self.params.stats_params.eval_period == 0 and \
+                    self.model_stats.total_steps > self.params.trainer_params.actor_freeze_step_count:
                 mode_pack = pickle.dumps([False])
                 self.redis_connection.publish(self.params.redis_params.ch_edge_mode, mode_pack)
                 self.training = False
