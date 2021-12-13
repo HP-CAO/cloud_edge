@@ -44,7 +44,7 @@ for d in tqdm.tqdm(dirs):
             continue
 
         if np.all(np.array(v[-5:]) < 250.0):
-            log_stats["convergence_time"] = s[-5]
+            log_stats["convergence_time"] = s[-1]
         else:
             log_stats["convergence_time"] = -1
 
