@@ -108,7 +108,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+video_recording/
 # Spyder project settings
 .spyderproject
 .spyproject

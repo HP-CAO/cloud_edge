@@ -79,7 +79,7 @@ class CloudSystem(IpsSystem):
         self.training = True
         self.trainable = 0
 
-        if self.params.cloud_params.artificial_bandwidth != -1:
+        if self.params.cloud_params.artificial_bandwidth != -1.0:
             packet = pickle.dumps([self.agent.get_actor_weights(), self.agent.action_noise_factor])
             ethernet_time = (len(packet) * 8 / 2 ** 20) / self.params.cloud_params.ethernet_bandwidth + \
                                 self.params.cloud_params.ethernet_ping / 1000

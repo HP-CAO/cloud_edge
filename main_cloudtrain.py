@@ -12,6 +12,7 @@ def main(p):
 
 def main_eval(p, episodes):
     cloud = CloudSystem(p)
+    cloud.params.stats_params.converge_episodes = episodes
     for cloud.ep in range(episodes):
         cloud.model_stats.reset_status()
         cloud.run_episode(training=False)

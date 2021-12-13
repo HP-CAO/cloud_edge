@@ -94,6 +94,7 @@ class EdgeControl:
     def send_edge_trajectory(self, edge_trajectory):
         """send trajectory from edge"""
         edge_trajectory_pack = pickle.dumps(edge_trajectory)
+        # print("BW lower bound:", len(edge_trajectory_pack) * 8 * self.params.control_params.frequency / 2**20)
         self.redis_connection.publish(channel=self.params.redis_params.ch_edge_trajectory, message=edge_trajectory_pack)
 
     def ini_weights_and_noise_factor_from_cloud(self, *args):
