@@ -5,7 +5,6 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 import tensorflow as tf
 import numpy as np
-import matplotlib.pyplot as plt
 
 import os
 
@@ -53,4 +52,4 @@ for d in tqdm.tqdm(dirs):
             log_stats["swing_up_time_series"][step] = value
 
 with open('data.json', 'w') as f:
-    json.dump(stats, f)
+    json.dump(stats, f, indent=4)
