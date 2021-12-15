@@ -15,7 +15,7 @@ def get_timeseries(event, ts_id):
     return steps, value
 
 
-dirs = [x[0] for x in os.walk('logs')]
+dirs = [x[0] for x in os.walk('../logs')]
 
 stats = {}
 
@@ -25,7 +25,7 @@ for d in tqdm.tqdm(dirs):
     event_acc = EventAccumulator(d, size_guidance={'tensors': 100000})
     event_acc.Reload()
 
-    log_name = d[d.find('/')+1:d.rfind('/')]
+    log_name = d[d.find('logs/')+5:d.rfind('/')]
 
     if log_name not in stats:
         stats[log_name] = {}

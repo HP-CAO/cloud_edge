@@ -1,0 +1,97 @@
+{
+    "data_fric": {
+        "no_fr": [
+            "logs_15_11/real_ddpg_+_30hz_non_friction_vol_4cm_both_con_5_vol_4",
+            "logs_15_11/real_ddpg_+_30hz_non_friction_vol_4cm_both_con_5_vol_4_3rd",
+            "logs_20_11/real_ddpg_+_30hz_non_friction_vol_4cm_both_con_5_200k"
+        ],
+        "lo_fr": [
+            "logs_20_11/real_ddpg_+_30hz_low_friction_vol_4cm_both_con_5_200k",
+            "logs_16_11/real_ddpg_+_30hz_low_friction_vol_4cm_both_con_5_vol_4_2nd",
+            "logs_13_12/low_friction_eval_after_freeze"
+        ],
+        "ok_fr": [
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_3rd",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_4th_video"
+        ],
+        "hi_fr": [
+            "logs_20_11/real_ddpg_+_30hz_high_friction_vol_4cm_both_con_5_200k",
+            "logs_20_11/real_ddpg_+_30hz_high_friction_vol_4cm_both_con_5_200k_2nd",
+            "logs_16_11/real_ddpg_+_30hz_high_friction_vol_4cm_both_con_5_vol_4_3rd"
+        ],
+        "over_fr": [
+            "logs_20_11/real_ddpg_+_30hz_over_friction_vol_4cm_both_con_5_200k",
+            "logs_16_11/real_ddpg_+_30hz_over_friction_vol_4cm_both_con_5_vol_4_2nd",
+            "logs_20_11/real_ddpg_+_30hz_over_friction_vol_4cm_both_con_5_200k_2nd"
+        ]
+    },
+    "data_freeze": {
+        "a_5_c_3.5": [
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_3rd",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_4th_video"
+        ],
+        "a_3.5_c_3.5": [
+            "logs_17_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_vol_4_3.5k_all",
+            "logs_17_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_vol_4_3.5k_all_2nd",
+            "logs_17_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_vol_4_3.5k_all_3rd"
+        ],
+        "a_5_c_0": [
+            "logs_20_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_200k_actor_5_critic_0",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_freeze_actor_only_2nd",
+            "logs_20_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_200k_actor_5_critic_0_2nd"
+        ],
+        "a_0_c_0": [
+            "logs_20_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_200k_non_freezeing",
+            "logs_15_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_non_freeze_2nd",
+            "logs_15_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_non_freeze_3rd"
+        ]
+    },
+    "data_bandwidth": {
+        "bw_0.06": [
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_0.06",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_0.06_2nd",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_0.06_3rd"
+        ],
+        "bw_0.1": [
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_0.1",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_0.1_2nd",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_0.1_3rd"
+        ],
+        "bw_1": [
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_1",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_1_2nd",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_1_3rd"
+        ],
+        "bw_5": [
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_5",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_5_2nd",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_5_3rd"
+        ],
+        "bw_50": [
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_50_2nd",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_50_3rd",
+            "logs_24_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_bw_50_4th"
+        ],
+        "bw_100": [
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_3rd",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_4th_video"
+        ]
+    },
+    "data_eval": {
+        "pre": [
+            "logs_13_12/eval_low_friction_pre"
+        ],
+        "low_1": [
+            "logs_13_12/eval_low_friction_real_20_11_200k"
+        ],
+        "low_2": [
+            "logs_13_12/eval_low_friction_real_16_11_2nd"
+        ],
+        "low_3": [
+            "logs_13_12/eval-low_friction_after_freeze"
+        ]
+    }
+}
