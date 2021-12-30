@@ -17,7 +17,8 @@ class DDPGTrainer:
         self.agent = agent
         self.optimizer_critic = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate_critic)
         self.optimizer_actor = tf.keras.optimizers.Adam(learning_rate=self.params.learning_rate_actor)
-        self.replay_mem = ReplayMemory(size=self.params.rm_size)
+        self.replay_mem = ReplayMemory(size=self.params.rm_size,
+                                       combined_experience_replay=self.params.combined_experience_replay)
         self.replay_memory_mutex = threading.Lock()
         self.critic_update = 0
 

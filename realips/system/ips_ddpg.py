@@ -1,6 +1,7 @@
 from realips.agent.ddpg import DDPGAgent, DDPGAgentParams
 from realips.trainer.trainer_ddpg import DDPGTrainer, DDPGTrainerParams
 from realips.system.ips import IpsSystem, IpsSystemParams
+from utils import write_config
 
 
 class IpsDDPGParams(IpsSystemParams):
@@ -21,6 +22,8 @@ class IpsDDPG(IpsSystem):
         self.agent.initial_model()
         if self.params.stats_params.weights_path is not None:
             self.agent.load_weights(self.params.stats_params.weights_path)
+
+        write_config(params, f"{self.model_stats.log_dir}/config.json")
 
     def test(self):
         self.evaluation_episode(self.agent)

@@ -119,6 +119,7 @@
     "trainer_params": {
         "gamma_discount": 0.99,
         "rm_size": 1000000,
+        "combined_experience_replay": true,
         "batch_size": 128,
         "learning_rate_actor": 3e-04,
         "learning_rate_critic": 3e-04,

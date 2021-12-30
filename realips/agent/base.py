@@ -48,7 +48,6 @@ class BaseAgent:
         self.critic_target = None
 
     def initial_model(self):
-
         self.actor = self.build_actor("normal-")
 
     def load_weights(self, path_to_weights):
@@ -127,7 +126,7 @@ class BaseAgent:
         :param observations:
         :return: action scalar
         """
-        observations = tf.expand_dims(observations, 0)
+        observations = tf.expand_dims(observations, 0)  # add batch dim
         targets = tf.expand_dims(targets, 0)
         action = self.actor([observations, targets]).numpy().squeeze()
         return action

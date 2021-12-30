@@ -21,10 +21,11 @@ class ReplayMemory(object):
     Replay memory class to store trajectories
     """
 
-    def __init__(self, size):
+    def __init__(self, size, combined_experience_replay=True):
         """
         initializing the replay memory
         """
+        self.combined_experience_replay = combined_experience_replay
         self.new_head = False
         self.k = 0
         self.head = -1
@@ -59,9 +60,11 @@ class ReplayMemory(object):
         if not self.full:
             r = self.k
         random_idx = np.random.choice(r, size=batch_size, replace=False)
-        if self.new_head:
-            random_idx[0] = self.head  # always add the latest one
-            self.new_head = False
+
+        if self.combined_experience_replay:
+            if self.new_head:
+                random_idx[0] = self.head  # always add the latest one
+                self.new_head = False
 
         return [mem[random_idx] for mem in self.memory]
 

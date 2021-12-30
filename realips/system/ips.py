@@ -30,18 +30,23 @@ class IpsSystem:
 
         self.model_stats.init_episode()
 
+        if agent.add_actions_observations:
+            action_observations = np.zeros(shape=agent.action_observations_dim)
+        else:
+            action_observations = []
+
         for step in range(self.params.stats_params.max_episode_steps):
 
             if self.params.stats_params.visualize_eval:
                 self.physics.render()
 
-            if agent.add_actions_observations:
-                action_observations = np.zeros(shape=agent.action_observations_dim)
-            else:
-                action_observations = []
-
             observations = np.hstack((self.model_stats.observations, action_observations))
+
             action = agent.get_exploitation_action(observations, self.model_stats.targets)
+
+            if self.params.agent_params.add_actions_observations:
+                action_observations = np.append(action_observations, action)[1:]
+
             states_next = self.physics.step(action)
             stats_observations_next, failed = states2observations(states_next)
 
@@ -135,7 +140,6 @@ class IpsSystem:
             if ep % self.params.stats_params.eval_period == 0:
                 dsal = self.evaluation_episode(self.agent, ep)
                 # self.agent.save_weights(self.params.stats_params.model_name + '_' + str(ep))
-
                 moving_average_dsas = 0.95 * moving_average_dsas + 0.05 * dsal
                 if moving_average_dsas > best_dsas:
                     self.agent.save_weights(self.params.stats_params.model_name + '_best')
