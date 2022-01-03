@@ -93,5 +93,74 @@
         "low_3": [
             "logs_16_12/low_friction_eval_after_freeze"
         ]
+    },
+    "data_fric_new": {
+        "no_fr": [
+            "sup_real/real_non_sup_1_1st",
+            "sup_real/real_non_sup_1_2nd",
+            "sup_real/real_non_sup_1_3rd"
+        ],
+        "lo_fr": [
+            "sup_real/real_low_sup_1_1st",
+            "sup_real/real_low_sup_1_2nd",
+            "sup_real/real_low_sup_1_3rd"
+        ],
+        "ok_fr": [
+            "sup_real/real_okay_sup_1_1st",
+            "sup_real/real_okay_sup_1_2nd",
+            "sup_real/real_okay_sup_1_3rd"
+        ],
+        "hi_fr": [
+            "sup_real/real_high_sup_1_1st",
+            "sup_real/real_high_sup_1_2nd",
+            "sup_real/real_high_sup_1_3rd"
+        ],
+        "over_fr": [
+            "sup_real/real_over_sup_1_1st",
+            "sup_real/real_over_sup_1_2nd",
+            "sup_real/real_over_sup_1_3rd"
+        ]
+    },
+    "no_actions_observations_eval": {
+        "low": [
+            "sup_real/low_eval_no_action_observations_50"
+        ],
+        "okay": [
+            "sup_real/okay_eval_no_action_observations_50"
+        ]
+    },
+    "data_bandwidth_without_cer": {
+        "bw_0.06": [
+            "sup_real/real_bandwidth_0.06_no_cer_1st",
+            "sup_real/real_bandwidth_0.06_no_cer_2nd",
+            "sup_real/real_bandwidth_0.06_no_cer_3rd"
+        ],
+        "bw_100": [
+            "sup_real/real_bandwidth_100_no_cer_1st",
+            "sup_real/real_bandwidth_100_no_cer_2nd",
+            "sup_real/real_bandwidth_100_no_cer_3rd"
+        ]
+    },
+    "fri_diff_pre": {
+        "lo_fr_1": [
+            "sup_real/real_low_sup_1_1st",
+            "sup_real/real_low_sup_1_2nd",
+            "sup_real/real_low_sup_1_3rd"
+        ],
+        "ok_fr_1": [
+            "sup_real/real_okay_sup_1_1st",
+            "sup_real/real_okay_sup_1_2nd",
+            "sup_real/real_okay_sup_1_3rd"
+        ],
+        "lo_fr_2": [
+            "sup_real/real_low_sup_2_1st",
+            "sup_real/real_low_sup_2_2nd",
+            "sup_real/real_low_sup_2_3rd"
+        ],
+        "ok_fr_2": [
+            "sup_real/real_okay_sup_3_1st",
+            "sup_real/real_okay_sup_3_2nd",
+            "sup_real/real_okay_sup_3_3rd"
+        ]
     }
 }
