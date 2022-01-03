@@ -141,7 +141,7 @@
             "sup_real/real_bandwidth_100_no_cer_3rd"
         ]
     },
-        "friction_diff_pre": {
+    "fri_diff_pre": {
         "lo_fr_1": [
             "sup_real/real_low_sup_1_1st",
             "sup_real/real_low_sup_1_2nd",
