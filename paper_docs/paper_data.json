@@ -158,9 +158,9 @@
             "sup_real/real_low_sup_2_3rd"
         ],
         "ok_fr_2": [
-            "sup_real/real_okay_sup_3_1st",
-            "sup_real/real_okay_sup_3_2nd",
-            "sup_real/real_okay_sup_3_3rd"
+            "sup_real/real_okay_sup_2_1st",
+            "sup_real/real_okay_sup_2_2nd",
+            "sup_real/real_okay_sup_2_3rd"
         ]
     }
 }

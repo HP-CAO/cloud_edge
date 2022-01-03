@@ -102,15 +102,43 @@ def plot_timeseries(dat, run_ids):
     plt.ylim(0, plt.ylim()[1])
 
 
+def plot_timeseries_median(dat, run_ids):
+    # Get convergence times
+
+    conv_times = {}
+    for k, runs in run_ids.items():
+        conv_times[k] = np.array(extract_data(dat, runs, "convergence_time")) / 1000.
+
+    for k, runs in run_ids.items():
+        median = np.median(conv_times[k])
+        idx = np.where(conv_times[k] == median)[0][0]
+        results = extract_data(dat, runs, "swing_up_time_series")
+        result = results[idx]
+        l = list(zip(*[[int(k), v] for k, v in result.items() if int(k) > 5000]))
+        sns.lineplot(x=l[0], y=l[1], marker='o')
+
+    plt.xlabel('Steps')
+    plt.ylabel('Swing-up-time [steps]')
+    lims = plt.xlim()
+    plt.hlines(y=250, xmin=0, xmax=lims[1], colors="green", linestyles='--')
+    plt.hlines(y=1000, xmin=0, xmax=lims[1], colors="red", linestyles='--')
+    plt.text(lims[1] // 41, 930, "Fail", {"color": "red"})
+    plt.text(lims[1] // 41, 110, "Success", {"color": "green"})
+    plt.axhspan(0, 250, color='green', alpha=0.2)
+    plt.xlim(0, lims[1])
+    plt.ylim(0, plt.ylim()[1])
+
+
 if __name__ == "__main__":
     with open("paper_data.json", "r") as f:
         runs = json.load(f)
     with open("data.json", "r") as f:
         data = json.load(f)
 
-    runs_fric = runs['data_fric']
+    runs_fric = runs['data_fric_new']
     runs_freeze = runs['data_freeze']
     runs_bw = runs['data_bandwidth']
+    runs_bw_no_combined = runs['data_bandwidth_without_cer']
     runs_eval = runs['data_eval']
 
     plt.figure()
@@ -135,7 +163,7 @@ if __name__ == "__main__":
     plt.ylim(0, plt.ylim()[1])
     plt.tight_layout()
     plt.savefig("eval_plot.png", dpi=300)
-    plt.show()
+    # plt.show()
 
     ax_fric = plot_cat(data, runs_fric)
     plt.xticks(range(5), ('0', '5', '10', '12', '16'))
@@ -158,7 +186,22 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.savefig("freezing_plot.png", dpi=300)
 
-    ax_bw = plot_cat(data, runs_bw)
+    # ax_bw = plot_cat(data, runs_bw)
+    # Adding no combined
+    plt.figure()
+    df = pd.DataFrame(columns=("convergence_time", "bandwidth", "Method"))
+    print(df)
+    for k, rs in runs_bw.items():
+        d = np.array(extract_data(data, rs, "convergence_time")) / 1000.
+        for c in d:
+            df = df.append({"convergence_time": c, "bandwidth": k, "Method": "w CER"}, ignore_index=True)
+
+    for k, rs in runs_bw_no_combined.items():
+        d = np.array(extract_data(data, rs, "convergence_time")) / 1000.
+        for c in d:
+            df = df.append({"convergence_time": c, "bandwidth": k, "Method": "w/o CER"}, ignore_index=True)
+    ax = sns.pointplot(data=df, x="bandwidth", y="convergence_time", hue="Method", capsize=.2, join=False, dodge=0.25)
+
     plt.xticks(range(6), ('0.06', '0.1', '1', '5', '50', '>100'))
     plt.xlabel('Bandwidth [Mbit/s]')
     plt.ylabel('Convergence time [k steps]')
@@ -166,11 +209,9 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.savefig("bandwidth_plot.png", dpi=300)
 
-    plot_timeseries(data, runs['data_fric']['ok_fr'])
-
-    plt.legend(["Run 1", "Run 2", "Run 3"])
-    plt.savefig("real_okayplot.png", dpi=300)
-
-    plot_timeseries(data, runs['data_fric']['lo_fr'])
-    plt.legend(["Run 1", "Run 2", "Run 3"])
-    plt.savefig("real_lowplot.png", dpi=300)
+    fig = plt.figure(figsize=(15, 4))
+    plot_timeseries_median(data, runs['data_fric_new'])
+    leg = plt.legend(["0", "5", "10", "12", "16"], title="Friction factor", loc='upper right', bbox_to_anchor=(1, 0.95))
+    plt.tight_layout()
+    plt.savefig("real_good.png", dpi=300)
+    plt.show()
