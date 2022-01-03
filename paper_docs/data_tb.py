@@ -124,17 +124,18 @@ if __name__ == "__main__":
         conv_times[f"low_{i + 1}"] = extract_data(data, k, "convergence_time") // 1000
     df = pd.DataFrame(results)
     df[df == 1000.0] = np.NaN
-    # ax = sns.pointplot(data=df, capsize=.2, join=False)
-    ax = sns.boxplot(data=df)
+    ax = sns.boxplot(data=df, width=.4)
     plt.xticks(range(4), (
-        f"Pretrained\n\nCrashed {crashes['pre']}/{df.shape[0]}",
-        f"Converged\nafter {conv_times['low_1']}k\nCrashed {crashes['low_1']}/{df.shape[0]}",
-        f"Converged\nafter {conv_times['low_2']}k\nCrashed {crashes['low_2']}/{df.shape[0]}",
-        f"Converged\nafter {conv_times['low_3']}k\nCrashed {crashes['low_3']}/{df.shape[0]}"
+        f"Pretrained\n\nFailed {crashes['pre']}/{df.shape[0]}",
+        f"Converged\nafter {conv_times['low_1']}k\nFailed {crashes['low_1']}/{df.shape[0]}",
+        f"Converged\nafter {conv_times['low_2']}k\nFailed {crashes['low_2']}/{df.shape[0]}",
+        f"Converged\nafter {conv_times['low_3']}k\nFailed {crashes['low_3']}/{df.shape[0]}"
     ))
     plt.ylabel("Swing-up-time [steps]")
+    plt.ylim(0, plt.ylim()[1])
     plt.tight_layout()
     plt.savefig("eval_plot.png", dpi=300)
+    plt.show()
 
     ax_fric = plot_cat(data, runs_fric)
     plt.xticks(range(5), ('0', '5', '10', '12', '16'))

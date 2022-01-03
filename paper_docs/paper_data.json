@@ -82,16 +82,16 @@
     },
     "data_eval": {
         "pre": [
-            "logs_13_12/eval_low_friction_pre"
+            "logs_16_12/eval_low_friction_pre"
         ],
         "low_1": [
-            "logs_13_12/eval_low_friction_real_20_11_200k"
+            "logs_16_12/eval_low_friction_real_20_11_200k"
         ],
         "low_2": [
-            "logs_13_12/eval_low_friction_real_16_11_2nd"
+            "logs_16_12/eval_low_friction_real_16_11_2nd"
         ],
         "low_3": [
-            "logs_13_12/eval-low_friction_after_freeze"
+            "logs_16_12/low_friction_eval_after_freeze"
         ]
     }
 }
