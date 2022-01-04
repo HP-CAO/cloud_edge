@@ -231,6 +231,8 @@ class CloudSystem(IpsSystem):
             #             .format(get_current_time(), self.trainer.replay_mem.get_size(), self.trainable))
 
     def waiting_edge_ready(self):
+        weights = self.agent.get_actor_weights()
+        self.send_weights_and_noise_factor(weights, self.agent.action_noise_factor)
 
         while True:
             edge_status = self.receive_edge_status()
