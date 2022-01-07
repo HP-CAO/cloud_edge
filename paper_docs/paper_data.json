@@ -135,6 +135,26 @@
             "sup_real/real_bandwidth_0.06_no_cer_2nd",
             "sup_real/real_bandwidth_0.06_no_cer_3rd"
         ],
+        "bw_0.1": [
+            "sup_real/real_bandwidth_0.1_no_cer_1sr",
+            "sup_real/real_bandwidth_0.1_no_cer_2nd",
+            "sup_real/real_bandwidth_0.1_no_cer_3rd"
+        ],
+        "bw_1": [
+            "sup_real/real_bandwidth_1_no_cer_1st",
+            "sup_real/real_bandwidth_1_no_cer_2nd",
+            "sup_real/real_bandwidth_1_no_cer_3rd"
+        ],
+        "bw_5": [
+            "sup_real/real_bandwidth_5_no_cer_1st",
+            "sup_real/real_bandwidth_5_no_cer_2nd",
+            "sup_real/real_bandwidth_5_no_cer_3rd"
+        ],
+        "bw_50": [
+            "sup_real/real_bandwidth_50_no_cer_1st",
+            "sup_real/real_bandwidth_50_no_cer_2nd",
+            "sup_real/real_bandwidth_50_no_cer_3rd"
+        ],
         "bw_100": [
             "sup_real/real_bandwidth_100_no_cer_1st",
             "sup_real/real_bandwidth_100_no_cer_2nd",
