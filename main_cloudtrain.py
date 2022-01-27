@@ -1,6 +1,6 @@
 import argparse
 import os
-
+import tensorflow as tf
 from realips.remote.cloud_trainer import CloudSystem, CloudSystemParams
 from utils import *
 
@@ -40,6 +40,12 @@ if __name__ == '__main__':
 
     if not args.gpu:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    else:
+        physical_devices = tf.config.list_physical_devices('GPU')
+        try:
+            tf.config.experimental.set_memory_growth(physical_devices[0], True)
+        except:
+            exit("GPU allocated failed")
 
     if args.config is None:
         exit("config file needed")
