@@ -42,7 +42,7 @@ for d in tqdm.tqdm(dirs):
         except KeyError:
             continue
 
-        if np.all(np.array(v[-5:]) < 250.0):
+        if np.all(np.array(v[-5:]) <= 250.0):
             log_stats["convergence_time"] = s[-1]
         else:
             log_stats["convergence_time"] = -1

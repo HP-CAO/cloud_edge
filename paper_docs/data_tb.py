@@ -109,15 +109,18 @@ def plot_timeseries_median(dat, run_ids):
     for k, runs in run_ids.items():
         conv_times[k] = np.array(extract_data(dat, runs, "convergence_time")) / 1000.
 
+    i = 0
     for k, runs in run_ids.items():
         median = np.median(conv_times[k])
         idx = np.where(conv_times[k] == median)[0][0]
         results = extract_data(dat, runs, "swing_up_time_series")
         result = results[idx]
         l = list(zip(*[[int(k), v] for k, v in result.items() if int(k) > 5000]))
-        sns.lineplot(x=l[0], y=l[1], marker='o')
+        a = sns.lineplot(x=l[0], y=l[1], marker='o', zorder=101)
+        plt.scatter(x=l[0][-1], y=l[1][-1], s=200, marker='*', color=a.get_lines()[i].get_color(), zorder=100)
+        i += 1
 
-    plt.xlabel('Steps')
+    plt.xlabel('Training time [steps]')
     plt.ylabel('Swing-up-time [steps]')
     lims = plt.xlim()
     plt.hlines(y=250, xmin=0, xmax=lims[1], colors="green", linestyles='--')
@@ -200,9 +203,10 @@ if __name__ == "__main__":
         d = np.array(extract_data(data, rs, "convergence_time")) / 1000.
         for c in d:
             df = df.append({"convergence_time": c, "bandwidth": k, "Method": "w/o CER"}, ignore_index=True)
-    ax = sns.pointplot(data=df, x="bandwidth", y="convergence_time", hue="Method", capsize=.2, join=False, dodge=0.25)
+    ax = sns.pointplot(data=df, x="bandwidth", y="convergence_time", hue="Method", capsize=.2, join=False, dodge=0.25, ci=95)
+    # ax = sns.scatterplot(data=df, x="bandwidth", y="convergence_time", hue="Method")
 
-    plt.xticks(range(6), ('0.06', '0.1', '1', '5', '50', '>100'))
+    plt.xticks(range(4), ('0.06', '0.5', '5', '>50'))
     plt.xlabel('Bandwidth [Mbit/s]')
     plt.ylabel('Convergence time [k steps]')
     plt.ylim([0, plt.ylim()[1]])
