@@ -86,6 +86,7 @@ class CloudSystem(IpsSystem):
             self.sending_time = (len(packet) * 8 / 2 ** 20) / self.params.cloud_params.artificial_bandwidth + \
                                 self.params.cloud_params.artificial_ping / 1000 - ethernet_time
             print(f"Setting sending time for actor weights to {self.sending_time} seconds")
+            print(f"Update actor weights every {self.sending_time * 30} steps")
         else:
             self.sending_time = 0
 
@@ -213,7 +214,8 @@ class CloudSystem(IpsSystem):
                 self.optimize_condition.acquire()
                 self.optimize_condition.wait()
 
-            self.trainer.optimize()
+            loss_critic = self.trainer.optimize()
+            self.model_stats.add_critic_loss(loss_critic)
             optimize_times += 1
             self.trainable -= 1
 
@@ -251,8 +253,6 @@ class CloudSystem(IpsSystem):
 
     def send_weights_and_noise_factor(self, weights, noise_factor):
         weights_and_noise_pack = pickle.dumps([weights, noise_factor])
-        if self.params.cloud_params.artificial_bandwidth != -1:
-            time.sleep(self.sending_time)
         self.redis_connection.publish(channel=self.params.redis_params.ch_edge_weights, message=weights_and_noise_pack)
 
     def receive_edge_trajectory(self):

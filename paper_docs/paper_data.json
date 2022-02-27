@@ -4,59 +4,94 @@
             "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5",
             "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_3rd",
             "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_4th_video",
-            "sup_real_4_5/real_actor_5k_critic_3.5k_4th",
-            "sup_real_4_5/real_actor_5k_critic_3.5k_5th"
+            "sup_real/real_actor_5k_critic_3.5k_4th",
+            "sup_real/real_actor_5k_critic_3.5k_5th"
         ],
         "a_3.5_c_3.5": [
             "logs_17_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_vol_4_3.5k_all",
             "logs_17_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_vol_4_3.5k_all_2nd",
             "logs_17_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_vol_4_3.5k_all_3rd",
-            "sup_real_4_5/real_actor_3.5k_critic_3.5k_4th",
-            "sup_real_4_5/real_actor_3.5k_critic_3.5k_5th"
+            "sup_real/real_actor_3.5k_critic_3.5k_4th",
+            "sup_real/real_actor_3.5k_critic_3.5k_5th"
         ],
-        "a_5_c_0": [
-            "logs_20_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_200k_actor_5_critic_0",
-            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_freeze_actor_only_2nd",
-            "logs_20_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_200k_actor_5_critic_0_2nd",
-            "sup_real_4_5/real_actor_5k_critic_128_4th",
-            "sup_real_4_5/real_actor_5k_critic_128_5th"
+        "a_3.5_c_3.5_delay": [
+            "real_okay_sup_actor_delayed_3.5k_1",
+            "real_okay_sup_actor_delayed_3.5k_2",
+            "real_okay_sup_actor_delayed_3.5k_3",
+            "real_okay_sup_actor_delayed_3.5k_4",
+            "real_okay_sup_actor_delayed_3.5k_5"
+        ],
+        "a_5_c_5": [
+            "sup_real/real_actor_5k_critic_5k_1st",
+            "sup_real/real_actor_5k_critic_5k_2nd",
+            "sup_real/real_actor_5k_critic_5k_3rd",
+            "sup_real/real_actor_5k_critic_5k_4th",
+            "sup_real/real_actor_5k_critic_5k_5th"
         ],
         "a_0_c_0": [
             "logs_20_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_200k_non_freezeing",
             "logs_15_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_non_freeze_2nd",
             "logs_15_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_non_freeze_3rd",
-            "sup_real_4_5/real_actor_128_critic_128_5th",
-            "sup_real_4_5/real_actor_128_critic_128_5th"
+            "sup_real/real_actor_128_critic_128_4th",
+            "sup_real/real_actor_128_critic_128_5th"
+        ],
+        "a_5_c_0": [
+            "logs_20_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_200k_actor_5_critic_0",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_freeze_actor_only_2nd",
+            "logs_20_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_200k_actor_5_critic_0_2nd",
+            "sup_real/real_actor_5k_critic_128_4th",
+            "sup_real/real_actor_5k_critic_128_5th"
         ]
     },
     "data_bandwidth": {
         "bw_0.06": [
-            "real_sup_bw/real_bandwidth_0.06_with_cer_1st",
-            "real_sup_bw/real_bandwidth_0.06_with_cer_2nd",
-            "real_sup_bw/real_bandwidth_0.06_with_cer_3rd",
-            "real_sup_bw/real_bandwidth_0.06_with_cer_4th",
-            "real_sup_bw/real_bandwidth_0.06_with_cer_5th"
+            "sup_real/real_bandwidth_0.06_with_cer_1st",
+            "sup_real/real_bandwidth_0.06_with_cer_2nd",
+            "sup_real/real_bandwidth_0.06_with_cer_3rd",
+            "sup_real/real_bandwidth_0.06_with_cer_4th",
+            "sup_real/real_bandwidth_0.06_with_cer_5th"
+        ],
+        "bw_0.1": [
+            "sup_real/real_bandwidth_0.1_with_cer_1st",
+            "sup_real/real_bandwidth_0.1_with_cer_2nd",
+            "sup_real/real_bandwidth_0.1_with_cer_3rd",
+            "sup_real/real_bandwidth_0.1_with_cer_4th",
+            "sup_real/real_bandwidth_0.1_with_cer_5th"
         ],
         "bw_0.5": [
-            "real_sup_bw/real_bandwidth_0.5_with_cer_1st",
-            "real_sup_bw/real_bandwidth_0.5_with_cer_2nd",
-            "real_sup_bw/real_bandwidth_0.5_with_cer_3rd",
-            "real_sup_bw/real_bandwidth_0.5_with_cer_4th",
-            "real_sup_bw/real_bandwidth_0.5_with_cer_5th"
+            "sup_real/real_bandwidth_0.5_with_cer_1st",
+            "sup_real/real_bandwidth_0.5_with_cer_2nd",
+            "sup_real/real_bandwidth_0.5_with_cer_3rd",
+            "sup_real/real_bandwidth_0.5_with_cer_4th",
+            "sup_real/real_bandwidth_0.5_with_cer_5th"
         ],
         "bw_5": [
-            "real_sup_bw/real_bandwidth_5_with_cer_1_st",
-            "real_sup_bw/real_bandwidth_5_with_cer_2nd",
-            "real_sup_bw/real_bandwidth_5_with_cer_3rd",
-            "real_sup_bw/real_bandwidth_5_with_cer_4th",
-            "real_sup_bw/real_bandwidth_5_with_cer_5th"
+            "sup_real/real_bandwidth_5_with_cer_1_st",
+            "sup_real/real_bandwidth_5_with_cer_2nd",
+            "sup_real/real_bandwidth_5_with_cer_3rd",
+            "sup_real/real_bandwidth_5_with_cer_4th",
+            "sup_real/real_bandwidth_5_with_cer_5th"
+        ],
+        "bw_10": [
+            "sup_real/real_bandwidth_10_with_cer_1st",
+            "sup_real/real_bandwidth_10_with_cer_2nd",
+            "sup_real/real_bandwidth_10_with_cer_3rd",
+            "sup_real/real_bandwidth_10_with_cer_4th",
+            "sup_real/real_bandwidth_10_with_cer_5th"
+        ],
+        "bw_15": [
+            "sup_real/real_bandwidth_15_with_cer_1st",
+            "sup_real/real_bandwidth_15_with_cer_2nd",
+            "sup_real/real_bandwidth_15_with_cer_3rd",
+            "sup_real/real_bandwidth_15_with_cer_4th",
+            "sup_real/real_bandwidth_15_with_cer_5th"
         ],
         "bw_50": [
             "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5",
             "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_3rd",
             "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_4th_video",
-            "sup_real_4_5/real_actor_5k_critic_3.5k_4th",
-            "sup_real_4_5/real_actor_5k_critic_3.5k_5th"
+            "sup_real/real_actor_5k_critic_3.5k_4th",
+            "sup_real/real_actor_5k_critic_3.5k_5th"
         ]
     },
     "data_eval": {
@@ -78,36 +113,37 @@
             "sup_real/real_non_sup_1_1st",
             "sup_real/real_non_sup_1_2nd",
             "sup_real/real_non_sup_1_3rd",
-            "sup_real_4_5/real_non_sup_1_4th",
-            "sup_real_4_5/real_non_sup_1_5th"
+            "sup_real/real_non_sup_1_4th",
+            "sup_real/real_non_sup_1_5th"
         ],
         "lo_fr": [
             "sup_real/real_low_sup_1_1st",
             "sup_real/real_low_sup_1_2nd",
             "sup_real/real_low_sup_1_3rd",
-            "sup_real_4_5/real_low_sup_1_4th",
-            "sup_real_4_5/real_low_sup_1_5th"
+            "sup_real/real_low_sup_1_4th",
+            "sup_real/real_low_sup_1_5th"
         ],
         "ok_fr": [
-            "sup_real/real_okay_sup_1_1st",
-            "sup_real/real_okay_sup_1_2nd",
-            "sup_real/real_okay_sup_1_3rd",
-            "sup_real_4_5/real_okay_sup_1_4th",
-            "sup_real_4_5/real_okay_sup_1_5th"
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_3rd",
+            "logs_14_11/real_ddpg_+_30hz_okay_friction_vol_4cm_both_con_5_4th_video",
+            "sup_real/real_actor_5k_critic_3.5k_4th",
+            "sup_real/real_actor_5k_critic_3.5k_5th"
+
         ],
         "hi_fr": [
             "sup_real/real_high_sup_1_1st",
             "sup_real/real_high_sup_1_2nd",
             "sup_real/real_high_sup_1_3rd",
-            "sup_real_4_5/real_high_sup_1_4th",
-            "sup_real_4_5/real_high_sup_1_5th"
+            "sup_real/real_high_sup_1_4th",
+            "sup_real/real_high_sup_1_5th"
         ],
         "over_fr": [
             "sup_real/real_over_sup_1_1st",
             "sup_real/real_over_sup_1_2nd",
             "sup_real/real_over_sup_1_3rd",
-            "sup_real_4_5/real_over_sup_1_4th",
-            "sup_real_4_5/real_over_sup_1_5th"
+            "sup_real/real_over_sup_1_4th",
+            "sup_real/real_over_sup_1_5th"
         ]
     },
     "no_actions_observations_eval": {
@@ -120,34 +156,56 @@
     },
     "data_bandwidth_without_cer": {
         "bw_0.06": [
-            "real_sup_bw/real_bandwidth_0.06_no_cer_1st",
-            "real_sup_bw/real_bandwidth_0.06_no_cer_2nd",
-            "real_sup_bw/real_bandwidth_0.06_no_cer_3rd",
-            "real_sup_bw/real_bandwidth_0.06_no_cer_4th",
-            "real_sup_bw/real_bandwidth_0.06_no_cer_5th"
+            "sup_real/real_bandwidth_0.06_no_cer_1st",
+            "sup_real/real_bandwidth_0.06_no_cer_2nd",
+            "sup_real/real_bandwidth_0.06_no_cer_3rd",
+            "sup_real/real_bandwidth_0.06_no_cer_4th",
+            "sup_real/real_bandwidth_0.06_no_cer_5th"
+        ],
+        "bw_0.1": [
+            "sup_real/real_bandwidth_0.1_no_cer_1st",
+            "sup_real/real_bandwidth_0.1_no_cer_2nd",
+            "sup_real/real_bandwidth_0.1_no_cer_3rd",
+            "sup_real/real_bandwidth_0.1_no_cer_4th",
+            "sup_real/real_bandwidth_0.1_no_cer_5th"
         ],
         "bw_0.5": [
-            "real_sup_bw/real_bandwidth_0.5_no_cer_1st",
-            "real_sup_bw/real_bandwidth_0.5_no_cer_2nd",
-            "real_sup_bw/real_bandwidth_0.5_no_cer_3rd",
-            "real_sup_bw/real_bandwidth_0.5_no_cer_4th",
-            "real_sup_bw/real_bandwidth_0.5_no_cer_5th"
+            "sup_real/real_bandwidth_0.5_no_cer_1st",
+            "sup_real/real_bandwidth_0.5_no_cer_2nd",
+            "sup_real/real_bandwidth_0.5_no_cer_3rd",
+            "sup_real/real_bandwidth_0.5_no_cer_4th",
+            "sup_real/real_bandwidth_0.5_no_cer_5th"
         ],
         "bw_5": [
-            "real_sup_bw/real_bandwidth_5_no_cer_1st",
-            "real_sup_bw/real_bandwidth_5_no_cer_2nd",
-            "real_sup_bw/real_bandwidth_5_no_cer_3rd",
-            "real_sup_bw/real_bandwidth_5_no_cer_4th",
-            "real_sup_bw/real_bandwidth_5_no_cer_5th"
+            "sup_real/real_bandwidth_5_no_cer_1st",
+            "sup_real/real_bandwidth_5_no_cer_2nd",
+            "sup_real/real_bandwidth_5_no_cer_3rd",
+            "sup_real/real_bandwidth_5_no_cer_4th",
+            "sup_real/real_bandwidth_5_no_cer_5th"
+        ],
+        "bw_10": [
+            "sup_real/real_bandwidth_10_no_cer_1st",
+            "sup_real/real_bandwidth_10_no_cer_2nd",
+            "sup_real/real_bandwidth_10_no_cer_3rd",
+            "sup_real/real_bandwidth_10_no_cer_4th",
+            "sup_real/real_bandwidth_10_no_cer_5th"
+        ],
+        "bw_15": [
+            "sup_real/real_bandwidth_15_no_cer_1st",
+            "sup_real/real_bandwidth_15_no_cer_2nd",
+            "sup_real/real_bandwidth_15_no_cer_3rd",
+            "sup_real/real_bandwidth_15_no_cer_4th",
+            "sup_real/real_bandwidth_15_no_cer_5th"
         ],
         "bw_50": [
-            "real_sup_bw/real_bandwidth_50_no_cer_1st",
-            "real_sup_bw/real_bandwidth_50_no_cer_2nd",
-            "real_sup_bw/real_bandwidth_50_no_cer_3rd",
-            "real_sup_bw/real_bandwidth_50_no_cer_4th",
-            "real_sup_bw/real_bandwidth_50_no_cer_5th"
+            "sup_real/real_bandwidth_50_no_cer_1st",
+            "sup_real/real_bandwidth_50_no_cer_2nd",
+            "sup_real/real_bandwidth_50_no_cer_3rd",
+            "sup_real/real_bandwidth_50_no_cer_4th",
+            "sup_real/real_bandwidth_50_no_cer_5th"
         ]
     },
+
     "fri_diff_pre": {
         "lo_fr_1": [
             "sup_real/real_low_sup_1_1st",

@@ -47,6 +47,7 @@ class ModelStats:
         self.consecutive_on_target_steps = 0
         self.cart_positions = []
         self.actions = []
+        self.critic_losses = []
         self.pendulum_angele = []
         self.total_steps = 0
         self.converge_eval_episode = 0
@@ -82,7 +83,14 @@ class ModelStats:
         self.cart_positions = []
         self.pendulum_angele = []
         self.actions = []
+        self.critic_losses = []
         self.survived = True
+
+    def get_average(self, data):
+        if len(data) == 0:
+            return 0
+        else:
+            return sum(data) / len(data)
 
     def get_average_reward(self):
         if len(self.reward) == 0:
@@ -111,18 +119,22 @@ class ModelStats:
         if crash:
             self.survived = False
 
+    def add_critic_loss(self, loss):
+        self.critic_losses.append(loss)
+
     def get_steps(self):
         return len(self.reward)
 
     def training_monitor(self, episode):
 
-        average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time = self.log_data()
+        average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, critic_loss = self.log_data()
         with self.training_log_writer.as_default():
             tf.summary.scalar('Average_Reward', average_reward, self.total_steps)
             tf.summary.scalar('On_target_step', on_target_steps, self.total_steps)
             tf.summary.scalar('Can_swing_up', can_swing_up, self.total_steps)
             tf.summary.scalar('swing_up_time', swing_up_time, self.total_steps)
             tf.summary.scalar('distance_score', average_distance_score, self.total_steps)
+            tf.summary.scalar('critic_loss', critic_loss, self.total_steps)
             tf.summary.scalar('distance_score_and_survived', average_distance_score * survived, self.total_steps)
 
         print("Training:=====>  Episode: ", episode, " Total steps:",
@@ -130,7 +142,7 @@ class ModelStats:
 
     def evaluation_monitor_scalar(self, episode):
 
-        average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time = self.log_data()
+        average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, _ = self.log_data()
 
         with self.evaluation_log_writer.as_default():
             tf.summary.scalar('Average_Reward', average_reward, self.total_steps)
@@ -150,7 +162,7 @@ class ModelStats:
 
     def evaluation_monitor_image(self, ep):
 
-        average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time = self.log_data()
+        average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, _ = self.log_data()
         tf_image = self.plot_to_image(average_reward, on_target_steps, average_distance_score)
 
         with self.evaluation_log_writer.as_default():
@@ -164,7 +176,8 @@ class ModelStats:
         survived = self.get_survived()
         can_swing_up = self.consecutive_on_target_steps >= self.params.can_swing_up_steps
         swing_up_time = self.get_steps() - self.consecutive_on_target_steps if can_swing_up else self.params.max_episode_steps
-        return average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time
+        critic_loss = self.get_average(self.critic_losses)
+        return average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, critic_loss
 
     def random_set_targets(self):
         x_target = np.random.uniform(-self.physics.params.x_threshold, self.physics.params.x_threshold)

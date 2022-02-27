@@ -35,7 +35,7 @@ class DDPGTrainer:
         for i in range(self.params.training_epoch):
 
             if self.params.pre_fill_exp > self.replay_mem.get_size():
-                return
+                return 0
 
             self.replay_memory_mutex.acquire()
             mini_batch = self.replay_mem.sample(self.params.batch_size)
@@ -83,6 +83,8 @@ class DDPGTrainer:
                     actor_gradients = tape.gradient(actor_value, self.agent.actor.trainable_variables)
                     self.optimizer_actor.apply_gradients(zip(actor_gradients, self.agent.actor.trainable_variables))
             self.agent.soft_update()
+
+            return tf.reduce_mean(loss_critic).numpy()
 
     def load_weights(self, path):
         self.agent.load_weights(path)

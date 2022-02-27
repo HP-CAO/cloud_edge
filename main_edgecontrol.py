@@ -3,6 +3,7 @@ from realips.remote.edge_quanser import QuanserEdgeControlParams, QuanserEdgeCon
 
 from utils import *
 
+
 def main(p, eval=None):
     edge = QuanserEdgeControl(p, eval)
     edge.run()

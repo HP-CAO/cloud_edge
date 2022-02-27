@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+python main_cloudtrain.py --config ./config/remote/remote_cloud_ddpg+.json --weights ./models/models_11_11/sim_ddpg+_30hz_okay_friction_voltage_4cm_best_DDPG/ --id real_actor_5k_critic_5k_1st --gpu --params trainer_params/pre_fill_exp 5000 trainer_params/actor_freeze_step_count 5000
+python main_cloudtrain.py --config ./config/remote/remote_cloud_ddpg+.json --weights ./models/models_11_11/sim_ddpg+_30hz_okay_friction_voltage_4cm_best_DDPG/ --id real_actor_5k_critic_5k_2nd --gpu --params trainer_params/pre_fill_exp 5000 trainer_params/actor_freeze_step_count 5000
+python main_cloudtrain.py --config ./config/remote/remote_cloud_ddpg+.json --weights ./models/models_11_11/sim_ddpg+_30hz_okay_friction_voltage_4cm_best_DDPG/ --id real_actor_5k_critic_5k_3rd --gpu --params trainer_params/pre_fill_exp 5000 trainer_params/actor_freeze_step_count 5000
+python main_cloudtrain.py --config ./config/remote/remote_cloud_ddpg+.json --weights ./models/models_11_11/sim_ddpg+_30hz_okay_friction_voltage_4cm_best_DDPG/ --id real_actor_5k_critic_5k_4th --gpu --params trainer_params/pre_fill_exp 5000 trainer_params/actor_freeze_step_count 5000
+python main_cloudtrain.py --config ./config/remote/remote_cloud_ddpg+.json --weights ./models/models_11_11/sim_ddpg+_30hz_okay_friction_voltage_4cm_best_DDPG/ --id real_actor_5k_critic_5k_5th --gpu --params trainer_params/pre_fill_exp 5000 trainer_params/actor_freeze_step_count 5000

@@ -32,7 +32,7 @@
     },
     "stats_params": {
         "max_episode_steps": 1000,
-        "total_steps": 5000000.0,
+        "total_steps": 216000,
         "target_distance_score": 0.77880078307,
         "targets": [
             0.0,
@@ -50,7 +50,7 @@
         "can_swing_up_steps": 100,
         "on_target_reset_steps": 100,
         "converge_swing_up_time": 250,
-        "converge_episodes": 3
+        "converge_episodes": 5
     },
     "redis_params": {
         "servers": [
@@ -94,7 +94,12 @@
         "sleep_after_reset": 2,
         "agent_type": 0,
         "pre_fill_steps" : 0,
-        "weights_update_period": 1
+        "on_target_reset_steps": 100,
+        "weights_update_period": 1,
+        "ethernet_bandwidth": 100,
+        "ethernet_ping": 0.0,
+        "artificial_bandwidth": -1.0,
+        "artificial_ping": 0.0
     },
     "agent_params": {
         "critic_dense1_obs": 256,
@@ -114,6 +119,7 @@
     "trainer_params": {
         "gamma_discount": 0.99,
         "rm_size": 1000000,
+        "combined_experience_replay": true,
         "batch_size": 128,
         "learning_rate_actor": 3e-04,
         "learning_rate_critic": 3e-04,
