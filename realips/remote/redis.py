@@ -5,7 +5,7 @@ class RedisServerParams:
     def __init__(self):
         self.port = "6379"
         self.password = ""
-        self.host_ip = "10.162.12.247"
+        self.host_ip = "10.162.12.241"
         self.name = "server_1"
 
 
@@ -25,6 +25,7 @@ class RedisParams:
         self.ch_plant_reset = ChannelMappingParams()
         self.ch_edge_mode = ChannelMappingParams()
         self.ch_edge_trajectory = ChannelMappingParams()
+        self.ch_training_steps = ChannelMappingParams()
 
 
 class RedisConnection:
