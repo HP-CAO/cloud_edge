@@ -78,8 +78,9 @@ class CloudSystem(IpsSystem):
         self.target = [0., 0.]
         self.training = True
         self.trainable = 0
-        self.mode = "Training"
+        self.mode = "Resetting"
         self.cumulative_step = 0
+        self.send_mode_and_steps()
 
         if self.params.cloud_params.artificial_bandwidth != -1.0:
             packet = pickle.dumps([self.agent.get_actor_weights(), self.agent.action_noise_factor])
@@ -204,6 +205,8 @@ class CloudSystem(IpsSystem):
             if self.model_stats.converge_eval_episode >= self.params.stats_params.converge_episodes:
                 self.agent.save_weights(self.params.stats_params.model_name + '_converge')
                 print("Converging, training stopped")
+                self.mode = "Training Finished"
+                self.send_mode_and_steps()
                 sys.exit()
 
         dsas = float(self.model_stats.survived) * self.model_stats.get_average_distance_score()

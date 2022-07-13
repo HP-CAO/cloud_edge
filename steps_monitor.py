@@ -62,9 +62,9 @@ root.geometry("{0}x{1}+0+0".format(int(root.winfo_screenwidth() / 2), root.winfo
 root.configure(bg='white')
 root.bind("<Button-1>", lambda evt: root.destroy())
 
-l = tk.Label(text='', font=("Arial", 120))
-l1 = tk.Label(text='', font=("Arial", 160))
-l2 = tk.Label(text='', font=("Arial", 120))
+l = tk.Label(text='', font=("Arial", 120, "bold"))
+l1 = tk.Label(text='', font=("Arial", 160, "bold"))
+l2 = tk.Label(text='', font=("Arial", 120, "bold"))
 
 l.pack(expand=True)
 l1.pack(expand=True)
