@@ -118,13 +118,14 @@ def plot_timeseries_median(dat, run_ids):
         idx = np.where(conv_times[k] == median)[0][0]
         results = extract_data(dat, runs, "swing_up_time_series")
         result = results[idx]
-        l = list(zip(*[[int(k)/1000, 1000-v] for k, v in result.items() if int(k) > 5000]))
+        l = list(zip(*[[int(k) / 1000, 1000 - v] for k, v in result.items() if int(k) > 5000]))
         a = sns.lineplot(x=l[0], y=l[1], marker='o', zorder=101)
         plt.scatter(x=l[0][-1], y=l[1][-1], s=200, marker='*', color=a.get_lines()[i].get_color(), zorder=100)
         i += 1
 
     plt.xlabel('Training time [k steps]')
-    plt.ylabel('Consecutive on-target steps $n_{T_e}$')
+    # plt.ylabel('Consecutive on-target steps $n_{T_e}$')
+    plt.ylabel('Successful on-target steps ${T_s}$')
     lims = plt.xlim()
     plt.hlines(y=750, xmin=0, xmax=lims[1], colors="green", linestyles='--')
     # plt.hlines(y=1000, xmin=0, xmax=lims[1], colors="red", linestyles='--')
@@ -149,6 +150,7 @@ if __name__ == "__main__":
     runs_bw = runs['data_bandwidth']
     runs_bw_no_combined = runs['data_bandwidth_without_cer']
     runs_eval = runs['data_eval']
+    runs_dis = runs['dis']
 
     plt.figure()
     results = {}
@@ -186,14 +188,24 @@ if __name__ == "__main__":
     plt.savefig("friction_plot.png", dpi=300)
 
     ax_freeze = plot_cat(data, runs_freeze, confidence_score)
+    # plt.xticks(range(6), (
+    #     '$N_c=3500$\n$N_a=5000$',
+    #     '$N_c=3500$\n$N_a=3500$',
+    #     '$N_c=3500$\n$N_a=3500$\nTD3-delay',
+    #     '$N_c=5000$\n$N_a=5000$',
+    #     '$N_c=128$\n$N_a=128$',
+    #     '$N_c=128$\n$N_a=5000$'
+    # ))
+
     plt.xticks(range(6), (
-        '$N_c=3500$\n$N_a=5000$',
+        '$N_c=128$\n$N_a=128$',
+        '$N_c=128$\n$N_a=5000$',
         '$N_c=3500$\n$N_a=3500$',
         '$N_c=3500$\n$N_a=3500$\nTD3-delay',
+        '$N_c=3500$\n$N_a=5000$',
         '$N_c=5000$\n$N_a=5000$',
-        '$N_c=128$\n$N_a=128$',
-        '$N_c=128$\n$N_a=5000$'
     ))
+
     plt.xlabel('Optimization delay configurations')
     plt.ylabel('Convergence time [k steps]')
     plt.ylim([0, plt.ylim()[1]])
@@ -218,7 +230,8 @@ if __name__ == "__main__":
         for c in d:
             df = df.append({"convergence_time": c, "bandwidth": k, "Method": "w/o CER"}, ignore_index=True)
 
-    ax = sns.pointplot(data=df, x="bandwidth", y="convergence_time", hue="Method", capsize=.2, join=False, dodge=0.25, ci=confidence_score)
+    ax = sns.pointplot(data=df, x="bandwidth", y="convergence_time", hue="Method", capsize=.2, join=False, dodge=0.25,
+                       ci=confidence_score)
 
     # ax = sns.scatterplot(data=df, x="bandwidth", y="convergence_time", hue="Method")
     # ax = sns.boxplot(data=df, x="bandwidth", y="convergence_time", hue="Method")
@@ -240,3 +253,14 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.savefig("real_good.png", dpi=300)
     plt.show()
+
+    ax_dis = plot_cat(data, runs_dis, confidence_score)
+    plt.xticks(range(8), ('0.06', '0.1', '0.5', '5', '10', '15', '>50', '>50 dis'))
+    plt.xlabel('Bandwidth (w/o CER) $k_f$')
+    plt.ylabel('Convergence time [k steps]')
+    plt.vlines(2.5, 0, ylims[1], colors="black", linestyles="--")
+    plt.text(0.5, 3, "Low BW")
+    plt.text(4, 3, "High BW")
+    plt.ylim([0, plt.ylim()[1]])
+    plt.tight_layout()
+    plt.savefig("bandwidth_dis.png", dpi=300)
