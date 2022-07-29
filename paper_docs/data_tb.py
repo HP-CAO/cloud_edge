@@ -124,8 +124,8 @@ def plot_timeseries_median(dat, run_ids):
         i += 1
 
     plt.xlabel('Training time [k steps]')
-    # plt.ylabel('Consecutive on-target steps $n_{T_e}$')
-    plt.ylabel('Successful on-target steps ${T_s}$')
+    plt.ylabel('Consecutive on-target steps $n_{T_e}$')
+    # plt.ylabel('Successful on-target steps ${T_s}$')
     lims = plt.xlim()
     plt.hlines(y=750, xmin=0, xmax=lims[1], colors="green", linestyles='--')
     # plt.hlines(y=1000, xmin=0, xmax=lims[1], colors="red", linestyles='--')
