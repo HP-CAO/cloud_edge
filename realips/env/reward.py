@@ -29,7 +29,7 @@ class RewardFcn:
         distance_score = self.get_distance_score(observations, targets, pole_length, self.params.distance_score_factor)
 
         r = self.params.distance_score_reward * distance_score
-        r -= self.params.action_penalty * action
+        r -= self.params.action_penalty * action * action
         r -= self.params.crash_penalty * terminal
 
         return r
