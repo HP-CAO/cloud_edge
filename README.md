@@ -15,7 +15,7 @@
     <a href=""><strong>Federico G. Wyrwal</strong></a>
     ·
     <a href="https://rtsl.cps.mw.tum.de/personal_page/mcaccamo/"><strong>Marco Caccamo</strong></a>
-    ·
+    
   </p>
 
   <p align="center">
