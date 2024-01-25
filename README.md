@@ -40,7 +40,7 @@ Sim-to-Real Deep Reinforcement Learning](https://arxiv.org/pdf/2203.02230.pdf). 
 ### Preparation
 Clone this repository: 
 ```Shell
-git clone 
+git clone git@github.com:HP-CAO/rips.git
 cd rips
 ```
 #### Hardware: 
@@ -67,13 +67,13 @@ python main_ddpg.py --generate
 ```
 A configuration template of .json will be generated and saved under ./config. One can change the parameter to try different configurations. 
 
-### Train a model in simulation
+### Training in simulation
 
 ```Shell
 python main_ddpg.py --config {DIR-CONFIGURATION} --id {NAME} --weights {DIR-PRETRAINED MODEL}
 ```
 
-### Training in real world
+### Training in the real world
 
 #### On the edge device
 ```Shell
