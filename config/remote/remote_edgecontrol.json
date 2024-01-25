@@ -35,6 +35,10 @@
         "ch_edge_trajectory": {
             "server_name": "cloud",
             "channel_name": "ch_edge_trajectory"
+        },
+        "ch_training_steps": {
+            "server_name": "cloud",
+            "channel_name": "ch_training_steps"
         }
     },
     "ddpg_params": {

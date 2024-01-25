@@ -1,7 +1,5 @@
-tensorflow~=2.5.0
-tensorflow-probability
-gym
-redis
+tensorflow==2.9.0
+keras-flops
 matplotlib
-numpy~=1.19.5
-simple-pid
+gym==0.16
+redis
