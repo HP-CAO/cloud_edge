@@ -129,3 +129,4 @@ dmypy.json
 .idea/
 models/
 logs/
+!models/pretrained_model

@@ -91,7 +91,7 @@ python main_edgecontrol.py --eval {DIR-PRETRAINED MODEL}
 Launch training process
 
 ```Shell
-python main_cloudtrain.py --config ./config/remote/remote_cloud_ddpg.json --id remote_training
+python main_cloudtrain.py --config ./config/remote/remote_cloud_ddpg++.json --weights ./models/pretrained_model/ --id remote_training --params trainer_params/pre_fill_exp 3500 trainer_params/actor_freeze_step_count 3500
 ```
 
 Real-time streaming 
