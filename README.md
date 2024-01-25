@@ -43,7 +43,11 @@ Clone this repository:
 git clone 
 cd rips
 ```
+#### Hardware: 
 
+In this project, we used an inverted pendulum as the testbed. The configurations and setup details about the pendulum can be found in [Quanser document](https://www.quanser.com/products/linear-servo-base-unit-inverted-pendulum/).
+
+#### Software
 Install requirements in a virtual environment (Tested on anaconda/miniconda environment):
 
 ```Shell
