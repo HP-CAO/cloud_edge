@@ -20,6 +20,7 @@ class SimEdgeControl(EdgeControl):
         self.physics = GymPhysics(self.params.physics_params)
         self.physics.random_reset()
         self.normal_mode = True
+        self.ep = 0
 
     def generate_action(self):
 
