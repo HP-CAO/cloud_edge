@@ -3,8 +3,8 @@
         "servers": [
             {
                 "port": "6379",
-                "password": "cps123456",
-                "host_ip": "10.162.12.241",
+                "password": "ippc123456",
+                "host_ip": "10.162.12.223",
                 "name": "cloud"
             }
         ],
