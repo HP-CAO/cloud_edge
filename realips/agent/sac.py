@@ -1,8 +1,7 @@
 import os
 import tensorflow as tf
 import numpy as np
-from dataclasses import dataclass, field
-from tensorflow.keras.layers import Input, Dense, LayerNormalization, Layer
+from tensorflow.keras.layers import Input, Dense, LayerNormalization
 from tensorflow.keras import Model
 import tensorflow_probability as tfp
 
@@ -11,32 +10,33 @@ tfd = tfp.distributions
 LOG_STD_MAX=2
 LOG_STD_MIN=-5
 
-@dataclass
 class SACConfig:
-    agent_name: str = 'SAC'
-    mode: str = 'train'
-    soft_alpha: float = 0.005
-    learning_rate_actor: float = 0.0003
-    learning_rate_critic: float = 0.0003
-    batch_size: int = 128
-    target_network_frequency: int = 1
-    noise_clip: float = 0.5
-    entropy_alpha: float = 0.1
-    gamma_discount: float = 0.99
-    model_path: str = ''
-    total_training_steps: int = 500000
-    replay_buffer_size: int = 500000
-    learning_starts: int = 3000
-    policy_update_frequency: int = 1
-    use_layer_norm: bool = False
+    def __init__(self):
+        self.agent_name: str = 'SAC'
+        self.mode: str = 'train'
+        self.soft_alpha: float = 0.005
+        self.learning_rate_actor: float = 0.0003
+        self.learning_rate_critic: float = 0.0003
+        self.batch_size: int = 128
+        self.target_network_frequency: int = 1
+        self.noise_clip: float = 0.5
+        self.entropy_alpha: float = 0.1
+        self.gamma_discount: float = 0.99
+        self.model_path: str = ''
+        self.total_training_steps: int = 500000
+        self.replay_buffer_size: int = 500000
+        self.learning_starts: int = 3000
+        self.policy_update_frequency: int = 1
+        self.use_layer_norm: bool = False
 
-    # Network architecture configurations
-    actor_hidden_units: list = field(default_factory=lambda: [256, 256])
-    critic_hidden_units: list = field(default_factory=lambda: [256, 256])
-    actor_activation: str = 'relu'
-    critic_activation: str = 'relu'
-    sac_lam_mode:str = 'opt'
-    autosafe_lam_mode:str = 'opt'
+        # Network architecture configurations
+        self.actor_hidden_units: list = [256, 256]
+        self.critic_hidden_units: list = [256, 256]
+        self.actor_activation: str = 'relu'
+        self.critic_activation: str = 'relu'
+        self.autosafe_lam_mode:str = 'opt'
+        self.add_actions_observations: bool = True
+        self.action_observations_dim: int = 5
 
 def build_mlp(input_layer, hidden_units, activation, use_layer_norm=False):
     """Builds an MLP given a starting input layer."""
@@ -46,7 +46,6 @@ def build_mlp(input_layer, hidden_units, activation, use_layer_norm=False):
         if use_layer_norm:
             x = LayerNormalization()(x)
     return x
-
 
 def build_critic(shape_input, shape_output, config: SACConfig, name=''):
     input_layer = Input(shape=(shape_input,), name=name + 'input', dtype=tf.float32)
@@ -92,15 +91,15 @@ class AutoSafeSAC:
         self.lam_mode = lam_mode
 
         if self.lam_mode == 'opt':
-            from agent.AutoSafe import AutoSafeActor
+            from realips.agent.AutoSafe import AutoSafeActor
             self.actor = AutoSafeActor(shape_action, P_matrix, F_matrix, LOG_STD_MAX, LOG_STD_MIN, tem_min, tem_max)
         elif self.lam_mode == 'linear':
-            from agent.AutoSafe import AutoSafeActorSchedule
+            from realips.agent.AutoSafe import AutoSafeActorSchedule
             self.actor = AutoSafeActorSchedule(shape_action, P_matrix,
                                                F_matrix, LOG_STD_MAX, LOG_STD_MIN, schedule_type="linear",
                                                total_steps=int(self.params.total_training_steps * 0.8))
         else:
-            from agent.AutoSafe import AutoSafeActorSchedule
+            from realips.agent.AutoSafe import AutoSafeActorSchedule
             self.actor = AutoSafeActorSchedule(shape_action, P_matrix,
                                                F_matrix, LOG_STD_MAX, LOG_STD_MIN, schedule_type="exp",
                                                total_steps=int(self.params.total_training_steps * 0.8))
@@ -119,7 +118,7 @@ class AutoSafeSAC:
         else:
             self.hard_update()
 
-        self.get_summary()
+        # self.get_summary()
 
     def get_summary(self):
         self.actor.summary()
@@ -161,6 +160,7 @@ class AutoSafeSAC:
             w_old.assign(w_new * soft_alpha + w_old * (1. - soft_alpha))
 
     def get_action(self, observations,  mode='train'):
+        observations = np.array(observations)
         if len(observations.shape) < 2:
             observations = tf.expand_dims(observations, 0)
         action_mean_learn, log_std_learn, action_safe, lam , tem = self.actor(observations)
@@ -251,4 +251,8 @@ class AutoSafeSAC:
         }
 
         return training_info
+
+    def set_actor_weights(self, weights):
+        self.actor.set_weights(weights)
+
 

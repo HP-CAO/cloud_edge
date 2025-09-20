@@ -55,7 +55,6 @@ class GymPhysics(gym.Env):
         param: action: a scalar value (not numpy type) [-1,1]
         return: a list of states
         """
-
         if self.params.actuation_delay > 0:
             self.last_actions.append(action)
             self.last_actions = self.last_actions[1:]
@@ -119,11 +118,11 @@ class GymPhysics(gym.Env):
         self.last_actions = [0.0] * self.params.actuation_delay
 
     def random_reset(self):
-        ran_x = np.random.uniform(-0.8 * self.params.x_threshold, 0.8 * self.params.x_threshold)
+        ran_x = np.random.uniform(-0.2 * self.params.x_threshold, 0.2 * self.params.x_threshold)
         if self.is_failed(ran_x, 0):
             ran_x += 0
         ran_v = 0
-        ran_theta = np.random.normal(math.pi, self.params.theta_random_std)
+        ran_theta = np.random.normal(0, 0.1)
         ran_theta_v = 0
         failed = False
         self.states = [ran_x, ran_v, ran_theta, ran_theta_v, failed]
@@ -148,9 +147,9 @@ class GymPhysics(gym.Env):
             self.viewer = rendering.Viewer(screen_width, screen_height)
             # target
             self.targettrans = rendering.Transform()
-            target = rendering.Image('./target.svg', width=target_width, height=target_height)
-            target.add_attr(self.targettrans)
-            self.viewer.add_geom(target)
+            # target = rendering.Image('./target.svg', width=target_width, height=target_height)
+            # target.add_attr(self.targettrans)
+            # self.viewer.add_geom(target)
             l, r, t, b = -cartwidth / 2, cartwidth / 2, cartheight / 2, -cartheight / 2
             axleoffset = cartheight / 4.0
             cart = rendering.FilledPolygon([(l, b), (l, t), (r, t), (r, b)])

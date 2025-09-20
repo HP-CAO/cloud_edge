@@ -3,3 +3,4 @@ keras-flops
 matplotlib
 gym==0.16
 redis
+tensorflow-probability==0.16.0

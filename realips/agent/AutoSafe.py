@@ -4,7 +4,7 @@ from tensorflow.keras import Model
 import numpy as np
 import math
 
-ACTION_BOUND = 20.0 #todo double check action bound, to normalize the safe action space to [-1, 1]
+ACTION_BOUND = 20.0
 
 F = np.array([[25.9995, 19.4241, 75.9886, 13.8553]]) / ACTION_BOUND # feedback law for the safe controller
 
@@ -161,3 +161,4 @@ class AutoSafeActorSchedule(Model):
         lam = tf.clip_by_value((tf.exp(safe_z * tem) - 1.0) / (tf.exp(1.0 * tem) - 1.0), 0.0, 1.0)
 
         return action_mean_learn, log_std_learn, action_safe, lam, tem
+

@@ -1,6 +1,8 @@
 import os
 import io
 import datetime
+import pickle
+
 import tensorflow as tf
 import numpy as np
 import shutil
@@ -48,6 +50,9 @@ class ModelStats:
         self.cart_positions = []
         self.actions = []
         self.critic_losses = []
+        self.actor_losses = []
+        self.lams = []
+        self.tems = []
         self.pendulum_angele = []
         self.total_steps = 0
         self.converge_eval_episode = 0
@@ -85,6 +90,9 @@ class ModelStats:
         self.actions = []
         self.critic_losses = []
         self.survived = True
+        self.actor_losses = []
+        self.lams = []
+        self.tems = []
 
     def get_average(self, data):
         if len(data) == 0:
@@ -119,17 +127,26 @@ class ModelStats:
         if crash:
             self.survived = False
 
-    def add_critic_loss(self, loss):
-        self.critic_losses.append(loss)
+    def add_training_info(self, training_info):
+        if training_info is not None:
+            critic_loss = training_info["critic_loss"]
+            actor_loss = training_info["actor_loss"]
+            tem = training_info["tem"]
+            lam = training_info["lam"]
+            self.critic_losses.append(critic_loss)
+            self.actor_losses.append(actor_loss)
+            self.tems.append(tem)
+            self.lams.append(lam)
+
 
     def get_steps(self):
         return len(self.reward)
 
     def training_monitor(self, episode):
 
-        average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, critic_loss = self.log_data()
+        accumulated_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, critic_loss = self.log_data()
         with self.training_log_writer.as_default():
-            tf.summary.scalar('Average_Reward', average_reward, self.total_steps)
+            tf.summary.scalar('Accumulated Reward', accumulated_reward, self.total_steps)
             tf.summary.scalar('On_target_step', on_target_steps, self.total_steps)
             tf.summary.scalar('Can_swing_up', can_swing_up, self.total_steps)
             tf.summary.scalar('swing_up_time', swing_up_time, self.total_steps)
@@ -138,14 +155,23 @@ class ModelStats:
             tf.summary.scalar('distance_score_and_survived', average_distance_score * survived, self.total_steps)
 
         print("Training:=====>  Episode: ", episode, " Total steps:",
-              self.get_steps(), " Average_reward: ", average_reward, "ds_mean", average_distance_score)
+              self.get_steps(), " accumulated_reward: ", accumulated_reward, "ds_mean", average_distance_score)
+
+        training_trajectories = {"actions": self.actions,
+                                 "critic_losses": self.critic_losses,
+                                 "actor_losses": self.actor_losses,
+                                 "lams": self.lams,
+                                 "tems": self.tems,
+                                 "rewards": self.reward}
+
+        pickle.dump(training_trajectories, open(self.log_dir + '/training/training_trajectories.p', 'wb'))
 
     def evaluation_monitor_scalar(self, episode):
 
-        average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, _ = self.log_data()
+        accumulated_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, _ = self.log_data()
 
         with self.evaluation_log_writer.as_default():
-            tf.summary.scalar('Average_Reward', average_reward, self.total_steps)
+            tf.summary.scalar('Accumulated Reward', accumulated_reward, self.total_steps)
             tf.summary.scalar('On_target_step', on_target_steps, self.total_steps)
             tf.summary.scalar('Can_swing_up', can_swing_up, self.total_steps)
             tf.summary.scalar('swing_up_time', swing_up_time, self.total_steps)
@@ -153,7 +179,7 @@ class ModelStats:
             tf.summary.scalar('distance_score_and_survived', average_distance_score * survived, self.total_steps)
 
         print("Evaluation:=====>  Episode: ", episode, " Total steps:",
-              self.get_steps(), " Average_reward: ", average_reward, "ds_mean", average_distance_score)
+              self.get_steps(), " accumulated_reward: ", accumulated_reward, "ds_mean", average_distance_score)
 
         if swing_up_time <= self.params.converge_swing_up_time:
             self.converge_eval_episode += 1
@@ -170,19 +196,20 @@ class ModelStats:
 
     def log_data(self):
 
-        average_reward = self.get_average_reward()
+        # average_reward = self.get_average_reward()
+        accumulated_reward  = sum(self.reward)
         on_target_steps = self.on_target_steps
         average_distance_score = self.get_average_distance_score()
         survived = self.get_survived()
         can_swing_up = self.consecutive_on_target_steps >= self.params.can_swing_up_steps
         swing_up_time = self.get_steps() - self.consecutive_on_target_steps if can_swing_up else self.params.max_episode_steps
         critic_loss = self.get_average(self.critic_losses)
-        return average_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, critic_loss
+        return accumulated_reward, on_target_steps, average_distance_score, survived, can_swing_up, swing_up_time, critic_loss
 
     def random_set_targets(self):
         x_target = np.random.uniform(-self.physics.params.x_threshold, self.physics.params.x_threshold)
         if self.physics.is_failed(x_target, 0):
-            x_target = 0.5 * self.physics.params.x_threshold
+            x_target = 0.2 * self.physics.params.x_threshold
         self.targets = [x_target, 0]
 
     def clear_cache(self):
@@ -199,7 +226,7 @@ class ModelStats:
                     print('Okay bye')
                     exit(1)
 
-    def plot_to_image(self, average_reward, on_target_steps, average_distance_score):
+    def plot_to_image(self, accumulated_reward, on_target_steps, average_distance_score):
         figure = plt.figure()
 
         x = self.get_steps()
@@ -227,8 +254,8 @@ class ModelStats:
         plt.subplot(3, 1, 3)
         tape_x = np.add(np.array(self.cart_positions), np.sin(np.array(self.pendulum_angele)))
         tape_y = np.cos(np.array(self.pendulum_angele))
-        label = 'Average_reward: {:.2} \n On_target_steps: ' \
-                '{} \n average_distance_score: {:.2}'.format(average_reward, on_target_steps, average_distance_score)
+        label = 'Accumulated: {:.2} \n On_target_steps: ' \
+                '{} \n average_distance_score: {:.2}'.format(accumulated_reward, on_target_steps, average_distance_score)
 
         plt.plot(tape_x[1: -1], tape_y[1: -1], 'o-.k', linewidth=0.5, markeredgewidth=0.3, markeredgecolor='m',
                  markerfacecolor='w',

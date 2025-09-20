@@ -1,0 +1,118 @@
+{
+    "redis_params": {
+        "servers": [
+            {
+                "port": "6379",
+                "password": "ippc123456",
+                "host_ip": "10.162.12.223",
+                "name": "cloud"
+            }
+        ],
+        "ch_edge_control": {
+            "server_name": "cloud",
+            "channel_name": "ch_plant_control"
+        },
+        "ch_plant_trajectory_segment": {
+            "server_name": "cloud",
+            "channel_name": "ch_plant_trajectory_segment"
+        },
+        "ch_plant_reset": {
+            "server_name": "cloud",
+            "channel_name": "ch_plant_reset"
+        },
+        "ch_edge_weights": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_weights"
+        },
+        "ch_edge_ready_update": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_ready_update"
+        },
+        "ch_edge_mode": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_mode"
+        },
+        "ch_edge_trajectory": {
+            "server_name": "cloud",
+            "channel_name": "ch_edge_trajectory"
+        },
+        "ch_training_steps": {
+            "server_name": "cloud",
+            "channel_name": "ch_training_steps"
+        }
+    },
+    "agent_params": {
+        "agent_name": "SAC",
+        "mode": "train",
+        "soft_alpha": 0.005,
+        "learning_rate_actor": 0.0003,
+        "learning_rate_critic": 0.0003,
+        "batch_size": 128,
+        "target_network_frequency": 1,
+        "noise_clip": 0.5,
+        "entropy_alpha": 0.1,
+        "gamma_discount": 0.99,
+        "model_path": "",
+        "total_training_steps": 500000,
+        "replay_buffer_size": 500000,
+        "learning_starts": 128,
+        "policy_update_frequency": 1,
+        "use_layer_norm": false,
+        "actor_hidden_units": [
+            256,
+            256
+        ],
+        "critic_hidden_units": [
+            256,
+            256
+        ],
+        "actor_activation": "relu",
+        "critic_activation": "relu",
+        "autosafe_lam_mode": "opt",
+        "add_actions_observations": true,
+        "action_observations_dim": 5,
+        "action_noise_factor": 0
+    },
+    "control_params": {
+        "frequency": 30.0,
+        "x_threshold": 0.3,
+        "theta_dot_threshold": 20,
+        "random_reset_target": false,
+        "control_targets": [
+            0.0,
+            0.0
+        ],
+        "is_quick_recover": true,
+        "agent_type": null,
+        "initialize_from_cloud": true,
+        "train_real": true,
+        "action_factor": 5,
+        "calibrating_period_steps": 10000,
+        "random_reset_ini": true
+    },
+    "physics_params": {
+        "x_threshold": 0.3,
+        "theta_dot_threshold": 15,
+        "kinematics_integrator": "euler",
+        "ini_states": [
+            0.0,
+            0.0,
+            -3.141592653589793,
+            0.0,
+            false
+        ],
+        "gravity": 9.8,
+        "mass_cart": 0.94,
+        "mass_pole": 0.23,
+        "force_mag": 20.0,
+        "voltage_mag": 20.0,
+        "length": 0.64,
+        "theta_random_std": 0.8,
+        "friction_cart": 10,
+        "friction_pole": 0.0011,
+        "with_friction": true,
+        "force_input": true,
+        "simulation_frequency": 30,
+        "actuation_delay": 1
+    }
+}
